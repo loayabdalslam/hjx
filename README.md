@@ -1,4 +1,5 @@
 # HJX v0.1 (MVP Skeleton)
+<img width="1200" height="500" alt="logo" src="https://github.com/user-attachments/assets/001b04f1-5aff-43f1-b4f9-ecb15752b061" />
 
 HJX is a unified UI language that compiles into **HTML + CSS + JavaScript** from a single `.hjx` file.
 
