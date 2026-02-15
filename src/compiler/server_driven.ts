@@ -75,6 +75,100 @@ mountApp();
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>${escapeHtml(tree.ast.component.name)}</title>
   <link rel="stylesheet" href="./app.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "hsl(var(--border))",
+            input: "hsl(var(--input))",
+            ring: "hsl(var(--ring))",
+            background: "hsl(var(--background))",
+            foreground: "hsl(var(--foreground))",
+            primary: {
+              DEFAULT: "hsl(var(--primary))",
+              foreground: "hsl(var(--primary-foreground))",
+            },
+            secondary: {
+              DEFAULT: "hsl(var(--secondary))",
+              foreground: "hsl(var(--secondary-foreground))",
+            },
+            destructive: {
+              DEFAULT: "hsl(var(--destructive))",
+              foreground: "hsl(var(--destructive-foreground))",
+            },
+            muted: {
+              DEFAULT: "hsl(var(--muted))",
+              foreground: "hsl(var(--muted-foreground))",
+            },
+            accent: {
+              DEFAULT: "hsl(var(--accent))",
+              foreground: "hsl(var(--accent-foreground))",
+            },
+            popover: {
+              DEFAULT: "hsl(var(--popover))",
+              foreground: "hsl(var(--popover-foreground))",
+            },
+            card: {
+              DEFAULT: "hsl(var(--card))",
+              foreground: "hsl(var(--card-foreground))",
+            },
+          },
+          borderRadius: {
+            lg: "var(--radius)",
+            md: "calc(var(--radius) - 2px)",
+            sm: "calc(var(--radius) - 4px)",
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 222.2 84% 4.9%;
+      --primary: 222.2 47.4% 11.2%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --accent: 210 40% 96.1%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --ring: 222.2 84% 4.9%;
+      --radius: 0.5rem;
+    }
+    .dark {
+      --background: 222.2 84% 4.9%;
+      --foreground: 210 40% 98%;
+      --card: 222.2 84% 4.9%;
+      --card-foreground: 210 40% 98%;
+      --popover: 222.2 84% 4.9%;
+      --popover-foreground: 210 40% 98%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 222.2 47.4% 11.2%;
+      --secondary: 217.2 32.6% 17.5%;
+      --secondary-foreground: 210 40% 98%;
+      --muted: 217.2 32.6% 17.5%;
+      --muted-foreground: 215 20.2% 65.1%;
+      --accent: 217.2 32.6% 17.5%;
+      --accent-foreground: 210 40% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 217.2 32.6% 17.5%;
+      --input: 217.2 32.6% 17.5%;
+      --ring: 212.7 26.8% 83.9%;
+    }
+  </style>
 </head>
 <body>
   <div id="app"></div>
@@ -108,20 +202,17 @@ type Bindings = {
   inputBindings: Array<{ selector: string; stateKey: string }>;
 };
 
-function renderComponent(comp: LoadedComponent, statePrefix: string): Bindings {
+function renderComponent(comp: LoadedComponent, statePrefix: string, extraAttrs: Record<string, string> = {}): Bindings {
   const scope = `hjx-${comp.ast.component.name.toLowerCase()}`;
-  return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix);
+  return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix, extraAttrs);
 }
-
-// Reuse renderNode logic from vanilla, or duplicate it to avoid circular deps if refactoring is hard.
-// Since vanilla.ts is not exporting renderNode, I will duplicate it for now or refactor.
-// For simplicity in this task, I'll duplicate the render logic. It's small.
 
 function renderNode(
   node: HJXNode,
   scope: string,
   imports: Record<string, LoadedComponent>,
-  statePrefix: string
+  statePrefix: string,
+  extraAttrs: Record<string, string> = {}
 ): Bindings {
   const bindings: Array<{ selector: string; template: string }> = [];
   const attrBindings: Array<{ selector: string; attr: string; template: string }> = [];
@@ -132,11 +223,8 @@ function renderNode(
   if (imports[node.tag]) {
     const childComp = imports[node.tag];
     const childPrefix = statePrefix ? `${statePrefix}.${node.tag}` : node.tag;
-    const childResult = renderComponent(childComp, childPrefix);
-
-    // TODO: Handle attributes passed to component?
-    // For now, simple composition.
-
+    // Merge attributes from usage into child component
+    const childResult = renderComponent(childComp, childPrefix, { ...node.attrs, ...extraAttrs });
     return childResult;
   }
 
@@ -150,16 +238,22 @@ function renderNode(
     return id;
   }
 
-  function render(n: HJXNode): string {
+  function render(n: HJXNode, isRoot: boolean): string {
     // If child is a component, handle it
     if (imports[n.tag]) {
       // Recurse for component
-      const res = renderNode(n, scope, imports, statePrefix);
-      bindings.push(...res.bindings);
-      attrBindings.push(...res.attrBindings);
-      eventBindings.push(...res.eventBindings);
-      inputBindings.push(...res.inputBindings);
-      return res.htmlBody;
+      const childComp = imports[n.tag];
+      const childPrefix = statePrefix ? `${statePrefix}.${n.tag}` : n.tag;
+      // We pass n.attrs (attributes on the usage) to the child.
+      // Note: we do NOT pass extraAttrs recursively down to children of children unless they are the root of that child.
+      // But here 'n' is inside the layout of the current component. 'extraAttrs' apply to the ROOT of the current component.
+      // So for children inside the layout, we don't pass extraAttrs.
+      const childRes = renderComponent(childComp, childPrefix, n.attrs);
+      bindings.push(...childRes.bindings);
+      attrBindings.push(...childRes.attrBindings);
+      eventBindings.push(...childRes.eventBindings);
+      inputBindings.push(...childRes.inputBindings);
+      return childRes.htmlBody;
     }
 
     const tag = mapTag(n.tag);
@@ -170,11 +264,23 @@ function renderNode(
     attrParts.push(`data-hjx-scope="${scope}"`);
 
     if (n.id) attrParts.push(`id="${escapeAttr(n.id)}"`);
-    if (n.classes?.length) attrParts.push(`class="${n.classes.map(escapeAttr).join(" ")}"`);
 
-    // attributes
-    for (const [key, val] of Object.entries(n.attrs)) {
+    // Handle classes: merge n.classes and extraAttrs.class (if root)
+    const classes = new Set(n.classes);
+    if (isRoot && extraAttrs["class"]) {
+      extraAttrs["class"].split(" ").forEach(c => c && classes.add(c));
+    }
+    if (classes.size > 0) {
+      attrParts.push(`class="${Array.from(classes).map(escapeAttr).join(" ")}"`);
+    }
+
+    // Merge attributes
+    // If isRoot, merge extraAttrs.
+    const allAttrs = isRoot ? { ...n.attrs, ...extraAttrs } : n.attrs;
+
+    for (const [key, val] of Object.entries(allAttrs)) {
       if (key === "data-hjx-id" || key === "data-hjx-scope") continue;
+      if (key === "class") continue; // handled above
 
       // check for interpolation {{ }}
       if (val.includes("{{")) {
@@ -217,13 +323,13 @@ function renderNode(
       }
     }
 
-    const inner = n.children?.length ? n.children.map(render).join("") : (n.text != null ? escapeTextWithInterpolation(n.text) : "");
+    const inner = n.children?.length ? n.children.map(c => render(c, false)).join("") : (n.text != null ? escapeTextWithInterpolation(n.text) : "");
 
     return `<${tag} ${attrParts.join(" ")}>${inner}</${tag}>`;
   }
 
-  const htmlBody = render(node);
-  return { htmlBody, bindings, eventBindings, inputBindings };
+  const htmlBody = render(node, true);
+  return { htmlBody, bindings, attrBindings, eventBindings, inputBindings };
 }
 
 function mapTag(tag: string): string {
@@ -270,20 +376,9 @@ export function createRemoteStore(wsUrl, initial) {
       try {
         const data = JSON.parse(msg.data);
         if (data.type === "state") {
-          // deep merge or replacement? For v0.1 state is sent fully on init?
-          // Our server logic sends full state tree.
           Object.assign(state, data.payload);
           notify();
         } else if (data.type === "patch") {
-          // Flattened patch support?
-          // If patch has keys like "Counter.count", we need to handle nested assignment?
-          // Or we just Object.assign and let the getters access it?
-          // If state is { C1: { count: 0 } }, and patch is { "C1.count": 1 }, Object.assign won't work deep.
-          // BUT ServerSession sends patched structure: { C1: { count: 1 } } ?
-          // Let's check ServerSession.runHandler. It returns prefixed patch: { "C1.count": 1 }.
-          // So the client receives flat keys with dots.
-
-          // We need a helper to apply flat patch to nested state.
           applyPatch(state, data.payload);
           notify();
         }
@@ -306,10 +401,8 @@ export function createRemoteStore(wsUrl, initial) {
   return {
     get: () => state,
     set: (patch) => {
-      // Optimistic update?
       applyPatch(state, patch);
       notify();
-      // Send to server
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: "state_update", payload: patch }));
       }
@@ -339,7 +432,6 @@ function applyPatch(state, patch) {
   }
 }
 
-// Access nested state by path "A.B.c"
 function getByPath(obj, path) {
   return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 }
@@ -349,7 +441,6 @@ export function textBinder(store, root, selector, template) {
   if (!el) return;
   const render = () => {
     const s = store.get();
-    // Regex now supports dots in identifier
     const out = template.replace(/\\{\\{\\s*([A-Za-z_][A-Za-z0-9_.]*)\\s*\\}\\}/g, (_, key) => String(getByPath(s, key) ?? ""));
     el.textContent = out;
   };

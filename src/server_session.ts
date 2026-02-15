@@ -1,7 +1,7 @@
 import { writeFileSync, unlinkSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { HJXAst } from "./types.js";
+import { HJXAst, HJXNode } from "./types.js";
 import { LoadedComponent } from "./loader.js";
 import { compileHandlersToJS } from "./compiler/vanilla_handlers.js";
 import { v4 as uuidv4 } from "uuid";
@@ -18,20 +18,18 @@ export class ServerSession {
   private readyPromise: Promise<void>;
   private tempFile: string | null = null;
 
-  constructor(component: LoadedComponent, workDir: string) {
-    this.state = { ...component.ast.state };
+  constructor(component: LoadedComponent, workDir: string, initialProps: Record<string, any> = {}) {
+    this.state = { ...component.ast.state, ...initialProps };
     this.readyPromise = this.init(component, workDir);
   }
 
   private async init(component: LoadedComponent, workDir: string) {
     const ast = component.ast;
 
-    // 1. Initialize children
+    // 1. Initialize children by traversing layout
     const childPromises: Promise<void>[] = [];
-    for (const [alias, childComp] of Object.entries(component.imports)) {
-      const childSession = new ServerSession(childComp, workDir);
-      this.children[alias] = childSession;
-      childPromises.push(childSession.ready());
+    if (ast.layout) {
+      this.traverseLayout(ast.layout, component.imports, workDir, childPromises, { autoId: 0 });
     }
 
     // 2. Prepare source code
@@ -65,6 +63,50 @@ export const handlers = ${handlersJS};
 
     // Wait for children
     await Promise.all(childPromises);
+  }
+
+  private traverseLayout(
+    node: HJXNode,
+    imports: Record<string, LoadedComponent>,
+    workDir: string,
+    promises: Promise<void>[],
+    ctx: { autoId: number }
+  ) {
+    // Check if node tag is an imported component
+    if (imports[node.tag]) {
+      const instanceId = ctx.autoId++;
+      const alias = node.tag;
+      const childKey = `${alias}_${instanceId}`;
+      const childComp = imports[alias];
+
+      // Extract static props from node.attrs
+      const initialProps: Record<string, any> = {};
+      for (const [k, v] of Object.entries(node.attrs)) {
+        if (!v.includes("{{")) {
+          // Try to parse number/bool
+          if (v === "true") initialProps[k] = true;
+          else if (v === "false") initialProps[k] = false;
+          else {
+            const n = Number(v);
+            initialProps[k] = !isNaN(n) ? n : v;
+          }
+        }
+      }
+
+      const childSession = new ServerSession(childComp, workDir, initialProps);
+      this.children[childKey] = childSession;
+      promises.push(childSession.ready());
+      return;
+    }
+
+    // Normal node: consumes an ID
+    ctx.autoId++;
+
+    if (node.children) {
+      for (const child of node.children) {
+        this.traverseLayout(child, imports, workDir, promises, ctx);
+      }
+    }
   }
 
   public async ready() {
