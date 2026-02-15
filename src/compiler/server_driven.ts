@@ -34,21 +34,23 @@ export function createApp(rootEl) {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   const wsUrl = protocol + "//" + location.host + "/hjx";
 
-  const store = createRemoteStore(wsUrl, initialState);
+  const store = createRemoteStore(wsUrl, initialState, rootEl);
 
-  // bind text interpolations
-  ${bindings.map((b) => `textBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.template)});`).join("\n  ")}
+  window._hjx_rebind = () => {
+    // bind text interpolations
+    ${bindings.map((b) => `textBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.template)});`).join("\n    ")}
 
-  // bind attributes
-  ${attrBindings.map((b) => `attrBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.attr)}, ${JSON.stringify(b.template)});`).join("\n  ")}
+    // bind attributes
+    ${attrBindings.map((b) => `attrBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.attr)}, ${JSON.stringify(b.template)});`).join("\n    ")}
 
-  // bind clicks
-  // Instead of executing a local handler, we send an event to the server
-  ${eventBindings.map((e) => `clickBinder(store, rootEl, ${JSON.stringify(e.selector)}, () => store.sendEvent(${JSON.stringify(e.handler)}));`).join("\n  ")}
+    // bind clicks
+    ${eventBindings.map((e) => `clickBinder(store, rootEl, ${JSON.stringify(e.selector)}, () => store.sendEvent(${JSON.stringify(e.handler)}));`).join("\n    ")}
 
-  // bind inputs (2-way)
-  ${inputBindings.map((b) => `inputBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.stateKey)});`).join("\n  ")}
+    // bind inputs
+    ${inputBindings.map((b) => `inputBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.stateKey)});`).join("\n    ")}
+  };
 
+  window._hjx_rebind();
   return { store };
 }
 
@@ -215,7 +217,7 @@ function renderComponent(
   return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix, extraAttrs, extraEvents, slots, ctx);
 }
 
-function renderNode(
+export function renderNode(
   node: HJXNode,
   scope: string,
   imports: Record<string, LoadedComponent>,
@@ -380,8 +382,25 @@ function renderNode(
       return childRes.htmlBody;
     }
 
-    // Normal node
-    ctx.autoId++;
+    // normal node consumes an ID (already handled at top of renderNode for ctx.autoId)
+    // but here we are in the recursive 'render' function.
+
+    if (n.kind === "if") {
+      const dataId = `if-${Math.random().toString(36).slice(2, 7)}`;
+      const inner = n.children.map(c => render(c, false)).join("");
+      return `<div data-hjx-block="${dataId}" data-hjx-if="${escapeAttr(n.condition || "")}">${inner}</div>`;
+    }
+
+    if (n.kind === "else") {
+      const dataId = `else-${Math.random().toString(36).slice(2, 7)}`;
+      const inner = n.children.map(c => render(c, false)).join("");
+      return `<div data-hjx-block="${dataId}" data-hjx-else>${inner}</div>`;
+    }
+
+    if (n.kind === "for") {
+      const dataId = `for-${Math.random().toString(36).slice(2, 7)}`;
+      return `<div data-hjx-block="${dataId}" data-hjx-for="${escapeAttr(n.iterator?.item || "")}:${escapeAttr(n.iterator?.list || "")}"></div>`;
+    }
 
     const tag = mapTag(n.tag);
     const dataId = ensureDataId(n);
@@ -479,31 +498,25 @@ window.__HJX_RUNTIME_URL__ = runtimeUrl;
 export function runtimeModuleSource(): string {
   return `// HJX runtime v0.1 (Server Driven)
 
-export function createRemoteStore(wsUrl, initial) {
+export function createRemoteStore(wsUrl, initial, rootEl) {
   const state = { ...initial };
   const listeners = new Set();
-
   let ws;
 
   function connect() {
     ws = new WebSocket(wsUrl);
-    ws.onopen = () => {
-      console.log("Connected to server");
-    };
     ws.onmessage = (msg) => {
       try {
         const data = JSON.parse(msg.data);
-        console.log("HJX Received:", data.type, data.payload || data.name);
-        if (data.type === "state") {
-          Object.assign(state, data.payload);
-          notify();
-        } else if (data.type === "patch") {
+        if (data.type === "patch") {
+          if (data.payload._html) {
+            rootEl.innerHTML = data.payload._html;
+            if (window._hjx_rebind) window._hjx_rebind();
+          }
           applyPatch(state, data.payload);
           notify();
         }
-      } catch (e) {
-        console.error("WS error", e);
-      }
+      } catch (e) {}
     };
     ws.onclose = () => {
       console.log("Disconnected. Reconnecting...");

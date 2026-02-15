@@ -12,6 +12,8 @@ state:
   status = "Operational"
   statusClass = "bg-green-100 text-green-800"
   lastIncident = "None"
+  showMaintenanceNotice = false
+  alerts = ["High CPU Usage", "New login from unknown device"]
 
 script:
   function getFormattedTime() {
@@ -65,10 +67,22 @@ layout:
         Card (title="Incident Status" description="Last reported issue"):
           view.text-2xl.font-bold: "{{lastIncident}}"
 
+      // Maintenance notice (Condition verification)
+      if (showMaintenanceNotice):
+        view.bg-red-500.text-white.p-4.rounded-lg.font-bold: "MAINTENANCE IN PROGRESS - LIMITED ACCESS"
+
+      // Alerts List (Loop verification)
+      view.space-y-2:
+        view.font-bold.text-lg: "System Alerts"
+        for (alert in alerts):
+          view.bg-white.border.border-slate-200.p-3.rounded.shadow-sm: "{{alert}}"
+
       // Actions
       view.flex.gap-4:
         Button (on click -> refresh): "Force Refresh"
         Button (variant="outline" on click -> toggleStatus): "Toggle Status"
+        Button (variant="outline" on click -> toggleNotice): "Toggle Notice"
+        Button (variant="outline" on click -> addAlert): "Add Alert"
 
 handlers:
   refresh:
@@ -77,3 +91,9 @@ handlers:
   toggleStatus:
     log "Action: Toggling Status"
     set status = status == "Operational" ? "Maintenance" : "Operational"
+  toggleNotice:
+    log "Action: Toggling Maintenance Notice"
+    set showMaintenanceNotice = !showMaintenanceNotice
+  addAlert:
+    log "Action: Adding Alert"
+    set alerts = alerts + ["System ping timed out"]

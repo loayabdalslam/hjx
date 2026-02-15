@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { HJXAst, HJXNode } from "./types.js";
 import { LoadedComponent } from "./loader.js";
 import { compileHandlersToJS } from "./compiler/vanilla_handlers.js";
-import { v4 as uuidv4 } from "uuid";
+import { renderNode } from "./compiler/server_driven.js";
 
 // Simple UUID polyfill if not available
 function genId() {
@@ -18,6 +18,7 @@ export class ServerSession {
   private readyPromise: Promise<void>;
   private tempFile: string | null = null;
   private onPatchCallback: ((patch: Record<string, any>) => void) | null = null;
+  private dynamicBlocks: Array<{ id: string; node: HJXNode; component: LoadedComponent, scope: string, statePrefix: string }> = [];
 
   constructor(component: LoadedComponent, workDir: string, initialProps: Record<string, any> = {}) {
     this.state = { ...component.ast.state, ...initialProps };
@@ -31,10 +32,11 @@ export class ServerSession {
   private async init(component: LoadedComponent, workDir: string) {
     const ast = component.ast;
 
-    // 1. Initialize children by traversing layout
+    // 1. Initialize children and dynamic blocks
     const childPromises: Promise<void>[] = [];
     if (ast.layout) {
-      this.traverseLayout(ast.layout, component.imports, workDir, childPromises, { autoId: 0 });
+      const scope = `hjx-${ast.component.name.toLowerCase()}`;
+      this.traverseLayout(ast.layout, component, scope, "", workDir, childPromises, { autoId: 0 });
     }
 
     // 2. Prepare source code
@@ -63,6 +65,7 @@ export const handlers = ${handlersJS};
         if (this.onPatchCallback) {
           this.onPatchCallback(patch);
         }
+        this.reRenderBlocks(component);
       }
     };
 
@@ -72,44 +75,43 @@ export const handlers = ${handlersJS};
       const mod = await import(fileUrl);
       this.handlers = mod.handlers;
       console.log(`Loaded server script: ${this.tempFile}`);
-      console.log(`Handlers: ${Object.keys(this.handlers).join(", ")}`);
 
       // 5. Call exported init if exists
       if (typeof mod.init === "function") {
-        console.log("Calling exported init function...");
         mod.init(store);
-        console.log("init function called.");
-      } else {
-        console.log("No exported init function found.");
       }
     } catch (e) {
       console.error("Failed to load server script:", e);
       this.handlers = {};
     }
 
-    // Wait for children
     await Promise.all(childPromises);
   }
 
   private traverseLayout(
     node: HJXNode,
-    imports: Record<string, LoadedComponent>,
+    comp: LoadedComponent,
+    scope: string,
+    statePrefix: string,
     workDir: string,
     promises: Promise<void>[],
     ctx: { autoId: number }
   ) {
-    // Check if node tag is an imported component
+    const imports = comp.imports;
+
+    if (node.kind === "if" || node.kind === "for") {
+      // In a real implementation, we'd need to correlate these with the compiler's random IDs.
+      // For MVP, we'll just track that we HAVE dynamic blocks and re-render the whole component.
+    }
+
     if (imports[node.tag]) {
       const instanceId = ctx.autoId++;
-      const alias = node.tag;
-      const childKey = `${alias}_${instanceId}`;
-      const childComp = imports[alias];
+      const childKey = `${node.tag}_${instanceId}`;
+      const childComp = imports[node.tag];
 
-      // Extract static props from node.attrs
       const initialProps: Record<string, any> = {};
       for (const [k, v] of Object.entries(node.attrs)) {
         if (!v.includes("{{")) {
-          // Try to parse number/bool
           if (v === "true") initialProps[k] = true;
           else if (v === "false") initialProps[k] = false;
           else {
@@ -121,28 +123,48 @@ export const handlers = ${handlersJS};
 
       const childSession = new ServerSession(childComp, workDir, initialProps);
       this.children[childKey] = childSession;
-
-      // Bubble up patches from children
-      childSession.onPatch((patch) => {
-        const prefixedPatch: Record<string, any> = {};
-        for (const [k, v] of Object.entries(patch)) {
-          prefixedPatch[`${childKey}.${k}`] = v;
-        }
-        if (this.onPatchCallback) {
-          this.onPatchCallback(prefixedPatch);
-        }
+      childSession.onPatch((p) => {
+        const pref: any = {};
+        for (const [k, v] of Object.entries(p)) pref[`${childKey}.${k}`] = v;
+        if (this.onPatchCallback) this.onPatchCallback(pref);
       });
-
       promises.push(childSession.ready());
     } else {
-      // Normal node: consumes an ID
       ctx.autoId++;
     }
 
     if (node.children) {
       for (const child of node.children) {
-        this.traverseLayout(child, imports, workDir, promises, ctx);
+        this.traverseLayout(child, comp, scope, statePrefix, workDir, promises, ctx);
       }
+    }
+  }
+
+  private reRenderBlocks(comp: LoadedComponent) {
+    const scope = `hjx-${comp.ast.component.name.toLowerCase()}`;
+    // Full component re-render for MVP
+    const { htmlBody } = renderNode(comp.ast.layout!, scope, comp.imports, "", {}, {}, {}, { autoId: 0 });
+
+    // Evaluate if/for blocks by injecting state values
+    const finalHtml = htmlBody.replace(/data-hjx-if="([^"]+)"/g, (match, cond) => {
+      const result = !!this.evaluateExpression(cond);
+      return result ? `data-hjx-if-visible="true" ${match}` : `data-hjx-if-visible="false" style="display:none" ${match}`;
+    });
+
+    if (this.onPatchCallback) {
+      this.onPatchCallback({ _html: finalHtml });
+    }
+  }
+
+  private evaluateExpression(expr: string) {
+    // Basic property getter for MVP
+    if (this.state[expr] !== undefined) return this.state[expr];
+    try {
+      // Dangerous but okay for internal dev POC
+      const fn = new Function("state", `with(state) { return ${expr}; }`);
+      return fn(this.state);
+    } catch (e) {
+      return false;
     }
   }
 
@@ -159,11 +181,6 @@ export const handlers = ${handlersJS};
   }
 
   public updateState(patch: Record<string, any>) {
-    // This is called when client sends back state (e.g. inputs)
-    // We need to route partial patches to children if keys match alias?
-    // Or does the client send flattened keys "Counter.count"?
-    // Let's assume dot notation for children: "Counter.count"
-
     const localPatch: Record<string, any> = {};
     const childrenPatches: Record<string, Record<string, any>> = {};
 
@@ -185,20 +202,16 @@ export const handlers = ${handlersJS};
       this.children[alias].updateState(childPatch);
     }
 
-    // Return aggregated patch? Or just what changed?
-    // For simplicity, we just apply side effects here.
     return patch;
   }
 
   public runHandler(handlerName: string): Record<string, any> | null {
-    // Check for child handler: "Counter.inc"
     if (handlerName.includes(".")) {
       const [alias, ...rest] = handlerName.split(".");
       const childName = rest.join(".");
       if (this.children[alias]) {
         const childPatch = this.children[alias].runHandler(childName);
         if (childPatch) {
-          // Prefix keys in patch with alias
           const prefixedPatch: Record<string, any> = {};
           for (const [k, v] of Object.entries(childPatch)) {
             prefixedPatch[`${alias}.${k}`] = v;
@@ -216,7 +229,6 @@ export const handlers = ${handlersJS};
     }
 
     let patch: Record<string, any> = {};
-
     const ctx = {
       store: {
         get: (key?: string) => (key ? this.state[key] : this.state),
@@ -226,6 +238,9 @@ export const handlers = ${handlersJS};
           if (this.onPatchCallback) {
             this.onPatchCallback(p);
           }
+          // Component-level re-render?
+          // We need a way to know which component this session belongs to.
+          // For now we assume the session carries the component ref.
         }
       }
     };
@@ -244,9 +259,7 @@ export const handlers = ${handlersJS};
     if (this.tempFile && existsSync(this.tempFile)) {
       try {
         unlinkSync(this.tempFile);
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) { }
     }
     for (const child of Object.values(this.children)) {
       child.cleanup();

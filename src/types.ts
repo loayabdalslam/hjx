@@ -3,13 +3,15 @@ export type HJXStateValue = string | number | boolean;
 export type HJXBind = { prop: "value"; state: string };
 
 export type HJXNode = {
-  kind: "node";
+  kind: "node" | "if" | "for" | "else";
   tag: string;
+  condition?: string;  // for "if"
+  iterator?: { item: string; list: string }; // for "for"
   id?: string;
   classes: string[];
   attrs: Record<string, string>;
-  text: string | null; // only for leaf nodes currently
-  events: Record<string, string>; // eventName -> handlerName
+  text: string | null;
+  events: Record<string, string>;
   bind: HJXBind | null;
   children: HJXNode[];
 };

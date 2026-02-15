@@ -163,6 +163,17 @@ function parseStateValue(raw: string, onError: () => never): HJXStateValue {
   if (raw === "true") return true;
   if (raw === "false") return false;
   if (/^-?\d+(?:\.\d+)?$/.test(raw)) return Number(raw);
+
+  // Arrays/Objects (JSON-like)
+  if (raw.startsWith('[') || raw.startsWith('{')) {
+    try {
+      // Basic support for JSON format in state
+      return JSON.parse(raw.replace(/'/g, '"'));
+    } catch (e) {
+      return onError();
+    }
+  }
+
   return onError();
 }
 
@@ -186,6 +197,40 @@ function parseLayout(
     const line = lines[lineNo];
     const indent = indentOf(line);
     const t = line.trim();
+
+    // if (condition):
+    const ifMatch = t.match(/^if\s*\((.+)\)\s*:\s*$/);
+    if (ifMatch) {
+      return {
+        node: { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        indent,
+        hasChildren: true
+      };
+    }
+
+    // else:
+    if (t === "else:") {
+      return {
+        node: { kind: "else", tag: "else", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        indent,
+        hasChildren: true
+      };
+    }
+
+    // for (item in list):
+    const forMatch = t.match(/^for\s*\(([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_.]+)\)\s*:\s*$/);
+    if (forMatch) {
+      return {
+        node: {
+          kind: "for",
+          tag: "for",
+          iterator: { item: forMatch[1], list: forMatch[2] },
+          classes: [], attrs: {}, text: null, events: {}, bind: null, children: []
+        },
+        indent,
+        hasChildren: true
+      };
+    }
 
     // container: view#id.class (attrs):
     const containerMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?\s*:\s*$/);

@@ -68,8 +68,9 @@ handlers:
   - `log "message"` (debug)
 
 ## Roadmap
-- conditionals: `if ...`
-- lists: `for item in items`
+- **Control Flow**:
+  - `if (condition):` block for conditional rendering.
+  - `for (item in list):` block for list iteration.
 - more DOM nodes + attributes + aria
 - effects: `effect when <expr> -> ...`
 - targets: React/Vue/WebComponents
