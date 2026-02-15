@@ -23,6 +23,7 @@ export type HJXAst = {
   kind: "HJXAst";
   version: "0.1";
   component: { name: string };
+  imports: Record<string, string>;
   state: Record<string, HJXStateValue>;
   layout: HJXNode | null;
   style: string;

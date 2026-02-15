@@ -18,6 +18,7 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
     kind: "HJXAst",
     version: "0.1",
     component: { name: componentName },
+    imports: {},
     state: {},
     layout: null,
     style: "",
@@ -59,6 +60,24 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
         const key = m[1];
         const raw = m[2].trim();
         ast.state[key] = parseStateValue(raw, () => err(`Invalid state value: ${raw}`, i));
+        i++;
+      }
+      continue;
+    }
+
+    if (trimmed === "imports:") {
+      i++;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (isSkippable(l)) { i++; continue; }
+        if (indentOf(l) === 0) break;
+
+        const t = l.trim();
+        const m = t.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*from\s*(.+)$/);
+        if (!m) err("Invalid import line. Expected: Alias from \"path\"", i);
+        const key = m[1];
+        const raw = m[2].trim();
+        ast.imports[key] = parseMaybeString(raw, () => err(`Invalid import path: ${raw}`, i));
         i++;
       }
       continue;
@@ -258,4 +277,10 @@ function parseLayout(
   // wrap multiple roots in a root view
   if (nodes.length === 1) return nodes[0];
   return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: nodes };
+}
+
+function parseMaybeString(rhs: string, onError: () => never): string {
+  const r = rhs.trim();
+  if ((r.startsWith('"') && r.endsWith('"')) || (r.startsWith("'") && r.endsWith("'"))) return r.slice(1, -1);
+  return onError();
 }
