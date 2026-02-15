@@ -2,8 +2,9 @@ import { writeFileSync, unlinkSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { HJXAst } from "./types.js";
+import { LoadedComponent } from "./loader.js";
 import { compileHandlersToJS } from "./compiler/vanilla_handlers.js";
-import { v4 as uuidv4 } from "uuid"; // We might need uuid, or just use Math.random
+import { v4 as uuidv4 } from "uuid";
 
 // Simple UUID polyfill if not available
 function genId() {
@@ -13,16 +14,27 @@ function genId() {
 export class ServerSession {
   private state: Record<string, any>;
   private handlers: Record<string, (ctx: any) => void> = {};
+  private children: Record<string, ServerSession> = {};
   private readyPromise: Promise<void>;
   private tempFile: string | null = null;
 
-  constructor(ast: HJXAst, workDir: string) {
-    this.state = { ...ast.state };
-    this.readyPromise = this.init(ast, workDir);
+  constructor(component: LoadedComponent, workDir: string) {
+    this.state = { ...component.ast.state };
+    this.readyPromise = this.init(component, workDir);
   }
 
-  private async init(ast: HJXAst, workDir: string) {
-    // 1. Prepare source code
+  private async init(component: LoadedComponent, workDir: string) {
+    const ast = component.ast;
+
+    // 1. Initialize children
+    const childPromises: Promise<void>[] = [];
+    for (const [alias, childComp] of Object.entries(component.imports)) {
+      const childSession = new ServerSession(childComp, workDir);
+      this.children[alias] = childSession;
+      childPromises.push(childSession.ready());
+    }
+
+    // 2. Prepare source code
     const scriptContent = ast.script ?? "";
     const handlersJS = compileHandlersToJS(ast.handlers, Object.keys(ast.state));
 
@@ -32,20 +44,7 @@ ${scriptContent}
 export const handlers = ${handlersJS};
 `;
 
-    // 2. Write to temp file
-    // We put it in workDir so relative imports in script might work (if workDir is properly set)
-    // Actually, imports in 'script' are relative to the hjx file usually.
-    // If we write to 'dist/session.mjs', imports like './foo' will look in 'dist/foo'.
-    // Use the workDir (which is outDir in devserver) or better, the input directory?
-    // If we write to input directory, we pollute it.
-    // If we write to dist, we need to copy imported files or adjust imports.
-    // For MVP, let's assume imports are absolute or package imports.
-    // OR we write the temp file next to the input file (and hide it?).
-
-    // Let's use the directory of the input file if possible, but we only get workDir here.
-    // We should pass input dir.
-
-    // For now, let's assume the workDir passed is a safe place (like dist-app/.sessions).
+    // 3. Write to temp file
     const sessionDir = join(workDir, ".sessions");
     if (!existsSync(sessionDir)) mkdirSync(sessionDir, { recursive: true });
 
@@ -55,8 +54,7 @@ export const handlers = ${handlersJS};
     writeFileSync(this.tempFile, moduleSource, "utf-8");
 
     try {
-      // 3. Import it
-      // We need a file URL for dynamic import on Windows
+      // 4. Import it
       const fileUrl = pathToFileURL(this.tempFile).href;
       const mod = await import(fileUrl);
       this.handlers = mod.handlers;
@@ -64,22 +62,74 @@ export const handlers = ${handlersJS};
       console.error("Failed to load server script:", e);
       this.handlers = {};
     }
+
+    // Wait for children
+    await Promise.all(childPromises);
   }
 
   public async ready() {
     return this.readyPromise;
   }
 
-  public getState() {
-    return this.state;
+  public getState(): Record<string, any> {
+    const s = { ...this.state };
+    for (const [alias, child] of Object.entries(this.children)) {
+      s[alias] = child.getState();
+    }
+    return s;
   }
 
   public updateState(patch: Record<string, any>) {
-    Object.assign(this.state, patch);
+    // This is called when client sends back state (e.g. inputs)
+    // We need to route partial patches to children if keys match alias?
+    // Or does the client send flattened keys "Counter.count"?
+    // Let's assume dot notation for children: "Counter.count"
+
+    const localPatch: Record<string, any> = {};
+    const childrenPatches: Record<string, Record<string, any>> = {};
+
+    for (const [key, val] of Object.entries(patch)) {
+      if (key.includes(".")) {
+        const [alias, ...rest] = key.split(".");
+        if (this.children[alias]) {
+          if (!childrenPatches[alias]) childrenPatches[alias] = {};
+          childrenPatches[alias][rest.join(".")] = val;
+        }
+      } else {
+        localPatch[key] = val;
+      }
+    }
+
+    Object.assign(this.state, localPatch);
+
+    for (const [alias, childPatch] of Object.entries(childrenPatches)) {
+      this.children[alias].updateState(childPatch);
+    }
+
+    // Return aggregated patch? Or just what changed?
+    // For simplicity, we just apply side effects here.
     return patch;
   }
 
   public runHandler(handlerName: string): Record<string, any> | null {
+    // Check for child handler: "Counter.inc"
+    if (handlerName.includes(".")) {
+      const [alias, ...rest] = handlerName.split(".");
+      const childName = rest.join(".");
+      if (this.children[alias]) {
+        const childPatch = this.children[alias].runHandler(childName);
+        if (childPatch) {
+          // Prefix keys in patch with alias
+          const prefixedPatch: Record<string, any> = {};
+          for (const [k, v] of Object.entries(childPatch)) {
+            prefixedPatch[`${alias}.${k}`] = v;
+          }
+          return prefixedPatch;
+        }
+        return null;
+      }
+    }
+
     const handler = this.handlers[handlerName];
     if (!handler) {
       console.warn(`Unknown handler: ${handlerName}`);
@@ -115,6 +165,9 @@ export const handlers = ${handlersJS};
       } catch (e) {
         // ignore
       }
+    }
+    for (const child of Object.values(this.children)) {
+      child.cleanup();
     }
   }
 }

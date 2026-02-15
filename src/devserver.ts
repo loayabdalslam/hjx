@@ -4,6 +4,7 @@ import { resolve, extname } from "node:path";
 import { WebSocketServer } from "ws";
 import chokidar from "chokidar";
 import { parseHJX } from "./parser.js";
+import { loadComponentTree, LoadedComponent } from "./loader.js";
 import { buildServerDriven, runtimeModuleSource } from "./compiler/server_driven.js";
 import { ServerSession } from "./server_session.js";
 import { HJXAst } from "./types.js";
@@ -16,31 +17,39 @@ function contentType(path: string): string {
   return "application/octet-stream";
 }
 
-let currentAst: HJXAst | null = null;
+let currentTree: LoadedComponent | null = null;
 
 function buildOnce(inputPath: string, outDir: string) {
-  const src = readFileSync(inputPath, "utf-8");
-  const ast = parseHJX(src, inputPath);
-  currentAst = ast;
-
-  const bundle = buildServerDriven(ast);
-  writeFileSync(resolve(outDir, "index.html"), bundle.html, "utf-8");
-  writeFileSync(resolve(outDir, "app.css"), bundle.css, "utf-8");
-  writeFileSync(resolve(outDir, "app.js"), bundle.js, "utf-8");
-  writeFileSync(resolve(outDir, "runtime.js"), runtimeModuleSource(), "utf-8");
+  try {
+    currentTree = loadComponentTree(inputPath);
+    // TODO: buildServerDriven needs to handle the tree
+    // For now we pass the root AST, but we need to update it to support the tree
+    const bundle = buildServerDriven(currentTree);
+    writeFileSync(resolve(outDir, "index.html"), bundle.html, "utf-8");
+    writeFileSync(resolve(outDir, "app.css"), bundle.css, "utf-8");
+    writeFileSync(resolve(outDir, "app.js"), bundle.js, "utf-8");
+    writeFileSync(resolve(outDir, "runtime.js"), runtimeModuleSource(), "utf-8");
+  } catch (e) {
+    console.error("Build error during load:", e);
+    throw e;
+  }
 }
 
 export async function serveDev(opts: { inputPath: string; outDir: string; port: number }) {
   const { inputPath, outDir, port } = opts;
   buildOnce(inputPath, outDir);
 
-  const watcher = chokidar.watch([inputPath], { ignoreInitial: true });
-  watcher.on("all", () => {
-    try {
-      buildOnce(inputPath, outDir);
-      console.log("Rebuilt.");
-    } catch (e: any) {
-      console.error("Build error:", e?.message ?? e);
+  const watcher = chokidar.watch([dirname(inputPath)], { ignoreInitial: true });
+  watcher.on("all", (event, path) => {
+    if (path.endsWith(".hjx")) {
+        try {
+            // Simplified rebuild: just rebuild everything if any hjx changes in dir
+            // A better way would be to track dependencies in loader
+            buildOnce(inputPath, outDir);
+            console.log("Rebuilt.");
+        } catch (e: any) {
+            console.error("Build error:", e?.message ?? e);
+        }
     }
   });
 
@@ -61,13 +70,13 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
   const wss = new WebSocketServer({ server, path: "/hjx" });
 
   wss.on("connection", async (ws) => {
-    if (!currentAst) {
+    if (!currentTree) {
       ws.close();
       return;
     }
 
     // Use outDir as workDir for sessions
-    const session = new ServerSession(currentAst, outDir);
+    const session = new ServerSession(currentTree, outDir);
     await session.ready();
 
     // Send initial state
