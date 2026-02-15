@@ -173,7 +173,7 @@ function parseLayout(
   filename: string
 ): HJXNode {
   let i = getIndex();
-  const nodes: HJXNode[] = [];
+  // const nodes: HJXNode[] = []; // Removed: now declared by call to parseBlock below
   const indentOf = (s: string) => (s.match(/^\s*/)?.[0].length ?? 0);
   const isSkippable = (s: string) => /^\s*$/.test(s) || /^\s*\/\//.test(s);
   const baseIndent = 2;
@@ -288,56 +288,55 @@ function parseLayout(
     return onError();
   }
 
-  // Read until next top-level block (indent 0)
-  while (i < lines.length) {
-    const line = lines[i];
-    if (isSkippable(line)) { i++; continue; }
-    const ind = indentOf(line);
-    if (ind === 0) break;
-    if (ind < baseIndent) err("Invalid indentation in layout", i);
+  function parseBlock(minIndent: number): HJXNode[] {
+    const nodes: HJXNode[] = [];
 
-    // parse a node and its children based on indentation
-    const { node, indent: nodeIndent, hasChildren } = parseNode(i);
-    i++;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (isSkippable(line)) { i++; continue; }
+      const ind = indentOf(line);
 
-    if (hasChildren) {
-      // gather children with greater indent
-      const childIndent = nodeIndent + 2;
-      while (i < lines.length) {
-        const ln = lines[i];
-        if (isSkippable(ln)) { i++; continue; }
-        const ci = indentOf(ln);
-        if (ci <= nodeIndent) break;
-        if (ci !== childIndent && ci % 2 !== 0) err("Indentation must use 2 spaces", i);
+      // If indentation is less than minIndent, we stepped out of this block
+      if (ind < minIndent) break;
 
-        // parse child node
-        const { node: child, indent: childInd, hasChildren: childHasChildren } = parseNode(i);
-        i++;
+      // If we are at top level (parsing layout content), stop if we hit another top-level block (indent 0)
+      // But minIndent for layout content is 2. So ind < 2 covers ind == 0.
 
-        if (childHasChildren) {
-          // parse grandchildren recursively by temporarily setting slice
-          // We handle by backtracking: push child, then parse its children inline:
-          const grandIndent = childInd + 2;
-          while (i < lines.length) {
-            const gl = lines[i];
-            if (isSkippable(gl)) { i++; continue; }
-            const gi = indentOf(gl);
-            if (gi <= childInd) break;
-            if (gi !== grandIndent && gi % 2 !== 0) err("Indentation must use 2 spaces", i);
+      if (ind !== minIndent) {
+        // If we are deeper than expected, it's an error (e.g. 4 spaces when we expected 2)
+        // unless it's a child of previous, which should have been consumed.
+        err(`Unexpected indentation. Expected ${minIndent}, got ${ind}`, i);
+      }
 
-            const { node: grand, hasChildren: gHas } = parseNode(i);
-            if (gHas) err("Nested containers deeper than 2 levels are not supported yet (v0.1)", i);
-            child.children.push(grand);
-            i++;
-          }
+      const { node, hasChildren } = parseNode(i);
+      i++;
+
+      if (hasChildren) {
+        // Recursively parse children
+        // We check if next line starts a block
+        // Look ahead for children
+        let j = i;
+        let hasContent = false;
+        while (j < lines.length) {
+            if (isSkippable(lines[j])) { j++; continue; }
+            if (indentOf(lines[j]) > minIndent) {
+                hasContent = true;
+            }
+            break;
         }
 
-        node.children.push(child);
+        if (hasContent) {
+            // We are at 'i'. The children should be at minIndent + 2
+            node.children = parseBlock(minIndent + 2);
+        }
       }
+      nodes.push(node);
     }
-
-    nodes.push(node);
+    return nodes;
   }
+
+  // Initial call: layout content starts at indent 2
+  const nodes = parseBlock(baseIndent);
 
   setIndex(i);
 
