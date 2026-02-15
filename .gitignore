@@ -5,3 +5,4 @@ dist-app
 .DS_Store
 package-lock.json
 hjx-v0.1
+dist-demo
