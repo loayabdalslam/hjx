@@ -17,10 +17,15 @@ export class ServerSession {
   private children: Record<string, ServerSession> = {};
   private readyPromise: Promise<void>;
   private tempFile: string | null = null;
+  private onPatchCallback: ((patch: Record<string, any>) => void) | null = null;
 
   constructor(component: LoadedComponent, workDir: string, initialProps: Record<string, any> = {}) {
     this.state = { ...component.ast.state, ...initialProps };
     this.readyPromise = this.init(component, workDir);
+  }
+
+  public onPatch(cb: (patch: Record<string, any>) => void) {
+    this.onPatchCallback = cb;
   }
 
   private async init(component: LoadedComponent, workDir: string) {
@@ -51,11 +56,32 @@ export const handlers = ${handlersJS};
 
     writeFileSync(this.tempFile, moduleSource, "utf-8");
 
+    const store = {
+      get: (key?: string) => (key ? this.state[key] : this.state),
+      set: (patch: Record<string, any>) => {
+        Object.assign(this.state, patch);
+        if (this.onPatchCallback) {
+          this.onPatchCallback(patch);
+        }
+      }
+    };
+
     try {
       // 4. Import it
       const fileUrl = pathToFileURL(this.tempFile).href;
       const mod = await import(fileUrl);
       this.handlers = mod.handlers;
+      console.log(`Loaded server script: ${this.tempFile}`);
+      console.log(`Handlers: ${Object.keys(this.handlers).join(", ")}`);
+
+      // 5. Call exported init if exists
+      if (typeof mod.init === "function") {
+        console.log("Calling exported init function...");
+        mod.init(store);
+        console.log("init function called.");
+      } else {
+        console.log("No exported init function found.");
+      }
     } catch (e) {
       console.error("Failed to load server script:", e);
       this.handlers = {};
@@ -95,6 +121,18 @@ export const handlers = ${handlersJS};
 
       const childSession = new ServerSession(childComp, workDir, initialProps);
       this.children[childKey] = childSession;
+
+      // Bubble up patches from children
+      childSession.onPatch((patch) => {
+        const prefixedPatch: Record<string, any> = {};
+        for (const [k, v] of Object.entries(patch)) {
+          prefixedPatch[`${childKey}.${k}`] = v;
+        }
+        if (this.onPatchCallback) {
+          this.onPatchCallback(prefixedPatch);
+        }
+      });
+
       promises.push(childSession.ready());
       return;
     }
@@ -182,10 +220,13 @@ export const handlers = ${handlersJS};
 
     const ctx = {
       store: {
-        get: () => this.state,
-        set: (p: any) => {
+        get: (key?: string) => (key ? this.state[key] : this.state),
+        set: (p: Record<string, any>) => {
           Object.assign(this.state, p);
           Object.assign(patch, p);
+          if (this.onPatchCallback) {
+            this.onPatchCallback(p);
+          }
         }
       }
     };

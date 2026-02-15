@@ -1,0 +1,77 @@
+component Dashboard
+
+imports:
+  Card from "./components/Card.hjx"
+  Button from "./components/Button.hjx"
+
+state:
+  uptime = 0
+  serverTime = ""
+  totalSessions = 12
+  cpuUsage = 45
+  status = "Operational"
+  lastIncident = "None"
+
+script:
+  function getFormattedTime() {
+    return new Date().toLocaleTimeString();
+  }
+
+  export function init(store) {
+    console.log("Dashboard background task started");
+    
+    // Update server time and uptime every second
+    const interval = setInterval(() => {
+      const currentUptime = store.get("uptime");
+      store.set({
+        uptime: currentUptime + 1,
+        serverTime: getFormattedTime(),
+        cpuUsage: Math.floor(Math.random() * 20) + 30 // Simulate CPU jitter
+      });
+    }, 1000);
+
+    store.set({ serverTime: getFormattedTime() });
+    
+    // Note: In a real app, we'd want a way to clear this interval on cleanup.
+  }
+
+layout:
+  view.min-h-screen.bg-slate-50.p-8:
+    view.max-w-6xl.mx-auto.space-y-8:
+      // Header
+      view.flex.items-center.justify-between:
+        view:
+          view.text-3xl.font-bold.tracking-tight: "System Dashboard"
+          view.text-muted-foreground: "Real-time infrastructure monitoring (Server-Driven)"
+        view.flex.items-center.gap-4:
+          view.px-3.py-1.rounded-full.text-xs.font-medium.bg-green-100.text-green-800: "{{status}}"
+          view.text-sm.text-muted-foreground: "Server Time: {{serverTime}}"
+
+      // Stats Grid
+      view.grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-4.gap-4:
+        Card (title="Uptime" description="Total system online time"):
+          view.text-2xl.font-bold: "{{uptime}} seconds"
+        
+        Card (title="Sessions" description="Active user sessions"):
+          view.text-2xl.font-bold: "{{totalSessions}}"
+        
+        Card (title="CPU Usage" description="Current load across clusters"):
+          view.text-2xl.font-bold: "{{cpuUsage}}%"
+          view.w-full.bg-slate-200.rounded-full.h-2.mt-2:
+            view.bg-blue-600.h-2.rounded-full (style="width: {{cpuUsage}}%"): ""
+
+        Card (title="Incident Status" description="Last reported issue"):
+          view.text-2xl.font-bold: "{{lastIncident}}"
+
+      // Actions
+      view.flex.gap-4:
+        Button (on click -> refresh): "Force Refresh"
+        Button (variant="outline" on click -> toggleStatus): "Toggle Status"
+
+handlers:
+  refresh:
+    log "Refreshing stats..."
+    set totalSessions = totalSessions + 1
+  toggleStatus:
+    log "Toggling system status"
+    set status = "Maintenance"

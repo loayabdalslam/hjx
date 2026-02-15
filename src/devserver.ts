@@ -42,14 +42,14 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
   const watcher = chokidar.watch([dirname(inputPath)], { ignoreInitial: true });
   watcher.on("all", (event, path) => {
     if (path.endsWith(".hjx")) {
-        try {
-            // Simplified rebuild: just rebuild everything if any hjx changes in dir
-            // A better way would be to track dependencies in loader
-            buildOnce(inputPath, outDir);
-            console.log("Rebuilt.");
-        } catch (e: any) {
-            console.error("Build error:", e?.message ?? e);
-        }
+      try {
+        // Simplified rebuild: just rebuild everything if any hjx changes in dir
+        // A better way would be to track dependencies in loader
+        buildOnce(inputPath, outDir);
+        console.log("Rebuilt.");
+      } catch (e: any) {
+        console.error("Build error:", e?.message ?? e);
+      }
     }
   });
 
@@ -77,6 +77,12 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
 
     // Use outDir as workDir for sessions
     const session = new ServerSession(currentTree, outDir);
+
+    // Subscribe to patches (for background tasks and handlers)
+    session.onPatch((patch) => {
+      ws.send(JSON.stringify({ type: "patch", payload: patch }));
+    });
+
     await session.ready();
 
     // Send initial state
@@ -87,16 +93,14 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
         const msg = JSON.parse(data.toString());
 
         if (msg.type === "event") {
-            try {
-                const patch = session.runHandler(msg.name);
-                if (patch) {
-                    ws.send(JSON.stringify({ type: "patch", payload: patch }));
-                }
-            } catch (err: any) {
-                console.error("Handler error:", err);
-            }
+          try {
+            // Handlers now trigger onPatch naturally
+            session.runHandler(msg.name);
+          } catch (err: any) {
+            console.error("Handler error:", err);
+          }
         } else if (msg.type === "state_update") {
-            session.updateState(msg.payload);
+          session.updateState(msg.payload);
         }
       } catch (e) {
         console.error("WS Message error", e);

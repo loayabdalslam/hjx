@@ -188,7 +188,7 @@ function parseLayout(
     const t = line.trim();
 
     // container: view#id.class (attrs):
-    const containerMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_-]+)*(\s*\([^\)]*\))?\s*:\s*$/);
+    const containerMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?\s*:\s*$/);
     if (containerMatch) {
       const tag = containerMatch[1];
       const id = containerMatch[2] ? containerMatch[2].slice(1) : undefined;
@@ -202,7 +202,7 @@ function parseLayout(
     }
 
     // leaf with : "text"
-    const leafMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_-]+)*(\s*\([^\)]*\))?\s*:\s*(.+)$/);
+    const leafMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?\s*:\s*(.+)$/);
     if (leafMatch) {
       const tag = leafMatch[1];
       const id = leafMatch[2] ? leafMatch[2].slice(1) : undefined;
@@ -218,7 +218,7 @@ function parseLayout(
     }
 
     // simple node (void/empty): view#id.class (attrs)
-    const simpleMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_-]+)*(\s*\([^\)]*\))?$/);
+    const simpleMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?$/);
     if (simpleMatch) {
       const tag = simpleMatch[1];
       const id = simpleMatch[2] ? simpleMatch[2].slice(1) : undefined;
@@ -266,9 +266,9 @@ function parseLayout(
       // 4. boolean attribute
       const boolMatch = remaining.match(/^([a-zA-Z0-9_-]+)(?=\s|$)/);
       if (boolMatch) {
-         node.attrs[boolMatch[1]] = "true";
-         remaining = remaining.slice(boolMatch[0].length).trim();
-         continue;
+        node.attrs[boolMatch[1]] = "true";
+        remaining = remaining.slice(boolMatch[0].length).trim();
+        continue;
       }
 
       break;
@@ -318,16 +318,16 @@ function parseLayout(
         let j = i;
         let hasContent = false;
         while (j < lines.length) {
-            if (isSkippable(lines[j])) { j++; continue; }
-            if (indentOf(lines[j]) > minIndent) {
-                hasContent = true;
-            }
-            break;
+          if (isSkippable(lines[j])) { j++; continue; }
+          if (indentOf(lines[j]) > minIndent) {
+            hasContent = true;
+          }
+          break;
         }
 
         if (hasContent) {
-            // We are at 'i'. The children should be at minIndent + 2
-            node.children = parseBlock(minIndent + 2);
+          // We are at 'i'. The children should be at minIndent + 2
+          node.children = parseBlock(minIndent + 2);
         }
       }
       nodes.push(node);
