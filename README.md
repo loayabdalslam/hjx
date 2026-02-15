@@ -1,4 +1,5 @@
 # HJX v0.1 (MVP Skeleton)
+<img width="1200" height="500" alt="logo" src="https://github.com/user-attachments/assets/001b04f1-5aff-43f1-b4f9-ecb15752b061" />
 
 HJX is a unified UI language that compiles into **HTML + CSS + JavaScript** from a single `.hjx` file.
 
@@ -54,8 +55,9 @@ handlers:
 ```
 
 ### Supported right now
-- `component <Name>`
-- `state:` with simple `name = number|string|bool`
+- **Composition**: Support for nested components and slots.
+- **Background Tasks**: Server-side `init(store)` function for periodic state updates.
+- **Modern CSS**: Support for `:` and `/` in class names (Tailwind-ready).
 - `layout:` with indentation-based tree
   - nodes: `view`, `text`, `button`, `input`
   - ids/classes: `view#id.class1.class2`
@@ -69,8 +71,9 @@ handlers:
   - `log "message"` (debug)
 
 ## Roadmap
-- conditionals: `if ...`
-- lists: `for item in items`
+- **Control Flow**:
+  - `if (condition):` block for conditional rendering.
+  - `for (item in list):` block for list iteration.
 - more DOM nodes + attributes + aria
 - effects: `effect when <expr> -> ...`
 - targets: React/Vue/WebComponents

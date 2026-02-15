@@ -17,7 +17,7 @@ export function buildServerDriven(tree: LoadedComponent): { html: string; css: s
   collectCss(tree);
   const css = Array.from(cssParts.values()).join("\n");
 
-  const { htmlBody, bindings, attrBindings, eventBindings, inputBindings } = renderComponent(tree, "");
+  const { htmlBody, bindings, attrBindings, eventBindings, inputBindings } = renderComponent(tree, "", {}, {}, {}, { autoId: 0 }, tree.ast.state);
 
   // We don't compile handlers to JS here because they run on the server.
   // We just need the initial state structure for potential hydration,
@@ -34,21 +34,23 @@ export function createApp(rootEl) {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   const wsUrl = protocol + "//" + location.host + "/hjx";
 
-  const store = createRemoteStore(wsUrl, initialState);
+  const store = createRemoteStore(wsUrl, initialState, rootEl);
 
-  // bind text interpolations
-  ${bindings.map((b) => `textBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.template)});`).join("\n  ")}
+  window._hjx_rebind = () => {
+    // bind text interpolations
+    ${bindings.map((b) => `textBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.template)});`).join("\n    ")}
 
-  // bind attributes
-  ${attrBindings.map((b) => `attrBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.attr)}, ${JSON.stringify(b.template)});`).join("\n  ")}
+    // bind attributes
+    ${attrBindings.map((b) => `attrBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.attr)}, ${JSON.stringify(b.template)});`).join("\n    ")}
 
-  // bind clicks
-  // Instead of executing a local handler, we send an event to the server
-  ${eventBindings.map((e) => `clickBinder(store, rootEl, ${JSON.stringify(e.selector)}, () => store.sendEvent(${JSON.stringify(e.handler)}));`).join("\n  ")}
+    // bind clicks
+    ${eventBindings.map((e) => `clickBinder(store, rootEl, ${JSON.stringify(e.selector)}, () => store.sendEvent(${JSON.stringify(e.handler)}));`).join("\n    ")}
 
-  // bind inputs (2-way)
-  ${inputBindings.map((b) => `inputBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.stateKey)});`).join("\n  ")}
+    // bind inputs
+    ${inputBindings.map((b) => `inputBinder(store, rootEl, ${JSON.stringify(b.selector)}, ${JSON.stringify(b.stateKey)});`).join("\n    ")}
+  };
 
+  window._hjx_rebind();
   return { store };
 }
 
@@ -188,9 +190,11 @@ function escapeHtml(s: string): string {
 }
 
 function emptyRoot(): HJXNode {
-  return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [
-    { kind: "node", tag: "text", classes: [], attrs: {}, text: "Empty layout", events: {}, bind: null, children: [] }
-  ]};
+  return {
+    kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [
+      { kind: "node", tag: "text", classes: [], attrs: {}, text: "Empty layout", events: {}, bind: null, children: [] }
+    ]
+  };
 }
 
 type Bindings = {
@@ -205,24 +209,32 @@ function renderComponent(
   comp: LoadedComponent,
   statePrefix: string,
   extraAttrs: Record<string, string> = {},
-  slots: Record<string, Bindings> = {}
+  extraEvents: Record<string, string> = {},
+  slots: Record<string, Bindings> = {},
+  ctx: { autoId: number } = { autoId: 0 },
+  serverState: Record<string, any> = {}
 ): Bindings {
   const scope = `hjx-${comp.ast.component.name.toLowerCase()}`;
-  return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix, extraAttrs, slots);
+  return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix, extraAttrs, extraEvents, slots, ctx, serverState);
 }
 
-function renderNode(
+export function renderNode(
   node: HJXNode,
   scope: string,
   imports: Record<string, LoadedComponent>,
   statePrefix: string,
   extraAttrs: Record<string, string> = {},
-  receivedSlots: Record<string, Bindings> = {}
+  extraEvents: Record<string, string> = {},
+  receivedSlots: Record<string, Bindings> = {},
+  ctx: { autoId: number },
+  serverState: Record<string, any> = {}
 ): Bindings {
   const bindings: Array<{ selector: string; template: string }> = [];
   const attrBindings: Array<{ selector: string; attr: string; template: string }> = [];
   const eventBindings: Array<{ selector: string; handler: string }> = [];
   const inputBindings: Array<{ selector: string; stateKey: string }> = [];
+
+  const localDefaults = node.tag === "component" ? {} : {}; // Hook for component defaults if we had them easily
 
   // 1. Handle <slot> element
   if (node.tag === "slot") {
@@ -230,144 +242,213 @@ function renderNode(
     const slotData = receivedSlots[slotName];
 
     if (slotData && slotData.htmlBody) {
-        // Return bindings from slot data
-        return slotData;
+      // Return bindings from slot data
+      return slotData;
     }
 
-    // Fallback content if slot is empty
-    // Proceed to standard render logic for children as fallback
+    // Default slot content
+    const defaultContent: Bindings = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
+    if (node.text) defaultContent.htmlBody = escapeTextWithInterpolation(node.text);
+    if (node.children) {
+      for (const child of node.children) {
+        const res = renderNode(child, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
+        defaultContent.htmlBody += res.htmlBody;
+        defaultContent.bindings.push(...res.bindings);
+        defaultContent.attrBindings.push(...res.attrBindings);
+        defaultContent.eventBindings.push(...res.eventBindings);
+        defaultContent.inputBindings.push(...res.inputBindings);
+      }
+    }
+    return defaultContent;
   }
 
   // Check if node tag is an imported component
   if (imports[node.tag]) {
     const childComp = imports[node.tag];
-    const childPrefix = statePrefix ? `${statePrefix}.${node.tag}` : node.tag;
+    const dataId = `${scope}-${ctx.autoId++}`;
+    const childKey = `${node.tag}_${ctx.autoId - 1}`; // Use the ID we just consumed
+    const childPrefix = statePrefix ? `${statePrefix}.${childKey}` : childKey;
 
-    // Rewrite props/attrs to use absolute state paths from current scope
+    // Rewrite props/attrs
     const childProps: Record<string, string> = {};
     for (const [k, v] of Object.entries({ ...node.attrs, ...extraAttrs })) {
-        if (v.includes("{{")) {
-            childProps[k] = v.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
-                if (extraAttrs[key]) return extraAttrs[key];
-                return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
-            });
-        } else {
-            childProps[k] = v;
-        }
+      if (v.includes("{{")) {
+        childProps[k] = v.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
+          if (extraAttrs[key]) return extraAttrs[key];
+          return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
+        });
+      } else {
+        childProps[k] = v;
+      }
+    }
+
+    // Rewrite events
+    const childEvents: Record<string, string> = {};
+    for (const [evt, handler] of Object.entries(node.events ?? {})) {
+      childEvents[evt] = statePrefix ? `${statePrefix}.${handler}` : handler;
     }
 
     // Pre-render children (default slot)
-    const preRenderedSlot: Bindings = {
-        htmlBody: "",
-        bindings: [],
-        attrBindings: [],
-        eventBindings: [],
-        inputBindings: []
-    };
+    const preRenderedSlot: Bindings = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
+
+    // Handle inline text as first child of slot
+    if (node.text != null && node.text.trim() !== "") {
+      const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: node.text, events: {}, bind: null, children: [] };
+      const res = renderNode(txtNode, scope, imports, statePrefix, {}, {}, receivedSlots, ctx);
+      preRenderedSlot.htmlBody += res.htmlBody;
+      preRenderedSlot.bindings.push(...res.bindings);
+      preRenderedSlot.attrBindings.push(...res.attrBindings);
+      preRenderedSlot.eventBindings.push(...res.eventBindings);
+      preRenderedSlot.inputBindings.push(...res.inputBindings);
+    }
 
     if (node.children && node.children.length > 0) {
-        for (const child of node.children) {
-            // Render slot content in CURRENT scope
-            const res = renderNode(child, scope, imports, statePrefix, {}, receivedSlots);
-            preRenderedSlot.htmlBody += res.htmlBody;
-            preRenderedSlot.bindings.push(...res.bindings);
-            preRenderedSlot.attrBindings.push(...res.attrBindings);
-            preRenderedSlot.eventBindings.push(...res.eventBindings);
-            preRenderedSlot.inputBindings.push(...res.inputBindings);
-        }
+      for (const child of node.children) {
+        const res = renderNode(child, scope, imports, statePrefix, {}, {}, receivedSlots, ctx);
+        preRenderedSlot.htmlBody += res.htmlBody;
+        preRenderedSlot.bindings.push(...res.bindings);
+        preRenderedSlot.attrBindings.push(...res.attrBindings);
+        preRenderedSlot.eventBindings.push(...res.eventBindings);
+        preRenderedSlot.inputBindings.push(...res.inputBindings);
+      }
     }
 
     const slotsMap = { "default": preRenderedSlot };
-
-    const childResult = renderComponent(childComp, childPrefix, childProps, slotsMap);
-
-    // Merge bindings from both child component AND the pre-rendered slot content
-    childResult.bindings.push(...preRenderedSlot.bindings);
-    childResult.attrBindings.push(...preRenderedSlot.attrBindings);
-    childResult.eventBindings.push(...preRenderedSlot.eventBindings);
-    childResult.inputBindings.push(...preRenderedSlot.inputBindings);
+    const childResult = renderComponent(childComp, childPrefix, childProps, childEvents, slotsMap, ctx);
 
     return childResult;
   }
 
-  let autoId = 0;
+  // No-op at top level, ensureDataId will handle it
 
   function ensureDataId(n: HJXNode): string {
-    const existing = n.attrs["data-hjx-id"];
-    if (existing) return existing;
-    const id = `${scope}-${Math.random().toString(36).slice(2, 7)}`;
-    n.attrs["data-hjx-id"] = id;
-    return id;
+    return `${scope}-${ctx.autoId++}`;
   }
 
   function render(n: HJXNode, isRoot: boolean): string {
     // Handle <slot> inside recursive render
     if (n.tag === "slot") {
-       const slotName = n.attrs["name"] || "default";
-       const slotData = receivedSlots[slotName];
+      const slotName = n.attrs["name"] || "default";
+      const slotData = receivedSlots[slotName];
 
-       if (slotData && slotData.htmlBody) {
-           // We must add the bindings from the slot to our current accumulation lists
-           bindings.push(...slotData.bindings);
-           attrBindings.push(...slotData.attrBindings);
-           eventBindings.push(...slotData.eventBindings);
-           inputBindings.push(...slotData.inputBindings);
-           return slotData.htmlBody;
-       }
-       // Fallback
-       if (n.children) {
-           return n.children.map(c => render(c, false)).join("");
-       }
-       return "";
+      if (slotData && slotData.htmlBody) {
+        bindings.push(...slotData.bindings);
+        attrBindings.push(...slotData.attrBindings);
+        eventBindings.push(...slotData.eventBindings);
+        inputBindings.push(...slotData.inputBindings);
+        return slotData.htmlBody;
+      }
+      if (n.children) {
+        return n.children.map(c => render(c, false)).join("");
+      }
+      return "";
     }
 
-    // If child is a component, handle it
+    // Component as child
     if (imports[n.tag]) {
-      // Recurse for component (same logic as top-level but inside render loop)
       const childComp = imports[n.tag];
-      const childPrefix = statePrefix ? `${statePrefix}.${n.tag}` : n.tag;
+      const instanceId = ctx.autoId++;
+      const childKey = `${n.tag}_${instanceId}`;
+      const childPrefix = statePrefix ? `${statePrefix}.${childKey}` : childKey;
 
       const childProps: Record<string, string> = {};
-
-      // Props rewriting
       for (const [k, v] of Object.entries(n.attrs)) {
-         if (v.includes("{{")) {
-            childProps[k] = v.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
-                if (extraAttrs[key]) return extraAttrs[key];
-                return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
-            });
-         } else {
-            childProps[k] = v;
-         }
+        if (v.includes("{{")) {
+          childProps[k] = v.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
+            if (extraAttrs[key]) return extraAttrs[key];
+            return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
+          });
+        } else {
+          childProps[k] = v;
+        }
       }
 
-      // Pre-render slots
+      const childEvents: Record<string, string> = {};
+      for (const [evt, handler] of Object.entries(n.events ?? {})) {
+        childEvents[evt] = statePrefix ? `${statePrefix}.${handler}` : handler;
+      }
+
       const preRenderedSlot: Bindings = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
+      if (n.text != null && n.text.trim() !== "") {
+        const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: n.text, events: {}, bind: null, children: [] };
+        const res = renderNode(txtNode, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
+        preRenderedSlot.htmlBody += res.htmlBody;
+        preRenderedSlot.bindings.push(...res.bindings);
+        preRenderedSlot.attrBindings.push(...res.attrBindings);
+        preRenderedSlot.eventBindings.push(...res.eventBindings);
+        preRenderedSlot.inputBindings.push(...res.inputBindings);
+      }
       if (n.children) {
-          for (const child of n.children) {
-              const res = renderNode(child, scope, imports, statePrefix, {}, receivedSlots);
-              preRenderedSlot.htmlBody += res.htmlBody;
-              preRenderedSlot.bindings.push(...res.bindings);
-              preRenderedSlot.attrBindings.push(...res.attrBindings);
-              preRenderedSlot.eventBindings.push(...res.eventBindings);
-              preRenderedSlot.inputBindings.push(...res.inputBindings);
-          }
+        for (const child of n.children) {
+          const res = renderNode(child, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
+          preRenderedSlot.htmlBody += res.htmlBody;
+          preRenderedSlot.bindings.push(...res.bindings);
+          preRenderedSlot.attrBindings.push(...res.attrBindings);
+          preRenderedSlot.eventBindings.push(...res.eventBindings);
+          preRenderedSlot.inputBindings.push(...res.inputBindings);
+        }
       }
 
       const slotsMap = { "default": preRenderedSlot };
-      const childRes = renderComponent(childComp, childPrefix, childProps, slotsMap);
+      const childRes = renderComponent(childComp, childPrefix, childProps, childEvents, slotsMap, ctx, serverState);
 
-      // Merge bindings
       bindings.push(...childRes.bindings);
-      bindings.push(...preRenderedSlot.bindings);
       attrBindings.push(...childRes.attrBindings);
-      attrBindings.push(...preRenderedSlot.attrBindings);
       eventBindings.push(...childRes.eventBindings);
-      eventBindings.push(...preRenderedSlot.eventBindings);
       inputBindings.push(...childRes.inputBindings);
-      inputBindings.push(...preRenderedSlot.inputBindings);
 
       return childRes.htmlBody;
+    }
+
+    // normal node consumes an ID (already handled at top of renderNode for ctx.autoId)
+    // but here we are in the recursive 'render' function.
+
+    if (n.kind === "if") {
+      const dataId = `if-${Math.random().toString(36).slice(2, 7)}`;
+      // Server-side evaluation if state is present
+      if (Object.keys(serverState).length > 0) {
+        const cond = n.condition || "false";
+        let visible = false;
+        try {
+          const fn = new Function("state", `with(state) { return ${cond}; }`);
+          visible = !!fn(serverState);
+        } catch (e) { visible = false; }
+
+        if (!visible) return `<div data-hjx-block="${dataId}" data-hjx-if="${escapeAttr(cond)}" style="display:none"></div>`;
+      }
+      const inner = n.children.map(c => render(c, false)).join("");
+      return `<div data-hjx-block="${dataId}" data-hjx-if="${escapeAttr(n.condition || "")}">${inner}</div>`;
+    }
+
+    if (n.kind === "else") {
+      // For MVP, we'll just render else blocks for now. 
+      // In a better version, we'd check previous if block visibility.
+      const dataId = `else-${Math.random().toString(36).slice(2, 7)}`;
+      const inner = n.children.map(c => render(c, false)).join("");
+      return `<div data-hjx-block="${dataId}" data-hjx-else>${inner}</div>`;
+    }
+
+    if (n.kind === "for") {
+      const dataId = `for-${Math.random().toString(36).slice(2, 7)}`;
+      if (Object.keys(serverState).length > 0 && n.iterator) {
+        const listName = n.iterator.list;
+        const itemName = n.iterator.item;
+        const list = serverState[listName];
+        if (Array.isArray(list)) {
+          const renderedItems = list.map(item => {
+            // Create a sub-state for the loop item
+            const subState = { ...serverState, [itemName]: item };
+            // We need to render children with this sub-state
+            return n.children.map(c => {
+              // Here we might need a local render or a refined approach
+              // For MVP, if labels use {{item}}, we substitute here
+              return renderNode(c, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, subState).htmlBody;
+            }).join("");
+          }).join("");
+          return `<div data-hjx-block="${dataId}" data-hjx-for="${escapeAttr(itemName)}:${escapeAttr(listName)}">${renderedItems}</div>`;
+        }
+      }
+      return `<div data-hjx-block="${dataId}" data-hjx-for="${escapeAttr(n.iterator?.item || "")}:${escapeAttr(n.iterator?.list || "")}"></div>`;
     }
 
     const tag = mapTag(n.tag);
@@ -378,7 +459,6 @@ function renderNode(
 
     if (n.id) attrParts.push(`id="${escapeAttr(n.id)}"`);
 
-    // Handle classes: merge n.classes and extraAttrs.class (if root)
     const classes = new Set(n.classes);
     if (isRoot && extraAttrs["class"]) {
       extraAttrs["class"].split(" ").forEach(c => c && classes.add(c));
@@ -387,18 +467,15 @@ function renderNode(
       attrParts.push(`class="${Array.from(classes).map(escapeAttr).join(" ")}"`);
     }
 
-    // Merge attributes
     const allAttrs = isRoot ? { ...n.attrs, ...extraAttrs } : n.attrs;
 
     for (const [key, val] of Object.entries(allAttrs)) {
       if (key === "data-hjx-id" || key === "data-hjx-scope") continue;
-      if (key === "class") continue; // handled above
-
-      // check for interpolation {{ }}
+      // Allow class interpolation
       if (val.includes("{{")) {
         const finalTemplate = val.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, k) => {
-             if (extraAttrs[k]) return extraAttrs[k];
-             return `{{${statePrefix ? statePrefix + "." + k : k}}}`;
+          if (extraAttrs[k]) return extraAttrs[k];
+          return `{{${statePrefix ? statePrefix + "." + k : k}}}`;
         });
         attrBindings.push({ selector: `[data-hjx-id="${dataId}"]`, attr: key, template: finalTemplate });
       } else {
@@ -406,32 +483,47 @@ function renderNode(
       }
     }
 
-    // events
-    for (const [evt, handler] of Object.entries(n.events ?? {})) {
+    // events: merge node events and extraEvents if root
+    const mergedEvents = { ...(n.events ?? {}), ...(isRoot ? extraEvents : {}) };
+    for (const [evt, handler] of Object.entries(mergedEvents)) {
       if (evt === "click") {
-        const fullHandler = statePrefix ? `${statePrefix}.${handler}` : handler;
+        // If it's an extraEvent, it's already fully qualified by the parent.
+        // If it's a local node event, we must prefix it.
+        const isExtra = isRoot && extraEvents[evt] === handler;
+        const fullHandler = isExtra ? handler : (statePrefix ? `${statePrefix}.${handler}` : handler);
         eventBindings.push({ selector: `[data-hjx-id="${dataId}"]`, handler: fullHandler });
       }
     }
 
-    // input binding
     if (n.bind?.prop === "value") {
       const fullState = statePrefix ? `${statePrefix}.${n.bind.state}` : n.bind.state;
       inputBindings.push({ selector: `[data-hjx-id="${dataId}"]`, stateKey: fullState });
     }
 
-    // text binding
+    let finalBody = "";
     if (n.text != null) {
+      // 1. Calculate Template for Client-side (Binding phase)
+      const clientTemplate = n.text.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
+        if (extraAttrs[key]) return extraAttrs[key];
+        return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
+      });
+
       if (n.text.includes("{{")) {
-        const rewrittenTemplate = n.text.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
-            if (extraAttrs[key]) return extraAttrs[key]; // Prop substitution
-            return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
-        });
-        bindings.push({ selector: `[data-hjx-id="${dataId}"]`, template: rewrittenTemplate });
+        bindings.push({ selector: `[data-hjx-id="${dataId}"]`, template: clientTemplate });
       }
+
+      // 2. Calculate Initial Value for HTML (Initial Render phase)
+      finalBody = n.text.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
+        if (extraAttrs[key]) return extraAttrs[key];
+        const fullPath = statePrefix ? `${statePrefix}.${key}` : key;
+        const val = getValueByPath(serverState, fullPath) ?? getValueByPath(serverState, key);
+        if (val !== undefined) return String(val);
+        return "";
+      });
+      finalBody = escapeTextWithInterpolation(finalBody);
     }
 
-    const inner = n.children?.length ? n.children.map(c => render(c, false)).join("") : (n.text != null ? escapeTextWithInterpolation(n.text) : "");
+    const inner = n.children?.length ? n.children.map(c => render(c, false)).join("") : finalBody;
 
     return `<${tag} ${attrParts.join(" ")}>${inner}</${tag}>`;
   }
@@ -447,6 +539,11 @@ function mapTag(tag: string): string {
   if (t === "button") return "button";
   if (t === "input") return "input";
   return t;
+}
+
+function getValueByPath(obj: any, path: string): any {
+  if (!path) return obj;
+  return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 }
 
 function escapeAttr(s: string): string {
@@ -469,30 +566,25 @@ window.__HJX_RUNTIME_URL__ = runtimeUrl;
 export function runtimeModuleSource(): string {
   return `// HJX runtime v0.1 (Server Driven)
 
-export function createRemoteStore(wsUrl, initial) {
+export function createRemoteStore(wsUrl, initial, rootEl) {
   const state = { ...initial };
   const listeners = new Set();
-
   let ws;
 
   function connect() {
     ws = new WebSocket(wsUrl);
-    ws.onopen = () => {
-      console.log("Connected to server");
-    };
     ws.onmessage = (msg) => {
       try {
         const data = JSON.parse(msg.data);
-        if (data.type === "state") {
-          Object.assign(state, data.payload);
-          notify();
-        } else if (data.type === "patch") {
+        if (data.type === "patch") {
+          if (data.payload._html) {
+            rootEl.innerHTML = data.payload._html;
+            if (window._hjx_rebind) window._hjx_rebind();
+          }
           applyPatch(state, data.payload);
           notify();
         }
-      } catch (e) {
-        console.error("WS error", e);
-      }
+      } catch (e) {}
     };
     ws.onclose = () => {
       console.log("Disconnected. Reconnecting...");
@@ -525,6 +617,7 @@ export function createRemoteStore(wsUrl, initial) {
 }
 
 function applyPatch(state, patch) {
+  console.log("HJX Applying patch:", patch);
   for (const [key, value] of Object.entries(patch)) {
     if (key.includes(".")) {
       const parts = key.split(".");

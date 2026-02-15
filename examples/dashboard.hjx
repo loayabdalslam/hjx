@@ -1,0 +1,99 @@
+component Dashboard
+
+imports:
+  Card from "./components/Card.hjx"
+  Button from "./components/Button.hjx"
+
+state:
+  uptime = 0
+  serverTime = ""
+  totalSessions = 12
+  cpuUsage = 45
+  status = "Operational"
+  statusClass = "bg-green-100 text-green-800"
+  lastIncident = "None"
+  showMaintenanceNotice = false
+  alerts = ["High CPU Usage", "New login from unknown device"]
+
+script:
+  function getFormattedTime() {
+    return new Date().toLocaleTimeString();
+  }
+
+  export function init(store) {
+    console.log("Dashboard background task started");
+    
+    // Update server time and uptime every second
+    const interval = setInterval(() => {
+      const currentUptime = store.get("uptime");
+      const currentStatus = store.get("status");
+      
+      store.set({
+        uptime: currentUptime + 1,
+        serverTime: getFormattedTime(),
+        cpuUsage: Math.floor(Math.random() * 20) + 30, // Simulate CPU jitter
+        statusClass: currentStatus === "Operational" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+      });
+    }, 1000);
+
+    store.set({ serverTime: getFormattedTime() });
+  }
+
+layout:
+  view.min-h-screen.bg-slate-50.p-8:
+    view.max-w-6xl.mx-auto.space-y-8:
+      // Header
+      view.flex.items-center.justify-between:
+        view:
+          view.text-3xl.font-bold.tracking-tight: "System Dashboard"
+          view.text-muted-foreground: "Real-time infrastructure monitoring (Server-Driven)"
+        view.flex.items-center.gap-4:
+          view.px-3.py-1.rounded-full.text-xs.font-medium(class="{{statusClass}}"): "{{status}}"
+          view.text-sm.text-muted-foreground: "Server Time: {{serverTime}}"
+
+      // Stats Grid
+      view.grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-4.gap-4:
+        Card (title="Uptime" description="Total system online time"):
+          view.text-2xl.font-bold: "{{uptime}} seconds"
+        
+        Card (title="Sessions" description="Active user sessions"):
+          view.text-2xl.font-bold: "{{totalSessions}}"
+        
+        Card (title="CPU Usage" description="Current load across clusters"):
+          view.text-2xl.font-bold: "{{cpuUsage}}%"
+          view.w-full.bg-slate-200.rounded-full.h-2.mt-2:
+            view.bg-blue-600.h-2.rounded-full (style="width: {{cpuUsage}}%"): ""
+
+        Card (title="Incident Status" description="Last reported issue"):
+          view.text-2xl.font-bold: "{{lastIncident}}"
+
+      // Maintenance notice (Condition verification)
+      if (showMaintenanceNotice):
+        view.bg-red-500.text-white.p-4.rounded-lg.font-bold: "MAINTENANCE IN PROGRESS - LIMITED ACCESS"
+
+      // Alerts List (Loop verification)
+      view.space-y-2:
+        view.font-bold.text-lg: "System Alerts"
+        for (alert in alerts):
+          view.bg-white.border.border-slate-200.p-3.rounded.shadow-sm: "{{alert}}"
+
+      // Actions
+      view.flex.gap-4:
+        Button (on click -> refresh): "Force Refresh"
+        Button (variant="outline" on click -> toggleStatus): "Toggle Status"
+        Button (variant="outline" on click -> toggleNotice): "Toggle Notice"
+        Button (variant="outline" on click -> addAlert): "Add Alert"
+
+handlers:
+  refresh:
+    log "Action: Force Refresh clicked"
+    set totalSessions = totalSessions + 1
+  toggleStatus:
+    log "Action: Toggling Status"
+    set status = status == "Operational" ? "Maintenance" : "Operational"
+  toggleNotice:
+    log "Action: Toggling Maintenance Notice"
+    set showMaintenanceNotice = !showMaintenanceNotice
+  addAlert:
+    log "Action: Adding Alert"
+    set alerts = alerts + ["System ping timed out"]

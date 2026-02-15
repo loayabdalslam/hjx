@@ -6,5 +6,9 @@ dist-app
 package-lock.json
 hjx-v0.1
 dist-demo
+<<<<<<< HEAD
 docs/.vitepress/dist/
 docs/.vitepress/.temp/
+=======
+dist-*
+>>>>>>> a9c30ee2a8a804d9c175355bf86403617cdc5926
