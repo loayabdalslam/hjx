@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173"
+    "dev": "node dist/cli.js dev examples/dashboard.hjx --out dist-app --port 5173"
   },
   "dependencies": {
     "chokidar": "^3.6.0",

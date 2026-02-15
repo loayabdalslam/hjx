@@ -52,8 +52,9 @@ handlers:
 ```
 
 ### Supported right now
-- `component <Name>`
-- `state:` with simple `name = number|string|bool`
+- **Composition**: Support for nested components and slots.
+- **Background Tasks**: Server-side `init(store)` function for periodic state updates.
+- **Modern CSS**: Support for `:` and `/` in class names (Tailwind-ready).
 - `layout:` with indentation-based tree
   - nodes: `view`, `text`, `button`, `input`
   - ids/classes: `view#id.class1.class2`

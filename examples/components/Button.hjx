@@ -1,74 +1,20 @@
-component Button
-
-// Props via state (initialized by parent or defaults)
 state:
   variant = "default"
-  size = "default"
-  className = ""
-
-layout:
-  // We use a button tag.
-  // Classes will be merged with parent provided classes.
-  // We construct the base class string.
-  // Note: we don't have computed state yet in v0.1, so we put the long class string in the layout or style?
-  // Or we use th e `script` block to compute it?
-  // v0.1 script block runs on server. But we need classes on client.
-  // We can use the style block for standard css, or Tailwind classes if we inject tailwind.
-  // The devserver injects tailwind CDN.
-
-  // For v0.1 without computed props on client, we'll just use a static base class and expect users to override.
-  // But wait, Shadcn variants rely on conditional classes.
-  // Since we don't have conditionals in layout yet, we can't easily switch classes based on `variant`.
-  // WORKAROUND: We use the `variant` state to select a class via interpolation if we supported it in class attributes?
-  // We do support interpolation in attributes! class="{{variantClass}}"
-
-  // But we need to map variant="destructive" to class="bg-destructive ...".
-  // We can do this map in the handler? No, render happens on client.
-  // We can do this map in the server script and push it to state?
-  // Yes! The server script runs on init.
-
-  button (class="{{computedClass}} inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"): "Click me"
+  variantClass = ""
 
 script:
-  // Server-side logic to compute classes based on props
-  // This runs once on init.
-  // TODO: React to state changes?
-  // If parent changes 'variant', we need to recompute.
-  // We don't have 'effects' yet.
-  // For now, let's just assume static props for the MVP components or simple state updates.
-
-  const variants = {
-    default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-    destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-    outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-    secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
-    link: "text-primary underline-offset-4 hover:underline"
-  };
-
-  const sizes = {
-    default: "h-9 px-4 py-2",
-    sm: "h-8 rounded-md px-3 text-xs",
-    lg: "h-10 rounded-md px-8",
-    icon: "h-9 w-9"
-  };
-
-  // We access state via `s` (injected in context, but here in script we are in module scope?)
-  // The script block is top-level code in the module.
-  // The handlers have access to `ctx.store`.
-  // We can export a function `init(store)`?
-  // Currently ServerSession just runs the script block.
-  // It doesn't allow reactive computations easily yet.
-
-  // Hack for MVP: We just put the Tailwind classes directly in the layout for a single variant
-  // or we accept `class` prop from parent which overrides/merges.
-  // Let's make a default Button and rely on parent to style it further if needed,
-  // OR just provide a "primary" button.
-
-  // Let's implement a Primary Button for now.
-
-state:
-  label = "Button"
+  export function init(store) {
+    const variant = store.get("variant") || "default";
+    const variantClasses = {
+      default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+      outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground text-slate-900",
+      secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+      ghost: "hover:bg-accent hover:text-accent-foreground",
+      link: "text-primary underline-offset-4 hover:underline"
+    };
+    store.set({ variantClass: variantClasses[variant] || variantClasses.default });
+  }
 
 layout:
-  button.inline-flex.items-center.justify-center.whitespace-nowrap.rounded-md.text-sm.font-medium.transition-colors.focus-visible-outline-none.focus-visible-ring-1.focus-visible-ring-ring.disabled-pointer-events-none.disabled-opacity-50.bg-primary.text-primary-foreground.shadow.hover-bg-primary-90.h-9.px-4.py-2: "{{label}}"
+  button.inline-flex.items-center.justify-center.whitespace-nowrap.rounded-md.text-sm.font-medium.transition-colors.focus-visible-outline-none.focus-visible-ring-1.focus-visible-ring-ring.disabled-pointer-events-none.disabled-opacity-50.h-9.px-4.py-2(class="{{variantClass}}"):
+    slot

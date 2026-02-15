@@ -134,11 +134,10 @@ export const handlers = ${handlersJS};
       });
 
       promises.push(childSession.ready());
-      return;
+    } else {
+      // Normal node: consumes an ID
+      ctx.autoId++;
     }
-
-    // Normal node: consumes an ID
-    ctx.autoId++;
 
     if (node.children) {
       for (const child of node.children) {

@@ -52,8 +52,10 @@ Node syntax forms:
 Notes:
 - `#id` optional; `.class` repeated allowed
 - `{{var}}` interpolates from state
-- Click event supported: `(on click -> handlerName)`
-- Two-way binding supported for input `value`
+- `(on click -> handlerName)` executes server handler
+- `init(store)` exported in `script` block for background logic
+- Two-way binding for `input` (bind value <-> key)
+- CSS classes support complex characters like `:` and `/` (Tailwind-ready)
 
 ## style
 Raw CSS rules. Compiler scopes them by prefixing selectors with the component scope attribute.
