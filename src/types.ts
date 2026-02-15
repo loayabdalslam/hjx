@@ -24,6 +24,7 @@ export type HJXAst = {
   version: "0.1";
   component: { name: string };
   imports: Record<string, string>;
+  script: string;
   state: Record<string, HJXStateValue>;
   layout: HJXNode | null;
   style: string;

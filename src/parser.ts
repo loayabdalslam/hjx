@@ -104,6 +104,21 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
+    if (trimmed === "script:") {
+      i++;
+      const startIndent = 2;
+      const scriptLines: string[] = [];
+      while (i < lines.length) {
+        const l = lines[i];
+        if (isSkippable(l)) { scriptLines.push(""); i++; continue; }
+        if (indentOf(l) === 0) break;
+        scriptLines.push(l.slice(startIndent));
+        i++;
+      }
+      ast.script = scriptLines.join("\n").trimEnd() + "\n";
+      continue;
+    }
+
     if (trimmed === "handlers:") {
       i++;
       while (i < lines.length) {

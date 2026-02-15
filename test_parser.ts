@@ -10,6 +10,10 @@ imports:
 state:
   x = 1
 
+script:
+  console.log("Hello from script");
+  import { v4 } from "uuid";
+
 layout:
   view:
     Counter: "hello"
