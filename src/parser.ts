@@ -186,13 +186,18 @@ function parseLayout(
     const indent = indentOf(line);
     const t = line.trim();
 
-    // container: view#id.class:
-    const containerMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_-]+)*\s*:\s*$/);
+    // container: view#id.class (attrs):
+    const containerMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_-]+)*(\s*\([^\)]*\))?\s*:\s*$/);
     if (containerMatch) {
       const tag = containerMatch[1];
       const id = containerMatch[2] ? containerMatch[2].slice(1) : undefined;
       const classes = extractClasses(t);
-      return { node: { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] }, indent, hasChildren: true };
+      const paren = containerMatch[4]?.trim() ?? "";
+
+      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
+      if (paren) parseParenContent(node, paren.slice(1, -1));
+
+      return { node, indent, hasChildren: true };
     }
 
     // leaf with : "text"
@@ -206,21 +211,67 @@ function parseLayout(
 
       const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: parseMaybeString(rhs, () => err("Expected string after ':'", lineNo)), events: {}, bind: null, children: [] };
 
-      // parse (on click -> handler) or (bind value <-> x)
-      if (paren) {
-        const inside = paren.slice(1, -1).trim();
-        // on click -> name
-        const onm = inside.match(/^on\s+click\s*->\s*([A-Za-z_][A-Za-z0-9_]*)$/);
-        if (onm) node.events["click"] = onm[1];
+      if (paren) parseParenContent(node, paren.slice(1, -1));
 
-        const bindm = inside.match(/^bind\s+value\s*<->\s*([A-Za-z_][A-Za-z0-9_]*)$/);
-        if (bindm) node.bind = { prop: "value", state: bindm[1] };
-      }
+      return { node, indent, hasChildren: false };
+    }
+
+    // simple node (void/empty): view#id.class (attrs)
+    const simpleMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_-]+)*(\s*\([^\)]*\))?$/);
+    if (simpleMatch) {
+      const tag = simpleMatch[1];
+      const id = simpleMatch[2] ? simpleMatch[2].slice(1) : undefined;
+      const classes = extractClasses(t);
+      const paren = simpleMatch[4]?.trim() ?? "";
+
+      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
+      if (paren) parseParenContent(node, paren.slice(1, -1));
 
       return { node, indent, hasChildren: false };
     }
 
     err(`Invalid layout line: ${t}`, lineNo);
+  }
+
+  function parseParenContent(node: HJXNode, content: string) {
+    let remaining = content.trim();
+    while (remaining.length > 0) {
+      // 1. on click -> handler
+      const onMatch = remaining.match(/^on\s+([a-zA-Z0-9_-]+)\s*->\s*([a-zA-Z0-9_.]+)/);
+      if (onMatch) {
+        node.events[onMatch[1]] = onMatch[2];
+        remaining = remaining.slice(onMatch[0].length).trim();
+        continue;
+      }
+
+      // 2. bind value <-> state
+      const bindMatch = remaining.match(/^bind\s+value\s*<->\s*([a-zA-Z0-9_.]+)/);
+      if (bindMatch) {
+        node.bind = { prop: "value", state: bindMatch[1] };
+        remaining = remaining.slice(bindMatch[0].length).trim();
+        continue;
+      }
+
+      // 3. attribute="value" or attribute='value'
+      const attrMatch = remaining.match(/^([a-zA-Z0-9_-]+)\s*=\s*("([^"]*)"|'([^']*)')/);
+      if (attrMatch) {
+        const key = attrMatch[1];
+        const val = attrMatch[3] ?? attrMatch[4] ?? "";
+        node.attrs[key] = val;
+        remaining = remaining.slice(attrMatch[0].length).trim();
+        continue;
+      }
+
+      // 4. boolean attribute
+      const boolMatch = remaining.match(/^([a-zA-Z0-9_-]+)(?=\s|$)/);
+      if (boolMatch) {
+         node.attrs[boolMatch[1]] = "true";
+         remaining = remaining.slice(boolMatch[0].length).trim();
+         continue;
+      }
+
+      break;
+    }
   }
 
   function extractClasses(t: string): string[] {
