@@ -25,7 +25,7 @@ export function compileHandlersToJS(handlers: Record<string, HJXHandler>, stateK
           bodyJS.push(`  throw new Error("Unknown state key: ${key}");`);
           continue;
         }
-        const jsExpr = exprToJS(expr);
+        const jsExpr = exprToJS(expr, allowed);
         bodyJS.push(`  patch["${key}"] = (${jsExpr});`);
         continue;
       }
@@ -53,18 +53,13 @@ function escapeForJS(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
-function exprToJS(expr: string): string {
-  // Minimal "safe-ish" expression: allow numbers, identifiers, + - * / ( ) and spaces
-  // Identifiers map to s.<id>
+function exprToJS(expr: string, stateKeys: Set<string>): string {
   const cleaned = expr.trim();
-  if (!/^[A-Za-z0-9_\s\+\-\*\/\(\)\.]+$/.test(cleaned)) {
-    return `(() => { throw new Error("Invalid expression"); })()`;
-  }
-  // Replace identifiers with s["id"]
-  // Keep numeric literals intact
+
+  // Replace identifiers that match state keys with s["key"]
+  // Leave everything else alone (numbers, operators, other vars)
   return cleaned.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\b/g, (m) => {
-    if (m === "true" || m === "false") return m;
-    if (/^\d/.test(m)) return m;
-    return `s["${m}"]`;
+    if (stateKeys.has(m)) return `s["${m}"]`;
+    return m;
   });
 }

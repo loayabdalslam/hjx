@@ -60,13 +60,15 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
 
   const wss = new WebSocketServer({ server, path: "/hjx" });
 
-  wss.on("connection", (ws) => {
+  wss.on("connection", async (ws) => {
     if (!currentAst) {
       ws.close();
       return;
     }
 
-    const session = new ServerSession(currentAst);
+    // Use outDir as workDir for sessions
+    const session = new ServerSession(currentAst, outDir);
+    await session.ready();
 
     // Send initial state
     ws.send(JSON.stringify({ type: "state", payload: session.getState() }));
@@ -90,6 +92,10 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
       } catch (e) {
         console.error("WS Message error", e);
       }
+    });
+
+    ws.on("close", () => {
+      session.cleanup();
     });
   });
 
