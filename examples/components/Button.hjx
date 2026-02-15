@@ -1,6 +1,6 @@
 state:
   variant = "default"
-  variantClass = ""
+  variantClass = "bg-primary text-primary-foreground shadow hover:bg-primary/90"
 
 script:
   export function init(store) {

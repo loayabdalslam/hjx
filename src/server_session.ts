@@ -99,9 +99,24 @@ export const handlers = ${handlersJS};
   ) {
     const imports = comp.imports;
 
-    if (node.kind === "if" || node.kind === "for") {
-      // In a real implementation, we'd need to correlate these with the compiler's random IDs.
-      // For MVP, we'll just track that we HAVE dynamic blocks and re-render the whole component.
+    if (node.tag === "slot") {
+      // Slots are virtual, don't consume IDs
+      if (node.children) {
+        for (const child of node.children) {
+          this.traverseLayout(child, comp, scope, statePrefix, workDir, promises, ctx);
+        }
+      }
+      return;
+    }
+
+    if (node.kind === "if" || node.kind === "for" || node.kind === "else") {
+      // Virtual nodes don't consume IDs, but we must traverse children
+      if (node.children) {
+        for (const child of node.children) {
+          this.traverseLayout(child, comp, scope, statePrefix, workDir, promises, ctx);
+        }
+      }
+      return;
     }
 
     if (imports[node.tag]) {
@@ -109,19 +124,19 @@ export const handlers = ${handlersJS};
       const childKey = `${node.tag}_${instanceId}`;
       const childComp = imports[node.tag];
 
-      const initialProps: Record<string, any> = {};
+      const childProps: Record<string, any> = {};
       for (const [k, v] of Object.entries(node.attrs)) {
         if (!v.includes("{{")) {
-          if (v === "true") initialProps[k] = true;
-          else if (v === "false") initialProps[k] = false;
+          if (v === "true") childProps[k] = true;
+          else if (v === "false") childProps[k] = false;
           else {
             const n = Number(v);
-            initialProps[k] = !isNaN(n) ? n : v;
+            childProps[k] = !isNaN(n) ? n : v;
           }
         }
       }
 
-      const childSession = new ServerSession(childComp, workDir, initialProps);
+      const childSession = new ServerSession(childComp, workDir, childProps);
       this.children[childKey] = childSession;
       childSession.onPatch((p) => {
         const pref: any = {};
@@ -143,16 +158,11 @@ export const handlers = ${handlersJS};
   private reRenderBlocks(comp: LoadedComponent) {
     const scope = `hjx-${comp.ast.component.name.toLowerCase()}`;
     // Full component re-render for MVP
-    const { htmlBody } = renderNode(comp.ast.layout!, scope, comp.imports, "", {}, {}, {}, { autoId: 0 });
-
-    // Evaluate if/for blocks by injecting state values
-    const finalHtml = htmlBody.replace(/data-hjx-if="([^"]+)"/g, (match, cond) => {
-      const result = !!this.evaluateExpression(cond);
-      return result ? `data-hjx-if-visible="true" ${match}` : `data-hjx-if-visible="false" style="display:none" ${match}`;
-    });
+    // getState() provides the full nested state tree, which renderNode now supports via getValueByPath
+    const { htmlBody } = renderNode(comp.ast.layout!, scope, comp.imports, "", {}, {}, {}, { autoId: 0 }, this.getState());
 
     if (this.onPatchCallback) {
-      this.onPatchCallback({ _html: finalHtml });
+      this.onPatchCallback({ _html: htmlBody });
     }
   }
 

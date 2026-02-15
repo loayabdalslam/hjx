@@ -17,7 +17,7 @@ export function buildServerDriven(tree: LoadedComponent): { html: string; css: s
   collectCss(tree);
   const css = Array.from(cssParts.values()).join("\n");
 
-  const { htmlBody, bindings, attrBindings, eventBindings, inputBindings } = renderComponent(tree, "");
+  const { htmlBody, bindings, attrBindings, eventBindings, inputBindings } = renderComponent(tree, "", {}, {}, {}, { autoId: 0 }, tree.ast.state);
 
   // We don't compile handlers to JS here because they run on the server.
   // We just need the initial state structure for potential hydration,
@@ -211,10 +211,11 @@ function renderComponent(
   extraAttrs: Record<string, string> = {},
   extraEvents: Record<string, string> = {},
   slots: Record<string, Bindings> = {},
-  ctx: { autoId: number } = { autoId: 0 }
+  ctx: { autoId: number } = { autoId: 0 },
+  serverState: Record<string, any> = {}
 ): Bindings {
   const scope = `hjx-${comp.ast.component.name.toLowerCase()}`;
-  return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix, extraAttrs, extraEvents, slots, ctx);
+  return renderNode(comp.ast.layout ?? emptyRoot(), scope, comp.imports, statePrefix, extraAttrs, extraEvents, slots, ctx, serverState);
 }
 
 export function renderNode(
@@ -225,12 +226,15 @@ export function renderNode(
   extraAttrs: Record<string, string> = {},
   extraEvents: Record<string, string> = {},
   receivedSlots: Record<string, Bindings> = {},
-  ctx: { autoId: number }
+  ctx: { autoId: number },
+  serverState: Record<string, any> = {}
 ): Bindings {
   const bindings: Array<{ selector: string; template: string }> = [];
   const attrBindings: Array<{ selector: string; attr: string; template: string }> = [];
   const eventBindings: Array<{ selector: string; handler: string }> = [];
   const inputBindings: Array<{ selector: string; stateKey: string }> = [];
+
+  const localDefaults = node.tag === "component" ? {} : {}; // Hook for component defaults if we had them easily
 
   // 1. Handle <slot> element
   if (node.tag === "slot") {
@@ -241,13 +245,28 @@ export function renderNode(
       // Return bindings from slot data
       return slotData;
     }
+
+    // Default slot content
+    const defaultContent: Bindings = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
+    if (node.text) defaultContent.htmlBody = escapeTextWithInterpolation(node.text);
+    if (node.children) {
+      for (const child of node.children) {
+        const res = renderNode(child, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
+        defaultContent.htmlBody += res.htmlBody;
+        defaultContent.bindings.push(...res.bindings);
+        defaultContent.attrBindings.push(...res.attrBindings);
+        defaultContent.eventBindings.push(...res.eventBindings);
+        defaultContent.inputBindings.push(...res.inputBindings);
+      }
+    }
+    return defaultContent;
   }
 
   // Check if node tag is an imported component
   if (imports[node.tag]) {
     const childComp = imports[node.tag];
-    const instanceId = ctx.autoId++;
-    const childKey = `${node.tag}_${instanceId}`;
+    const dataId = `${scope}-${ctx.autoId++}`;
+    const childKey = `${node.tag}_${ctx.autoId - 1}`; // Use the ID we just consumed
     const childPrefix = statePrefix ? `${statePrefix}.${childKey}` : childKey;
 
     // Rewrite props/attrs
@@ -295,16 +314,15 @@ export function renderNode(
     }
 
     const slotsMap = { "default": preRenderedSlot };
-    const childResult = renderComponent(childComp, childPrefix, childProps, childEvents, slotsMap, { autoId: 0 });
+    const childResult = renderComponent(childComp, childPrefix, childProps, childEvents, slotsMap, ctx);
 
     return childResult;
   }
 
-  // Normal node: consumes an ID
-  ctx.autoId++;
+  // No-op at top level, ensureDataId will handle it
 
   function ensureDataId(n: HJXNode): string {
-    return `${scope}-${Math.random().toString(36).slice(2, 7)}`;
+    return `${scope}-${ctx.autoId++}`;
   }
 
   function render(n: HJXNode, isRoot: boolean): string {
@@ -353,7 +371,7 @@ export function renderNode(
       const preRenderedSlot: Bindings = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
       if (n.text != null && n.text.trim() !== "") {
         const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: n.text, events: {}, bind: null, children: [] };
-        const res = renderNode(txtNode, scope, imports, statePrefix, {}, {}, receivedSlots, ctx);
+        const res = renderNode(txtNode, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
         preRenderedSlot.htmlBody += res.htmlBody;
         preRenderedSlot.bindings.push(...res.bindings);
         preRenderedSlot.attrBindings.push(...res.attrBindings);
@@ -362,7 +380,7 @@ export function renderNode(
       }
       if (n.children) {
         for (const child of n.children) {
-          const res = renderNode(child, scope, imports, statePrefix, {}, {}, receivedSlots, ctx);
+          const res = renderNode(child, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
           preRenderedSlot.htmlBody += res.htmlBody;
           preRenderedSlot.bindings.push(...res.bindings);
           preRenderedSlot.attrBindings.push(...res.attrBindings);
@@ -372,7 +390,7 @@ export function renderNode(
       }
 
       const slotsMap = { "default": preRenderedSlot };
-      const childRes = renderComponent(childComp, childPrefix, childProps, childEvents, slotsMap, { autoId: 0 });
+      const childRes = renderComponent(childComp, childPrefix, childProps, childEvents, slotsMap, ctx, serverState);
 
       bindings.push(...childRes.bindings);
       attrBindings.push(...childRes.attrBindings);
@@ -387,11 +405,24 @@ export function renderNode(
 
     if (n.kind === "if") {
       const dataId = `if-${Math.random().toString(36).slice(2, 7)}`;
+      // Server-side evaluation if state is present
+      if (Object.keys(serverState).length > 0) {
+        const cond = n.condition || "false";
+        let visible = false;
+        try {
+          const fn = new Function("state", `with(state) { return ${cond}; }`);
+          visible = !!fn(serverState);
+        } catch (e) { visible = false; }
+
+        if (!visible) return `<div data-hjx-block="${dataId}" data-hjx-if="${escapeAttr(cond)}" style="display:none"></div>`;
+      }
       const inner = n.children.map(c => render(c, false)).join("");
       return `<div data-hjx-block="${dataId}" data-hjx-if="${escapeAttr(n.condition || "")}">${inner}</div>`;
     }
 
     if (n.kind === "else") {
+      // For MVP, we'll just render else blocks for now. 
+      // In a better version, we'd check previous if block visibility.
       const dataId = `else-${Math.random().toString(36).slice(2, 7)}`;
       const inner = n.children.map(c => render(c, false)).join("");
       return `<div data-hjx-block="${dataId}" data-hjx-else>${inner}</div>`;
@@ -399,6 +430,24 @@ export function renderNode(
 
     if (n.kind === "for") {
       const dataId = `for-${Math.random().toString(36).slice(2, 7)}`;
+      if (Object.keys(serverState).length > 0 && n.iterator) {
+        const listName = n.iterator.list;
+        const itemName = n.iterator.item;
+        const list = serverState[listName];
+        if (Array.isArray(list)) {
+          const renderedItems = list.map(item => {
+            // Create a sub-state for the loop item
+            const subState = { ...serverState, [itemName]: item };
+            // We need to render children with this sub-state
+            return n.children.map(c => {
+              // Here we might need a local render or a refined approach
+              // For MVP, if labels use {{item}}, we substitute here
+              return renderNode(c, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, subState).htmlBody;
+            }).join("");
+          }).join("");
+          return `<div data-hjx-block="${dataId}" data-hjx-for="${escapeAttr(itemName)}:${escapeAttr(listName)}">${renderedItems}</div>`;
+        }
+      }
       return `<div data-hjx-block="${dataId}" data-hjx-for="${escapeAttr(n.iterator?.item || "")}:${escapeAttr(n.iterator?.list || "")}"></div>`;
     }
 
@@ -438,9 +487,10 @@ export function renderNode(
     const mergedEvents = { ...(n.events ?? {}), ...(isRoot ? extraEvents : {}) };
     for (const [evt, handler] of Object.entries(mergedEvents)) {
       if (evt === "click") {
-        // If handler is already prefixed (from extraEvents), use as is. 
-        // If it's from n.events, prefix it now.
-        const fullHandler = (isRoot && extraEvents[evt] === handler) ? handler : (statePrefix ? `${statePrefix}.${handler}` : handler);
+        // If it's an extraEvent, it's already fully qualified by the parent.
+        // If it's a local node event, we must prefix it.
+        const isExtra = isRoot && extraEvents[evt] === handler;
+        const fullHandler = isExtra ? handler : (statePrefix ? `${statePrefix}.${handler}` : handler);
         eventBindings.push({ selector: `[data-hjx-id="${dataId}"]`, handler: fullHandler });
       }
     }
@@ -450,17 +500,30 @@ export function renderNode(
       inputBindings.push({ selector: `[data-hjx-id="${dataId}"]`, stateKey: fullState });
     }
 
+    let finalBody = "";
     if (n.text != null) {
+      // 1. Calculate Template for Client-side (Binding phase)
+      const clientTemplate = n.text.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
+        if (extraAttrs[key]) return extraAttrs[key];
+        return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
+      });
+
       if (n.text.includes("{{")) {
-        const rewrittenTemplate = n.text.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
-          if (extraAttrs[key]) return extraAttrs[key];
-          return `{{${statePrefix ? statePrefix + "." + key : key}}}`;
-        });
-        bindings.push({ selector: `[data-hjx-id="${dataId}"]`, template: rewrittenTemplate });
+        bindings.push({ selector: `[data-hjx-id="${dataId}"]`, template: clientTemplate });
       }
+
+      // 2. Calculate Initial Value for HTML (Initial Render phase)
+      finalBody = n.text.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, key) => {
+        if (extraAttrs[key]) return extraAttrs[key];
+        const fullPath = statePrefix ? `${statePrefix}.${key}` : key;
+        const val = getValueByPath(serverState, fullPath) ?? getValueByPath(serverState, key);
+        if (val !== undefined) return String(val);
+        return "";
+      });
+      finalBody = escapeTextWithInterpolation(finalBody);
     }
 
-    const inner = n.children?.length ? n.children.map(c => render(c, false)).join("") : (n.text != null ? escapeTextWithInterpolation(n.text) : "");
+    const inner = n.children?.length ? n.children.map(c => render(c, false)).join("") : finalBody;
 
     return `<${tag} ${attrParts.join(" ")}>${inner}</${tag}>`;
   }
@@ -476,6 +539,11 @@ function mapTag(tag: string): string {
   if (t === "button") return "button";
   if (t === "input") return "input";
   return t;
+}
+
+function getValueByPath(obj: any, path: string): any {
+  if (!path) return obj;
+  return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 }
 
 function escapeAttr(s: string): string {
