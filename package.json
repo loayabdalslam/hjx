@@ -1,0 +1,18 @@
+{
+  "name": "hjx",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.6.3"
+  }
+}
