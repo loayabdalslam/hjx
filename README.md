@@ -2,6 +2,8 @@
 
 HJX is a unified UI language that compiles into **HTML + CSS + JavaScript** from a single `.hjx` file.
 
+📚 **[Documentation](https://loayabdalslam.github.io/hjx/)** | 🏠 [GitHub](https://github.com/loayabdalslam/hjx)
+
 This repo is an **initial working version**:
 - A small **HJX grammar** (block-based)
 - A **parser** that produces an AST JSON

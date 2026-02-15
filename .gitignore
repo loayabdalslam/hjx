@@ -6,3 +6,5 @@ dist-app
 package-lock.json
 hjx-v0.1
 dist-demo
+docs/.vitepress/dist/
+docs/.vitepress/.temp/

@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173"
+    "dev": "node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "chokidar": "^3.6.0",
@@ -15,6 +18,7 @@
   "devDependencies": {
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitepress": "^1.0.0"
   }
 }
