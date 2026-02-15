@@ -19,6 +19,7 @@ export class ServerSession {
   private tempFile: string | null = null;
   private onPatchCallback: ((patch: Record<string, any>) => void) | null = null;
   private dynamicBlocks: Array<{ id: string; node: HJXNode; component: LoadedComponent, scope: string, statePrefix: string }> = [];
+  private component!: LoadedComponent;
 
   constructor(component: LoadedComponent, workDir: string, initialProps: Record<string, any> = {}) {
     this.state = { ...component.ast.state, ...initialProps };
@@ -30,6 +31,7 @@ export class ServerSession {
   }
 
   private async init(component: LoadedComponent, workDir: string) {
+    this.component = component;
     const ast = component.ast;
 
     // 1. Initialize children and dynamic blocks
@@ -58,16 +60,8 @@ export const handlers = ${handlersJS};
 
     writeFileSync(this.tempFile, moduleSource, "utf-8");
 
-    const store = {
-      get: (key?: string) => (key ? this.state[key] : this.state),
-      set: (patch: Record<string, any>) => {
-        Object.assign(this.state, patch);
-        if (this.onPatchCallback) {
-          this.onPatchCallback(patch);
-        }
-        this.reRenderBlocks(component);
-      }
-    };
+    // init store: background tasks only send individual patches (no full re-render)
+    const store = this.createStore(false);
 
     try {
       // 4. Import it
@@ -113,7 +107,9 @@ export const handlers = ${handlersJS};
       // Virtual nodes don't consume IDs, but we must traverse children
       if (node.children) {
         for (const child of node.children) {
-          this.traverseLayout(child, comp, scope, statePrefix, workDir, promises, ctx);
+          // Isolate loop ID sequence to keep main sequence stable
+          const loopCtx = node.kind === "for" ? { autoId: 0 } : ctx;
+          this.traverseLayout(child, comp, scope, statePrefix, workDir, promises, loopCtx);
         }
       }
       return;
@@ -215,6 +211,26 @@ export const handlers = ${handlersJS};
     return patch;
   }
 
+  private createStore(structural: boolean, outPatch?: Record<string, any>) {
+    return {
+      get: (key?: string) => (key ? this.state[key] : this.state),
+      set: (p: Record<string, any>) => {
+        Object.assign(this.state, p);
+        if (outPatch) Object.assign(outPatch, p);
+
+        // ALWAYS synchronize state with client first
+        if (this.onPatchCallback) {
+          this.onPatchCallback(p);
+        }
+
+        // Conditionally trigger full re-render for structural changes
+        if (structural) {
+          this.reRenderBlocks(this.component);
+        }
+      }
+    };
+  }
+
   public runHandler(handlerName: string): Record<string, any> | null {
     if (handlerName.includes(".")) {
       const [alias, ...rest] = handlerName.split(".");
@@ -240,19 +256,7 @@ export const handlers = ${handlersJS};
 
     let patch: Record<string, any> = {};
     const ctx = {
-      store: {
-        get: (key?: string) => (key ? this.state[key] : this.state),
-        set: (p: Record<string, any>) => {
-          Object.assign(this.state, p);
-          Object.assign(patch, p);
-          if (this.onPatchCallback) {
-            this.onPatchCallback(p);
-          }
-          // Component-level re-render?
-          // We need a way to know which component this session belongs to.
-          // For now we assume the session carries the component ref.
-        }
-      }
+      store: this.createStore(true, patch)
     };
 
     try {
