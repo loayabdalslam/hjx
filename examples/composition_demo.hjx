@@ -1,0 +1,75 @@
+component CompositionDemo
+
+imports:
+  Button from "./components/Button.hjx"
+  Input from "./components/Input.hjx"
+  Card from "./components/Card.hjx"
+
+state:
+  name = ""
+  count = 0
+  message = "Welcome to HJX Composition!"
+
+script:
+  import { v4 } from "uuid";
+  console.log("CompositionDemo initialized with UUID:", v4());
+
+layout:
+  view.min-h-screen.bg-background.text-foreground.flex.items-center.justify-center.p-4:
+    Card (class="w-[400px]" title="Login" description="Enter your details below"):
+      // Content slot for Card?
+      // Our Card implementation renders children via {{content}} state if provided,
+      // OR we need slot support.
+      // v0.1 doesn't support slots/children passing to components yet in a standard way.
+      // The `Card` component I wrote expects `content` state.
+      // Let's rely on props passing to configuring the card for now,
+      // OR we treat the children of `Card` in layout as being ignored unless Card renders them.
+      // My `Card.hjx` implementation:
+      // view.p-6.pt-0:
+      //   text: "{{content}}"
+      // It renders `content` string. It doesn't support rendering children passed from parent yet.
+      // To support children, `Card` would need to iterate over its `children` property which is not exposed to layout yet.
+      // For this demo, I will use the `content` prop.
+
+      // Wait, I can't pass complex HTML into `content` string prop easily.
+      // Let's modify Card.hjx to use a "slot" concept if possible, or just build the form outside?
+      // Actually, standard composition allows nesting:
+      // Card:
+      //   Button: "Click"
+      // But my `render` function for `Card` uses its own layout.
+      // If `Card` has its own layout, the children defined here in `CompositionDemo` are currently ignored/lost
+      // unless `Card` explicitly renders them.
+      // My compiler currently replaces the node with the component's layout.
+      // So `Card`'s layout *replaces* the `Card` tag in `CompositionDemo`.
+      // The children defined here in `CompositionDemo` are NOT passed to `Card` in my current implementation.
+      // They are effectively lost.
+
+      // To show composition, I will just use `Card` as a leaf for now, or nest other things around it.
+      // Or I can update `Card` to not be a component but just a wrapper? No.
+
+      // Let's build a form using the primitives directly, and maybe use Card for a summary.
+
+      view.flex.flex-col.gap-4:
+        view.space-y-2:
+          view.text-sm.font-medium: "Username"
+          Input (placeholder="johndoe" bind value <-> name)
+
+        view.space-y-2:
+          view.text-sm.font-medium: "Counter: {{count}}"
+          view.flex.gap-2:
+            Button (variant="outline" size="icon" on click -> dec): "-"
+            Button (on click -> inc): "+"
+
+        view.pt-4:
+          Button (class="w-full" on click -> submit): "Submit"
+
+        view.text-sm.text-muted-foreground.text-center: "{{message}}"
+
+handlers:
+  inc:
+    set count = count + 1
+  dec:
+    set count = count - 1
+  submit:
+    log "Submitting form..."
+    set message = "Hello " + name + "! You clicked " + count + " times."

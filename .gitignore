@@ -3,3 +3,5 @@ dist
 dist-app
 *.log
 .DS_Store
+package-lock.json
+hjx-v0.1
