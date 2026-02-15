@@ -231,12 +231,12 @@ export const handlers = ${handlersJS};
     };
   }
 
-  public runHandler(handlerName: string): Record<string, any> | null {
+  public runHandler(handlerName: string, mockEl?: any): Record<string, any> | null {
     if (handlerName.includes(".")) {
       const [alias, ...rest] = handlerName.split(".");
       const childName = rest.join(".");
       if (this.children[alias]) {
-        const childPatch = this.children[alias].runHandler(childName);
+        const childPatch = this.children[alias].runHandler(childName, mockEl);
         if (childPatch) {
           const prefixedPatch: Record<string, any> = {};
           for (const [k, v] of Object.entries(childPatch)) {
@@ -256,7 +256,8 @@ export const handlers = ${handlersJS};
 
     let patch: Record<string, any> = {};
     const ctx = {
-      store: this.createStore(true, patch)
+      store: this.createStore(true, patch),
+      el: mockEl  // pass mock element with dataset from event payload
     };
 
     try {

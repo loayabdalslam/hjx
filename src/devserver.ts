@@ -94,8 +94,12 @@ export async function serveDev(opts: { inputPath: string; outDir: string; port: 
 
         if (msg.type === "event") {
           try {
+            // Create mock element with dataset attributes from payload
+            const mockEl = {
+              dataset: msg.payload || {}
+            };
             // Handlers now trigger onPatch naturally
-            session.runHandler(msg.name);
+            session.runHandler(msg.name, mockEl);
           } catch (err: any) {
             console.error("Handler error:", err);
           }

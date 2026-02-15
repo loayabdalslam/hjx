@@ -58,8 +58,13 @@ handlers:
 - **Composition**: Support for nested components and slots.
 - **Background Tasks**: Server-side `init(store)` function for periodic state updates.
 - **Modern CSS**: Support for `:` and `/` in class names (Tailwind-ready).
+- **Control Flow**: ✨ NEW!
+  - `if (condition):` blocks for conditional rendering
+  - `for (item in list):` blocks for list iteration
+  - Negation, equality, inequality operators
 - `layout:` with indentation-based tree
   - nodes: `view`, `text`, `button`, `input`
+  - control flow: `if`, `for` (with nesting)
   - ids/classes: `view#id.class1.class2`
   - inline text: `text: "..."` or `button.class (on click -> handler): "..."` 
   - bindings: `{{stateName}}` inside text
@@ -71,9 +76,10 @@ handlers:
   - `log "message"` (debug)
 
 ## Roadmap
-- **Control Flow**:
-  - `if (condition):` block for conditional rendering.
-  - `for (item in list):` block for list iteration.
-- more DOM nodes + attributes + aria
-- effects: `effect when <expr> -> ...`
-- targets: React/Vue/WebComponents
+- **Enhanced Control Flow**:
+  - AND/OR operators in conditions.
+  - Array index access in loops (`{{index}}`).
+  - Else/else-if blocks.
+- **More DOM features**: nodes, attributes, aria
+- **Effects system**: `effect when <expr> -> ...`
+- **Framework targets**: React/Vue/WebComponents

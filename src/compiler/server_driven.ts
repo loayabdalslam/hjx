@@ -80,7 +80,14 @@ export function createApp(rootEl) {
     // Discover and bind click handlers from data-hjx-click attributes
     rootEl.querySelectorAll("[data-hjx-click]").forEach(el => {
       const handler = el.getAttribute("data-hjx-click");
-      el.addEventListener("click", () => store.sendEvent(handler));
+      el.addEventListener("click", (e) => {
+        const payload = {};
+        // forward dataset keys (like data-hjx-idx) to server
+        if (el.dataset) {
+          for (const k of Object.keys(el.dataset)) payload[k] = el.dataset[k];
+        }
+        store.sendEvent(handler, payload);
+      });
     });
 
     // Discover and bind input bindings from data-hjx-input attributes
@@ -672,9 +679,9 @@ export function createRemoteStore(wsUrl, initial, rootEl) {
         ws.send(JSON.stringify({ type: "state_update", payload: patch }));
       }
     },
-    sendEvent: (handlerName) => {
+    sendEvent: (handlerName, payload = {}) => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "event", name: handlerName }));
+        ws.send(JSON.stringify({ type: "event", name: handlerName, payload }));
       }
     },
     subscribe: (fn) => { listeners.add(fn); return () => listeners.delete(fn); }

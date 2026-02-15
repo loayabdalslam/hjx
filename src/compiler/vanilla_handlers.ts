@@ -5,6 +5,11 @@ import { HJXHandler } from "../types.js";
  * Supported statements:
  * - set x = expr
  * - log "text"
+ * 
+ * Expressions support:
+ * - State variables: myVar
+ * - Array methods: arr.push(val), arr.filter(...)
+ * - Context access: ctx.el.dataset.hjxIdx, ctx.store
  */
 export function compileHandlersToJS(handlers: Record<string, HJXHandler>, stateKeys: string[]): string {
   const fns: string[] = [];
@@ -17,7 +22,14 @@ export function compileHandlersToJS(handlers: Record<string, HJXHandler>, stateK
     bodyJS.push(`  let patch = {};`);
 
     for (const line of h.body) {
-      const setm = line.match(/^set\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+      const trimmed = line.trim();
+      
+      // skip empty lines and comments
+      if (!trimmed || trimmed.startsWith("#")) {
+        continue;
+      }
+
+      const setm = trimmed.match(/^set\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
       if (setm) {
         const key = setm[1];
         const expr = setm[2];
@@ -30,14 +42,14 @@ export function compileHandlersToJS(handlers: Record<string, HJXHandler>, stateK
         continue;
       }
 
-      const logm = line.match(/^log\s+(".*"|'[^']*')\s*$/);
+      const logm = trimmed.match(/^log\s+(".*"|'[^']*')\s*$/);
       if (logm) {
         bodyJS.push(`  console.log(${logm[1]});`);
         continue;
       }
 
       // unknown line
-      bodyJS.push(`  throw new Error("Unsupported handler statement: ${escapeForJS(line)}");`);
+      bodyJS.push(`  throw new Error("Unsupported handler statement: ${escapeForJS(trimmed)}");`);
     }
 
     bodyJS.push(`  ctx.store.set(patch);`);
@@ -56,6 +68,20 @@ function escapeForJS(s: string): string {
 function exprToJS(expr: string, stateKeys: Set<string>): string {
   const cleaned = expr.trim();
 
+  // Handle array.push(value) -> [...array, value]
+  const pushMatch = cleaned.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*\.push\s*\(\s*([^)]+)\s*\)/);
+  if (pushMatch) {
+    const arrayName = pushMatch[1];
+    const value = pushMatch[2];
+    const arrayExpr = stateKeys.has(arrayName) ? `s["${arrayName}"]` : arrayName;
+    const valueExpr = exprToJS(value, stateKeys);
+    return `[...${arrayExpr}, ${valueExpr}]`;
+  }
+
+  // Handle array.filter(...) -> keep as-is but replace identifiers
+  // Simple case: items.filter((_, i) => i !== idx)
+  // This will have identifiers replaced below
+  
   // Replace identifiers that match state keys with s["key"]
   // Leave everything else alone (numbers, operators, other vars)
   return cleaned.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\b/g, (m) => {

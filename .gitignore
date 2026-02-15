@@ -1,6 +1,11 @@
 node_modules
 dist
-dist-app
+ACTION_ITEMS.md
+CONTROL_FLOW_IMPLEMENTATION.md
+CONTROL_FLOW.md
+EXECUTIVE_SUMMARY.md
+ARCHITECTURE.md
+PROJECT_REVIEW.md
 *.log
 .DS_Store
 package-lock.json

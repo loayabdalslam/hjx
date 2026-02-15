@@ -5,14 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-<<<<<<< HEAD
-    "dev": "node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173",
+    "dev": "node dist/cli.js dev examples/list.hjx --out dist-app --port 5172",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
-=======
-    "dev": "node dist/cli.js dev examples/dashboard.hjx --out dist-app --port 5173"
->>>>>>> a9c30ee2a8a804d9c175355bf86403617cdc5926
   },
   "dependencies": {
     "chokidar": "^3.6.0",

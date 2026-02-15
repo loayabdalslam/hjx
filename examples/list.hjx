@@ -1,0 +1,52 @@
+component TodoList
+
+state:
+  items = ["Learn HJX", "Build a UI", "Deploy to production"]
+  newItem = ""
+  showCompleted = false
+
+layout:
+  view.container:
+    view.header:
+      text.title: "My Todo List"
+      text.count: "Items: {{items.length}} tasks"
+
+    view.input-section:
+      input.todo-input (bind value <-> newItem): 
+      button.add-btn (on click -> addItem): "Add"
+
+    view.list:
+      for (todo in items):
+        view.todo-item:
+          text: "• {{todo}}"
+          button.delete-btn (on click -> removeItem): "×"
+
+    view.footer:
+      button.toggle-btn (on click -> toggleCompleted): "Show Completed"
+      if (showCompleted):
+        text.completed-note: "👍 All tasks completed!"
+
+style:
+  .container { padding: 20px; max-width: 500px; margin: 0 auto; font-family: system-ui, -apple-system, sans-serif; }
+  .header { margin-bottom: 20px; }
+  .title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+  .count { font-size: 14px; color: #666; }
+  .input-section { display: flex; gap: 8px; margin-bottom: 20px; }
+  .todo-input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; }
+  .add-btn { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .add-btn:hover { background: #0056b3; }
+  .list { margin-bottom: 20px; }
+  .todo-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; }
+  .delete-btn { padding: 4px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  .footer { padding-top: 20px; border-top: 1px solid #ddd; }
+  .toggle-btn { padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .completed-note { color: green; margin-top: 12px; font-weight: bold; }
+
+handlers:
+  addItem:
+    set items = [...items, newItem]
+    set newItem = ""
+  removeItem:
+    set items = items.filter(i => i !== ctx.el.dataset.hjxItem)
+  toggleCompleted:
+    set showCompleted = !showCompleted
