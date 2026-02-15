@@ -10,6 +10,7 @@ state:
   totalSessions = 12
   cpuUsage = 45
   status = "Operational"
+  statusClass = "bg-green-100 text-green-800"
   lastIncident = "None"
 
 script:
@@ -23,16 +24,17 @@ script:
     // Update server time and uptime every second
     const interval = setInterval(() => {
       const currentUptime = store.get("uptime");
+      const currentStatus = store.get("status");
+      
       store.set({
         uptime: currentUptime + 1,
         serverTime: getFormattedTime(),
-        cpuUsage: Math.floor(Math.random() * 20) + 30 // Simulate CPU jitter
+        cpuUsage: Math.floor(Math.random() * 20) + 30, // Simulate CPU jitter
+        statusClass: currentStatus === "Operational" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
       });
     }, 1000);
 
     store.set({ serverTime: getFormattedTime() });
-    
-    // Note: In a real app, we'd want a way to clear this interval on cleanup.
   }
 
 layout:
@@ -44,7 +46,7 @@ layout:
           view.text-3xl.font-bold.tracking-tight: "System Dashboard"
           view.text-muted-foreground: "Real-time infrastructure monitoring (Server-Driven)"
         view.flex.items-center.gap-4:
-          view.px-3.py-1.rounded-full.text-xs.font-medium.bg-green-100.text-green-800: "{{status}}"
+          view.px-3.py-1.rounded-full.text-xs.font-medium(class="{{statusClass}}"): "{{status}}"
           view.text-sm.text-muted-foreground: "Server Time: {{serverTime}}"
 
       // Stats Grid
@@ -70,8 +72,8 @@ layout:
 
 handlers:
   refresh:
-    log "Refreshing stats..."
+    log "Action: Force Refresh clicked"
     set totalSessions = totalSessions + 1
   toggleStatus:
-    log "Toggling system status"
-    set status = "Maintenance"
+    log "Action: Toggling Status"
+    set status = status == "Operational" ? "Maintenance" : "Operational"

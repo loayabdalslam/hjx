@@ -403,7 +403,7 @@ function renderNode(
 
     for (const [key, val] of Object.entries(allAttrs)) {
       if (key === "data-hjx-id" || key === "data-hjx-scope") continue;
-      if (key === "class") continue;
+      // Allow class interpolation
       if (val.includes("{{")) {
         const finalTemplate = val.replace(/\{\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}\}/g, (_, k) => {
           if (extraAttrs[k]) return extraAttrs[k];
@@ -493,6 +493,7 @@ export function createRemoteStore(wsUrl, initial) {
     ws.onmessage = (msg) => {
       try {
         const data = JSON.parse(msg.data);
+        console.log("HJX Received:", data.type, data.payload || data.name);
         if (data.type === "state") {
           Object.assign(state, data.payload);
           notify();
@@ -535,6 +536,7 @@ export function createRemoteStore(wsUrl, initial) {
 }
 
 function applyPatch(state, patch) {
+  console.log("HJX Applying patch:", patch);
   for (const [key, value] of Object.entries(patch)) {
     if (key.includes(".")) {
       const parts = key.split(".");
