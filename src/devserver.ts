@@ -1,6 +1,6 @@
 import http from "node:http";
 import { readFileSync, writeFileSync } from "node:fs";
-import { resolve, extname } from "node:path";
+import { resolve, extname, dirname } from "node:path";
 import { WebSocketServer } from "ws";
 import chokidar from "chokidar";
 import { parseHJX } from "./parser.js";

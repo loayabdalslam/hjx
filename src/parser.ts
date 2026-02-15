@@ -19,6 +19,7 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
     version: "0.1",
     component: { name: componentName },
     imports: {},
+    script: "",
     state: {},
     layout: null,
     style: "",
