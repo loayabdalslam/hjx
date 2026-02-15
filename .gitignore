@@ -6,6 +6,7 @@ CONTROL_FLOW.md
 EXECUTIVE_SUMMARY.md
 ARCHITECTURE.md
 PROJECT_REVIEW.md
+HJX_VS_OTHERS.md
 *.log
 .DS_Store
 package-lock.json
