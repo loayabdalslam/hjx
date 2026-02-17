@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="logo.png" alt="HJX Logo" width="140" />
-</p>
+
 
 <h1 align="center">HJX</h1>
 
