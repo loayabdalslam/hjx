@@ -482,18 +482,6 @@ Features: **HMR support**, **CSS injection**, **automatic scoping**.
 
 ---
 
-## 🗺️ Roadmap
-
-- [ ] **Enhanced Control Flow** — `else`/`else-if`, AND/OR operators, `{{index}}` in loops
-- [ ] **Effects System** — `effect when <expr> -> ...`
-- [ ] **More DOM Nodes** — `img`, `a`, `select`, `textarea`, custom attributes, ARIA
-- [ ] **Async Handlers** — `fetch`, `await` in handler bodies
-- [ ] **Framework Targets** — Compile to React, Vue, or Web Components
-- [ ] **VS Code Extension** — Syntax highlighting, IntelliSense, go-to-definition
-- [ ] **Package Manager** — `hjx add <component>` from a shared registry
-
----
-
 ## 📁 Project Structure
 
 ```
