@@ -1,0 +1,54 @@
+{
+    "name": "hjx-vscode",
+    "displayName": "HJX Language Support",
+    "description": "Syntax highlighting and snippets for the HJX Unified UI Language.",
+    "version": "0.1.0",
+    "publisher": "hjx-lang",
+    "icon": "logo.png",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "hjx",
+                "aliases": [
+                    "HJX",
+                    "hjx"
+                ],
+                "extensions": [
+                    ".hjx"
+                ],
+                "configuration": "./language-configuration.json",
+                "icon": "./icon.png"
+            }
+        ],
+        "iconThemes": [
+            {
+                "id": "hjx-icons",
+                "label": "HJX Icon Theme",
+                "path": "./hjx-icons.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "hjx",
+                "scopeName": "source.hjx",
+                "path": "./syntaxes/hjx.tmLanguage.json"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "hjx",
+                "path": "./snippets/snippets.json"
+            }
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/loayabdalslam/hjx"
+    }
+}

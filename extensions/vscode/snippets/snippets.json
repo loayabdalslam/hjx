@@ -1,0 +1,34 @@
+{
+    "Counter Example": {
+        "prefix": "hjx-counter",
+        "body": [
+            "component ${1:Counter}",
+            "",
+            "state:",
+            "  count = 0",
+            "",
+            "layout:",
+            "  view.card:",
+            "    text: \"Count: {{count}}\"",
+            "    button.primary (on click -> inc): \"Increase\"",
+            "",
+            "style:",
+            "  .card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; }",
+            "  .primary { padding: 8px 12px; border-radius: 6px; cursor: pointer; }",
+            "",
+            "handlers:",
+            "  inc:",
+            "    set count = count + 1"
+        ],
+        "description": "Standard HJX counter component"
+    },
+    "Dashboard Card": {
+        "prefix": "hjx-card",
+        "body": [
+            "view.p-4.bg-white.rounded-lg.shadow-sm.border:",
+            "  view.text-sm.text-muted-foreground: \"${1:Label}\"",
+            "  view.text-2xl.font-bold: \"{{${2:value}}}\""
+        ],
+        "description": "Tailwind-styled dashboard card"
+    }
+}

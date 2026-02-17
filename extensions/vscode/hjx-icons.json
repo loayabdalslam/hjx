@@ -1,0 +1,18 @@
+{
+    "iconDefinitions": {
+        "hjx": {
+            "iconPath": "icon.png"
+        }
+    },
+    "fileExtensions": {
+        "hjx": "hjx"
+    },
+    "fileNames": {
+        "hjx.config.js": "hjx",
+        "hjx.config.ts": "hjx",
+        "hjx.config.json": "hjx"
+    },
+    "languageIds": {
+        "hjx": "hjx"
+    }
+}

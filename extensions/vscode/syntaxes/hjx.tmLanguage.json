@@ -1,0 +1,98 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "HJX",
+    "scopeName": "source.hjx",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#blocks"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#interpolations"
+        }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.hjx",
+                    "match": "//.*$"
+                }
+            ]
+        },
+        "blocks": {
+            "patterns": [
+                {
+                    "name": "entity.name.tag.hjx",
+                    "match": "\\b(component|state|layout|style|handlers|imports|script)\\b(?=:)"
+                },
+                {
+                    "name": "keyword.control.hjx",
+                    "match": "\\b(if|else|for|in)\\b"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.other.hjx",
+                    "match": "\\b(component|set|log|bind|on|value)\\b"
+                },
+                {
+                    "name": "constant.language.hjx",
+                    "match": "\\b(true|false)\\b"
+                },
+                {
+                    "name": "constant.numeric.hjx",
+                    "match": "\\b\\d+(\\.\\d+)?\\b"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.double.hjx",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "include": "#interpolations"
+                        }
+                    ]
+                },
+                {
+                    "name": "string.quoted.single.hjx",
+                    "begin": "'",
+                    "end": "'",
+                    "patterns": [
+                        {
+                            "include": "#interpolations"
+                        }
+                    ]
+                }
+            ]
+        },
+        "interpolations": {
+            "patterns": [
+                {
+                    "name": "variable.interpolation.hjx",
+                    "begin": "\\{\\{",
+                    "end": "\\}\\}",
+                    "captures": {
+                        "0": {
+                            "name": "punctuation.section.interpolation.hjx"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
