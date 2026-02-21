@@ -25,9 +25,23 @@ Compiles an AST to vanilla HTML/CSS/JS.
 
 **Returns:** Object with `html`, `css`, and `js` strings
 
-### `buildServerDriven(ast: HJXAst): { html: string; css: string; js: string }`
+### `buildServerDriven(tree: LoadedComponent): { html: string; css: string; js: string }`
 
-Compiles an AST for server-driven rendering.
+Compiles a loaded component tree for server-driven rendering with WebSocket synchronization.
+
+**Parameters:**
+- `tree`: A `LoadedComponent` object (from `loadComponentTree`)
+
+**Returns:** Object with `html`, `css`, and `js` strings
+
+### `loadComponentTree(filePath: string): LoadedComponent`
+
+Recursively loads a `.hjx` file and all its imported components into a component tree.
+
+**Parameters:**
+- `filePath`: Absolute path to the root `.hjx` file
+
+**Returns:** `LoadedComponent` object with `ast`, `path`, and resolved `imports`
 
 ## Runtime APIs
 
@@ -49,6 +63,14 @@ Binds click events to handlers.
 
 Binds input elements to state with two-way binding.
 
+### `ifBinder(store, root, selector, condition)`
+
+Binds conditional visibility to DOM elements based on a condition expression.
+
+### `forBinder(store, root, selector, itemName, listName)`
+
+Binds list rendering — iterates over an array in state and renders template HTML for each item.
+
 ## Type Definitions
 
 ### `HJXAst`
@@ -66,11 +88,25 @@ Binds input elements to state with two-way binding.
 }
 ```
 
+### `LoadedComponent`
+```typescript
+{
+  ast: HJXAst;
+  path: string;
+  imports: Record<string, LoadedComponent>;
+}
+```
+
 ### `HJXNode`
 ```typescript
 {
-  kind: "node";
+  kind: "node" | "if" | "for" | "else";
   tag: string;
+  condition?: string;       // for "if" nodes
+  iterator?: {              // for "for" nodes
+    item: string;
+    list: string;
+  };
   id?: string;
   classes: string[];
   attrs: Record<string, string>;

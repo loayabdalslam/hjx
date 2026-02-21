@@ -20,3 +20,7 @@ HJX files contain blocks that define different aspects of your component:
 - `handlers`: Event handler logic
 
 The HJX compiler processes these blocks and generates vanilla web code that runs in any browser.
+
+---
+
+**Next:** [Installation →](/guide/installation)

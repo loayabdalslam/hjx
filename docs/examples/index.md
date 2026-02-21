@@ -2,14 +2,14 @@
 
 Explore HJX through practical examples. Each example demonstrates different features of the language.
 
-## Counter
+## [Counter](/examples/counter)
 
-A simple counter with increment/decrement buttons.
+A simple counter with increment/decrement buttons. Demonstrates **state**, **event handlers**, and **text interpolation**.
 
-## Form
+## [Form](/examples/form)
 
-A form with input binding and validation.
+A newsletter form with input binding. Demonstrates **two-way binding**, **dynamic text**, and **state updates**.
 
-## Composition
+## [Composition](/examples/composition)
 
-Multiple components working together.
+Multiple components working together. Demonstrates **imports**, **props**, **slots**, and **component composition**.

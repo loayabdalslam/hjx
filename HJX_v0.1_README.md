@@ -352,13 +352,17 @@ handlers:
 
 # 10. v0.1 Limitations
 
-- Layout nesting limited to 2 container levels  
-- Only `click` event supported  
-- Only `bind value <-> stateKey`  
-- No conditionals  
-- No loops  
-- No computed state  
-- No async handlers  
+**Implemented since initial v0.1 spec:**
+- ✅ Conditionals (`if`/`if !`/`if ===`/`if !=`)
+- ✅ Loops (`for item in items`)
+- ✅ Component composition (`imports:` block with props and slots)
+
+**Current limitations:**
+- Only `click` event supported (no `input`, `submit`, `change` events in handlers DSL)
+- Only `bind value <-> stateKey` binding
+- No computed state
+- No async handlers
+- No multi-target codegen (React/Vue)
 
 ---
 

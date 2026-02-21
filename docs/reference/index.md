@@ -2,14 +2,14 @@
 
 Complete reference documentation for HJX language features and APIs.
 
-## Language Specification
+## [Language Specification](/reference/spec)
 
-Detailed specification of the HJX language syntax and semantics.
+Detailed specification of the HJX language syntax and semantics — all blocks, control flow, expressions, and compilation output.
 
-## CLI Reference
+## [CLI Reference](/reference/cli)
 
-Command-line interface options and usage.
+Command-line interface: `parse`, `build`, and `dev` commands with options.
 
-## API Reference
+## [API Reference](/reference/api)
 
-Runtime and compiler APIs for advanced usage.
+Parser, compiler, and runtime APIs for programmatic usage and integration.

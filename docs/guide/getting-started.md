@@ -53,6 +53,10 @@ Open http://localhost:5173 in your browser!
 
 ## CLI Commands
 
-- `hjx parse <file.hjx>` - Parse and show AST
-- `hjx build <file.hjx> --out <dir>` - Build to static files
-- `hjx dev <file.hjx> --out <dir> --port <n>` - Start dev server
+- `hjx parse <file.hjx>` — Parse and show AST
+- `hjx build <file.hjx> --out <dir>` — Build to static files
+- `hjx dev <file.hjx> --out <dir> --port <n>` — Start dev server
+
+---
+
+**Next:** [Control Flow →](/guide/control-flow)

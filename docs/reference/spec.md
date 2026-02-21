@@ -40,6 +40,28 @@ state:
 - `number`: `42`, `3.14`
 - `string`: `"hello"`, `'world'`
 - `boolean`: `true`, `false`
+- `array`: `["item1", "item2"]`
+- `object`: `{ name: "John", age: 30 }`
+
+## Imports Block
+
+Import and compose other `.hjx` components:
+
+### Syntax
+```
+imports:
+  Button from "./components/Button.hjx"
+  Card from "./components/Card.hjx"
+```
+
+Use imported components in layout with **props** and **slots**:
+
+```hjx
+layout:
+  Card (title="My Card"):
+    text: "This is slot content"
+    Button (variant="primary" on click -> save): "Save"
+```
 
 ## Layout Block
 
@@ -73,6 +95,33 @@ button.primary (on click -> handler): "Click me"
 ```
 input (bind value <-> stateVar)
 ```
+
+### Control Flow
+
+#### Conditional Rendering
+```hjx
+layout:
+  if (isLoggedIn):
+    text: "Welcome back!"
+
+  if (!isLoggedIn):
+    text: "Please log in."
+
+  if (status === "active"):
+    text: "Account is active"
+```
+
+**Supported condition operators:** `!` (negation), `===` (equality), `==` (equality), `!=` (inequality)
+
+#### Loop Rendering
+```hjx
+layout:
+  for (item in items):
+    view.row:
+      text: "{{item}}"
+```
+
+The loop variable (`item`) is available for interpolation within the loop body.
 
 ### Attributes and Modifiers
 
@@ -123,6 +172,24 @@ log "message"
 - Identifiers: `count`, `name`
 - Parentheses: `(a + b)`
 - Binary operations: `+`, `-`, `*`, `/`
+- Array spread: `[...items, newItem]`
+
+## Script Block (Optional)
+
+Server-side initialization code. The `init(store)` function receives a reactive store for background state updates:
+
+```hjx
+script:
+  export function init(store) {
+    setInterval(() => {
+      store.set({ timestamp: Date.now() });
+    }, 1000);
+  }
+```
+
+The store provides:
+- `store.get(key?)` — get current state (or specific key)
+- `store.set(patch)` — update state and push changes to clients
 
 ## Compilation Output
 
@@ -131,3 +198,8 @@ The vanilla compiler generates three files:
 - **`index.html`**: Minimal HTML page with embedded runtime
 - **`app.css`**: Scoped CSS styles
 - **`app.js`**: Component logic and runtime code
+
+The server-driven compiler additionally includes:
+- WebSocket client for real-time state synchronization
+- Server-managed state evaluation
+- Automatic UI updates on state changes

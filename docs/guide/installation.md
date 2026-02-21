@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 16+
+- Node.js 18+
 - npm or yarn
 
 ## From Source
@@ -37,5 +37,10 @@ To modify HJX itself:
 
 ```bash
 npm run build  # Build TypeScript
-npm run dev    # Start dev server for docs (once set up)
+npm run dev    # Start dev server with an example
+```
+
+---
+
+**Next:** [Getting Started →](/guide/getting-started)
 ```

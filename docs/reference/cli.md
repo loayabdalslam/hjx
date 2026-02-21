@@ -51,10 +51,13 @@ hjx dev examples/counter.hjx --out dist-app --port 5173
 - WebSocket-based hot reload
 - Serves static files from output directory
 
-## Global Options
+## Help
 
-- `--help`: Show help information
-- `--version`: Show version number
+Run without arguments or with the `help` command to see usage information:
+
+```bash
+node dist/cli.js help
+```
 
 ## Exit Codes
 
