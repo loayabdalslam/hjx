@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/hjx/',
   title: 'HJX',
   description: 'A compiled UI language that unifies structure, style, and logic into a single .hjx file',
   appearance: 'dark',
@@ -72,7 +73,7 @@ export default defineConfig({
     ],
     footer: {
       message: 'Released under the MIT License',
-      copyright: 'Copyright © 2024-present HJX'
+      copyright: 'Copyright © 2026-present HJX'
     },
     search: {
       provider: 'local'
