@@ -2,7 +2,7 @@ name: Deploy VitePress site to Pages
 
 on:
   push:
-    branches: [main] # تأكد أن اسم الفرع هنا يطابق اسم الفرع الرئيسي لديك (main أو master)
+    branches: [main]
 
 permissions:
   contents: read
@@ -20,27 +20,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Not needed if lastUpdated is not configured
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm # غيرها إلى pnpm أو yarn إذا كنت تستخدم أياً منهما
+          cache: npm
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Install dependencies
-        run: npm ci # استخدم npm install أو yarn install حسب مدير الحزم الخاص بك
+        run: npm ci
 
       - name: Build with VitePress
-        run: npm run docs:build # تأكد أن هذا الأمر موجود في package.json الخاص بك
+        run: npm run docs:build
+        # Or: npx vitepress build docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/.vitepress/dist # تأكد أن هذا هو مسار البناء الصحيح لديك
+          path: docs/.vitepress/dist
 
   deploy:
     environment:
