@@ -1,0 +1,17 @@
+import{_ as a,o as s,c as e,ag as p}from"./chunks/framework.ePeAWSvT.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{"layout":"home","hero":{"name":"HJX","text":"A Compiled UI Language","tagline":"Unify structure, style, and logic into a single .hjx file","actions":[{"theme":"brand","text":"Get Started","link":"/guide/getting-started"},{"theme":"alt","text":"View Examples","link":"/examples/counter"}]},"features":[{"title":"Single File Components","details":"Write HTML, CSS, and JavaScript in one .hjx file. No more jumping between multiple files."},{"title":"Zero Dependencies","details":"Compiles to clean, dependency-free HTML, CSS, and JavaScript. Runs anywhere."},{"title":"Reactive State","details":"Built-in state management with automatic UI updates when state changes."},{"title":"Server-Driven Mode","details":"Optional server-driven state management via WebSocket for complex applications."},{"title":"Hot Reload","details":"Fast development cycle with instant updates as you type."},{"title":"TypeScript Support","details":"Full TypeScript support with type-safe runtime APIs."}]},"headers":[],"relativePath":"index.md","filePath":"index.md"}'),t={name:"index.md"};function l(i,n,r,c,o,u){return s(),e("div",null,[...n[0]||(n[0]=[p(`<h2 id="quick-example" tabindex="-1">Quick Example <a class="header-anchor" href="#quick-example" aria-label="Permalink to &quot;Quick Example&quot;">​</a></h2><div class="language-hjx vp-adaptive-theme line-numbers-mode"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>component Counter</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>state:</span></span>
+<span class="line"><span>  count = 0</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>layout:</span></span>
+<span class="line"><span>  view.card:</span></span>
+<span class="line"><span>    text: &quot;Count: {{count}}&quot;</span></span>
+<span class="line"><span>    button (on click -&gt; inc): &quot;Increase&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>style:</span></span>
+<span class="line"><span>  .card { padding: 20px; }</span></span>
+<span class="line"><span>  button { cursor: pointer; }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>handlers:</span></span>
+<span class="line"><span>  inc:</span></span>
+<span class="line"><span>    set count = count + 1</span></span></code></pre><div class="line-numbers-wrapper" aria-hidden="true"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br><span class="line-number">8</span><br><span class="line-number">9</span><br><span class="line-number">10</span><br><span class="line-number">11</span><br><span class="line-number">12</span><br><span class="line-number">13</span><br><span class="line-number">14</span><br><span class="line-number">15</span><br><span class="line-number">16</span><br><span class="line-number">17</span><br></div></div><p>Compiles to clean, readable HTML, CSS, and JavaScript with zero dependencies.</p>`,3)])])}const b=a(t,[["render",l]]);export{m as __pageData,b as default};
