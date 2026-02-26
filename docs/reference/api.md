@@ -1,126 +1,163 @@
 # API Reference
 
-Low-level APIs for advanced HJX usage and integration.
+## Runtime API
 
-## Parser API
+The runtime provides functions for state management and DOM binding.
 
-### `parseHJX(source: string, filename?: string): HJXAst`
+### createStore
 
-Parses HJX source code into an AST.
+Creates a reactive state store:
 
-**Parameters:**
-- `source`: The HJX source code as a string
-- `filename`: Optional filename for error reporting
-
-**Returns:** `HJXAst` object
-
-## Compiler APIs
-
-### `buildVanilla(ast: HJXAst): { html: string; css: string; js: string }`
-
-Compiles an AST to vanilla HTML/CSS/JS.
-
-**Parameters:**
-- `ast`: Parsed HJX AST
-
-**Returns:** Object with `html`, `css`, and `js` strings
-
-### `buildServerDriven(tree: LoadedComponent): { html: string; css: string; js: string }`
-
-Compiles a loaded component tree for server-driven rendering with WebSocket synchronization.
-
-**Parameters:**
-- `tree`: A `LoadedComponent` object (from `loadComponentTree`)
-
-**Returns:** Object with `html`, `css`, and `js` strings
-
-### `loadComponentTree(filePath: string): LoadedComponent`
-
-Recursively loads a `.hjx` file and all its imported components into a component tree.
-
-**Parameters:**
-- `filePath`: Absolute path to the root `.hjx` file
-
-**Returns:** `LoadedComponent` object with `ast`, `path`, and resolved `imports`
-
-## Runtime APIs
-
-### `createStore(initial: Record<string, any>)`
-
-Creates a reactive state store.
-
-**Returns:** Store object with `get()`, `set(patch)`, and `subscribe(fn)` methods
-
-### `textBinder(store, root, selector, template)`
-
-Binds text interpolation to DOM elements.
-
-### `clickBinder(store, root, selector, handler)`
-
-Binds click events to handlers.
-
-### `inputBinder(store, root, selector, stateKey)`
-
-Binds input elements to state with two-way binding.
-
-### `ifBinder(store, root, selector, condition)`
-
-Binds conditional visibility to DOM elements based on a condition expression.
-
-### `forBinder(store, root, selector, itemName, listName)`
-
-Binds list rendering — iterates over an array in state and renders template HTML for each item.
-
-## Type Definitions
-
-### `HJXAst`
 ```typescript
-{
-  kind: "HJXAst";
-  version: "0.1";
-  component: { name: string };
-  imports: Record<string, string>;
-  script: string;
-  state: Record<string, HJXStateValue>;
-  layout: HJXNode | null;
-  style: string;
-  handlers: Record<string, HJXHandler>;
+function createStore(initial: Record<string, any>): Store
+```
+
+**Parameters:**
+- `initial` - Initial state object
+
+**Returns:**
+- Store with `get()`, `set()`, and `subscribe()` methods
+
+**Example:**
+
+```typescript
+const store = createStore({ count: 0 });
+store.get(); // { count: 0 }
+store.set({ count: 1 });
+```
+
+### Store Methods
+
+#### get()
+
+Get current state:
+
+```typescript
+store.get(): Record<string, any>
+```
+
+#### set()
+
+Update state:
+
+```typescript
+store.set(patch: Record<string, any>): void
+```
+
+#### subscribe()
+
+Subscribe to state changes:
+
+```typescript
+store.subscribe(fn: () => void): () => void
+```
+
+Returns unsubscribe function.
+
+## Binders
+
+### textBinder
+
+Bind text content to state:
+
+```typescript
+function textBinder(
+  store: Store,
+  root: Element,
+  selector: string,
+  template: string
+): void
+```
+
+**Parameters:**
+- `store` - The state store
+- `root` - Root element to search in
+- `selector` - CSS selector for target element
+- `template` - Template with `{{variable}}` placeholders
+
+### clickBinder
+
+Bind click events:
+
+```typescript
+function clickBinder(
+  store: Store,
+  root: Element,
+  selector: string,
+  fn: (ctx: Context) => void
+): void
+```
+
+### inputBinder
+
+Bind two-way input:
+
+```typescript
+function inputBinder(
+  store: Store,
+  root: Element,
+  selector: string,
+  stateKey: string
+): void
+```
+
+### ifBinder
+
+Bind conditional rendering:
+
+```typescript
+function ifBinder(
+  store: Store,
+  root: Element,
+  selector: string,
+  condition: string
+): void
+```
+
+### forBinder
+
+Bind list rendering:
+
+```typescript
+function forBinder(
+  store: Store,
+  root: Element,
+  selector: string,
+  itemName: string,
+  listName: string
+): void
+```
+
+## Context Object
+
+Handlers receive a context object:
+
+```typescript
+interface Context {
+  store: Store;
+  event: Event;
+  el: Element;
 }
 ```
 
-### `LoadedComponent`
-```typescript
-{
-  ast: HJXAst;
-  path: string;
-  imports: Record<string, LoadedComponent>;
-}
-```
+## Usage Example
 
-### `HJXNode`
 ```typescript
-{
-  kind: "node" | "if" | "for" | "else";
-  tag: string;
-  condition?: string;       // for "if" nodes
-  iterator?: {              // for "for" nodes
-    item: string;
-    list: string;
-  };
-  id?: string;
-  classes: string[];
-  attrs: Record<string, string>;
-  text: string | null;
-  events: Record<string, string>;
-  bind: HJXBind | null;
-  children: HJXNode[];
-}
-```
+import { createStore, mount, textBinder, clickBinder } from './runtime.js';
 
-### `HJXHandler`
-```typescript
-{
-  name: string;
-  body: string[]; // Array of statement lines
-}
+const store = createStore({ count: 0 });
+
+const handlers = {
+  increment: (ctx) => {
+    ctx.store.set({ count: ctx.store.get().count + 1 });
+  }
+};
+
+// Bind text
+textBinder(store, root, '.count', 'Count: {{count}}');
+
+// Bind click
+clickBinder(store, root, 'button', (ctx) => {
+  handlers.increment(ctx);
+});
 ```

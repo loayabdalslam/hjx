@@ -1,71 +1,52 @@
 # State Management
 
-State is the heart of HJX's reactivity system. This guide covers everything you need to know about managing state.
+HJX has built-in reactive state management. State changes automatically trigger UI updates.
 
-## Basic State
-
-Define state using the `state:` block:
+## Defining State
 
 ```hjx
 state:
   count = 0
   name = "World"
   isActive = true
+  items = ["a", "b", "c"]
 ```
 
-## Supported Types
+## Using State in Layout
 
-HJX supports several data types:
-
-### Numbers
+Reference state variables in text:
 
 ```hjx
-state:
-  count = 42
-  price = 19.99
-  negative = -10
+layout:
+  text: "Hello {{name}}"
+  text: "Count: {{count}}"
 ```
 
-### Strings
+## Updating State
+
+Use handlers to update state:
 
 ```hjx
-state:
-  name = "John"
-  message = 'Hello world'
-  empty = ""
+handlers:
+  increment:
+    set count = count + 1
+  
+  decrement:
+    set count = count - 1
+  
+  reset:
+    set count = 0
+  
+  setName:
+    set name = "New Name"
 ```
 
-### Booleans
-
-```hjx
-state:
-  isEnabled = true
-  isComplete = false
-```
-
-### Arrays
-
-```hjx
-state:
-  items = ["apple", "banana", "cherry"]
-  numbers = [1, 2, 3, 4, 5]
-  mixed = [1, "two", true]
-```
-
-### Objects
-
-```hjx
-state:
-  user = { name: "John", age: 30 }
-  config = { theme: "dark", lang: "en" }
-```
-
-## Reactive Updates
+## State Reactivity
 
 When state changes, the UI updates automatically:
 
 ```hjx
-component Demo
+component Counter
 
 state:
   count = 0
@@ -73,115 +54,96 @@ state:
 layout:
   view:
     text: "Count: {{count}}"
-    button (on click -> increment): "Add One"
+    button (on click -> increment): "+"
+    button (on click -> decrement): "-"
 
 handlers:
   increment:
     set count = count + 1
-```
-
-Try clicking the button - the text updates instantly.
-
-## Array Operations
-
-### Adding Items
-
-```hjx
-handlers:
-  add:
-    set items = [...items, newItem]
-```
-
-### Removing Items
-
-```hjx
-handlers:
-  remove:
-    set items = items.filter(i => i !== target)
-```
-
-### Updating Items
-
-```hjx
-handlers:
-  update:
-    set items = items.map(i => i.id === id ? newValue : i)
-```
-
-## Object Updates
-
-```hjx
-handlers:
-  updateUser:
-    set user = { ...user, name: newName }
+  
+  decrement:
+    set count = count - 1
 ```
 
 ## Computed Values
 
-There's no special computed syntax, but you can use helper functions:
+While HJX doesn't have computed properties, you can compute values in handlers:
 
 ```hjx
-component TodoList
-
 state:
-  items = ["Learn HJX", "Build something"]
-  filter = "all"
+  a = 10
+  b = 5
+  sum = 0
 
-layout:
-  view:
-    text: "Total: {{items.length}}"
-    text: "Filtered: {{filteredCount}}"
-
-script:
-  export function init(store) {
-    store.compute('filteredCount', () => {
-      const items = store.get('items');
-      const filter = store.get('filter');
-      if (filter === 'all') return items.length;
-      return items.filter(i => i.done).length;
-    });
-  }
+handlers:
+  calculate:
+    set sum = a + b
 ```
 
-## State in Server-Driven Mode
-
-In server-driven mode, state lives on the server:
+## State with Arrays
 
 ```hjx
-component Dashboard
-
 state:
-  users = []
-  cpu = 0
+  todos = ["Buy milk", "Walk dog"]
 
-script:
-  export function init(store) {
-    setInterval(() => {
-      store.set({
-        cpu: Math.random() * 100,
-        users: fetchUsers()
-      });
-    }, 1000);
-  }
-
-layout:
-  view:
-    text: "CPU: {{cpu}}%"
-    for (user in users):
-      text: "{{user.name}}"
+handlers:
+  addTodo:
+    set todos = todos + ["New task"]
+  
+  clearTodos:
+    set todos = []
 ```
 
-The server pushes updates to all connected clients automatically.
+## State with Objects
 
-## Best Practices
+```hjx
+state:
+  user = { name: "Alice", age: 30 }
 
-1. **Keep state minimal** - Only store what you need for rendering
-2. **Use meaningful names** - `items` > `arr`, `isLoading` > `loading`
-3. **Group related state** - Use objects for related data
-4. **Avoid deeply nested state** - Keep it flat when possible
+handlers:
+  birthday:
+    set user = { name: user.name, age: user.age + 1 }
+```
 
-## Next Steps
+## Two-Way Binding
 
-- [Event Handling](/guide/events) - Respond to user actions
-- [Control Flow](/language/conditionals) - Conditionals and loops
-- [Server-Driven Mode](/guide/server-driven) - Real-time updates
+For input elements, use two-way binding:
+
+```hjx
+layout:
+  input (bind value -> username)
+  text: "Hello {{username}}"
+```
+
+This automatically:
+- Displays the state value in the input
+- Updates state when the input changes
+
+## Conditional Rendering
+
+Use state to conditionally show/hide elements:
+
+```hjx
+state:
+  isLoggedIn = false
+
+layout:
+  if (isLoggedIn):
+    view.dashboard: "Welcome!"
+  
+  if (!isLoggedIn):
+    view.login: "Please log in"
+```
+
+## List Rendering
+
+Use state arrays with `for`:
+
+```hjx
+state:
+  items = ["Apple", "Banana", "Cherry"]
+
+layout:
+  for (item in items):
+    view.item: "{{item}}"
+```

@@ -1,210 +1,146 @@
-# Component Composition
+# Components
 
-Learn how to build reusable components and compose them together.
+HJX supports component composition - building complex UIs from smaller, reusable components.
 
-## Importing Components
+## Creating Components
 
-First, import components using the `imports:` block:
-
-```hjx
-imports:
-  Button from "./Button.hjx"
-  Card from "./Card.hjx"
-  Input from "./Input.hjx"
-```
-
-## Using Imported Components
-
-Use imported components like built-in elements:
-
-```hjx
-layout:
-  Card (title="Welcome"):
-    text: "Hello, World!"
-    Button (on click -> sayHello): "Click Me"
-```
-
-## Props
-
-Pass data to components using props in parentheses:
-
-```hjx
-Card (title="My Card" class="w-[400px]")
-```
-
-Common props:
-- `title` - Card title
-- `class` - Additional CSS classes
-- `disabled` - Disable element
-- `placeholder` - Input placeholder
-
-## Slots
-
-Slot content goes inside the component tags:
-
-```hjx
-Card (title="Form"):
-  Input (bind value <-> name)
-  Button (on click -> submit): "Submit"
-```
-
-The content between the component tags becomes the slot.
-
-## Building Reusable Components
-
-### Button Component
+A component is simply a `.hjx` file. Create `Button.hjx`:
 
 ```hjx
 component Button
 
 state:
-  label = "Button"
+  label = "Click me"
   variant = "primary"
 
 layout:
-  view.button (on click -> handleClick):
+  button.btn (on click -> handleClick):
     text: "{{label}}"
 
 style:
-  .button {
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    border: none;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .primary { background: #007bff; color: white; }
-  .secondary { background: #6c757d; color: white; }
-  .outline { background: transparent; border: 1px solid #007bff; color: #007bff; }
+  .btn { padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+  .primary { background: #007bff; color: white; border: none; }
+  .secondary { background: #6c757d; color: white; border: none; }
 
 handlers:
   handleClick:
-    log "Button clicked!"
+    log "Button clicked"
 ```
 
-### Card Component
+## Using Components
+
+Import and use components in other files:
+
+```hjx
+component App
+
+imports:
+  Button from "./components/Button.hjx"
+
+layout:
+  view.app:
+    Button variant="primary"
+    Button variant="secondary"
+```
+
+## Component Props
+
+Pass data to components using attributes:
 
 ```hjx
 component Card
 
 state:
-  title = ""
+  title = "Default Title"
+  content = ""
 
 layout:
-  view.card:
-    if (title !== ""):
-      view.header: "{{title}}"
-    view.content:
-      # Slot content goes here
+  div.card:
+    div.header:
+      text: "{{title}}"
+    div.body:
+      text: "{{content}}"
 
 style:
-  .card {
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    overflow: hidden;
-    background: white;
-  }
-  .header {
-    padding: 16px;
-    border-bottom: 1px solid #e0e0e0;
-    font-weight: 600;
-    font-size: 18px;
-  }
-  .content {
-    padding: 16px;
-  }
+  .card { border: 1px solid #ddd; border-radius: 8px; }
+  .header { font-weight: bold; padding: 12px; border-bottom: 1px solid #eee; }
+  .body { padding: 12px; }
 ```
 
-### Input Component
+Usage:
 
 ```hjx
-component Input
-
-state:
-  value = ""
-  placeholder = "Enter text..."
-
-layout:
-  input.input (bind value <-> value) placeholder="{{placeholder}}"
-
-style:
-  .input {
-    padding: 10px 14px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .input:focus {
-    outline: none;
-    border-color: #007bff;
-  }
-```
-
-## Complete Example
-
-```hjx
-component LoginForm
+component App
 
 imports:
-  Button from "./Button.hjx"
   Card from "./Card.hjx"
-  Input from "./Input.hjx"
-
-state:
-  email = ""
-  password = ""
-  message = ""
 
 layout:
-  view.container:
-    Card (title="Login"):
-      view.form:
-        Input (placeholder="Email" bind value <-> email)
-        Input (placeholder="Password" type="password" bind value <-> password)
-        Button (on click -> login): "Sign In"
-        text.message: "{{message}}"
+  view.app:
+    Card title="Hello" content="This is a card"
+    Card title="Another" content="More content"
+```
 
-style:
-  .container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f5f5;
-  }
-  .form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .message {
-    text-align: center;
-    color: #666;
-    font-size: 14px;
-  }
+## Nested Components
 
-handlers:
-  login:
-    if (email === ""):
-      set message = "Please enter email"
-    else if (password === ""):
-      set message = "Please enter password"
-    else:
-      set message = "Welcome, " + email + "!"
+Components can contain other components:
+
+```hjx
+component Dashboard
+
+imports:
+  Card from "./Card.hjx"
+  Button from "./Button.hjx"
+
+layout:
+  view.dashboard:
+    Card title="Stats" content="Some stats here"
+    Button label="Refresh"
+```
+
+## Composition Patterns
+
+### List of Components
+
+```hjx
+component ItemList
+
+state:
+  items = ["Item 1", "Item 2", "Item 3"]
+
+imports:
+  Card from "./Card.hjx"
+
+layout:
+  view.list:
+    for (item in items):
+      Card title="{{item}}"
+```
+
+### Conditional Components
+
+```hjx
+component App
+
+state:
+  isLoggedIn = false
+
+imports:
+  LoginForm from "./LoginForm.hjx"
+  Dashboard from "./Dashboard.hjx"
+
+layout:
+  view.app:
+    if (isLoggedIn):
+      Dashboard
+    
+    if (!isLoggedIn):
+      LoginForm
 ```
 
 ## Best Practices
 
-1. **One component per file** - Keep components focused
-2. **Use descriptive names** - `PrimaryButton` > `Btn1`
-3. **Document props** - Comment what props do
-4. **Style consistently** - Follow your design system
-
-## Next Steps
-
-- [Hot Reload](/guide/hot-reload) - Fast development cycle
-- [Production Build](/guide/production) - Deploy your app
-- [Language Reference](/language/syntax) - Full syntax guide
+1. **Keep components focused** - Each component should do one thing well
+2. **Use descriptive names** - `SubmitButton` is better than `Button1`
+3. **Extract common styles** - Share CSS using the style block
+4. **Compose from the top down** - Start with a layout, then extract components

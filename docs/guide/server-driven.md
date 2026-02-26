@@ -1,100 +1,68 @@
 # Server-Driven Mode
 
-Server-driven mode allows your UI to receive real-time updates from the server via WebSocket.
+HJX supports a server-driven mode where the server manages state and sends updates to the client via WebSocket.
 
-## How It Works
+## Overview
 
-1. Server maintains the "source of truth" state
-2. Server pushes state updates to all connected clients
-3. Client renders based on server state
-4. Client actions are sent to server for processing
+In server-driven mode:
+- State lives on the server
+- Events are sent to the server via WebSocket
+- Server responds with state updates
+- Client automatically re-renders
 
-## Basic Example
+## When to Use
 
-```hjx
-component Dashboard
+- Complex state logic that should stay on the server
+- Real-time applications with shared state
+- Applications requiring server-side validation
+- When you want centralized state management
 
-state:
-  time = ""
-  cpu = 0
-  memory = 0
-
-script:
-  export function init(store) {
-    setInterval(() => {
-      store.set({
-        time: new Date().toLocaleTimeString(),
-        cpu: Math.random() * 100,
-        memory: Math.random() * 100
-      });
-    }, 1000);
-  }
-
-layout:
-  view.container:
-    text: "Server Time: {{time}}"
-    text: "CPU: {{cpu}}%"
-    text: "Memory: {{memory}}%"
-```
-
-## Starting Server-Driven Mode
+## Running in Server-Driven Mode
 
 ```bash
-node dist/cli.js dev examples/dashboard.hjx --out dist-app --port 5173 --server
+node dist/cli.js dev examples/counter.hjx --out dist-app --port 5172
 ```
 
-The `--server` flag enables WebSocket synchronization.
+The dev server automatically enables WebSocket communication.
 
-## Server API
+## Architecture
 
-In the `script:` block, you have access to:
+### Client Side
 
-### `store.get(key)`
+The client connects to the server via WebSocket:
 
-Get a state value:
-
-```js
-export function init(store) {
-  const count = store.get('count');
-}
+```javascript
+const ws = new WebSocket("ws://localhost:5172/hjx");
 ```
 
-### `store.set(values)`
+Messages are JSON:
 
-Set state values:
+```javascript
+// Client sends:
+{ type: "event", handler: "increment", args: [] }
 
-```js
-export function init(store) {
-  store.set({ count: 42 });
-}
+// Server responds:
+{ type: "update", state: { count: 1 } }
 ```
 
-### `store.on(event, handler)`
+### Server Side
 
-Listen for events:
+The server (`server_session.ts`) manages component state:
 
-```js
-export function init(store) {
-  store.on('increment', () => {
-    const count = store.get('count');
-    store.set({ count: count + 1 });
-  });
-}
-```
+- Parses the HJX component
+- Maintains state in memory
+- Handles events by executing handlers
+- Broadcasts updates to connected clients
 
-### `store.broadcast(event, data)`
+## State Synchronization
 
-Broadcast to all clients:
+1. Initial load: Server sends full state
+2. Event: Client sends event to server
+3. Processing: Server executes handler
+4. Update: Server sends new state to all clients
+5. Render: Client updates UI
 
-```js
-export function init(store) {
-  store.broadcast('user-joined', { name: 'John' });
-}
-```
-
-## Handling Client Actions
-
-When a client triggers a handler, it sends a message to the server:
+## Example
 
 ```hjx
 component Counter
@@ -109,37 +77,62 @@ layout:
 
 handlers:
   increment:
-    # Handled server-side in server-driven mode
     set count = count + 1
 ```
 
-The handler executes on the server, then broadcasts the new state to all clients.
-
-## Use Cases
-
-- **Real-time dashboards** - Live metrics, charts, logs
-- **Collaborative apps** - Multiple users editing same data
-- **IoT dashboards** - Device status updates
-- **Live notifications** - Push updates to all clients
+In server-driven mode, when the user clicks the button:
+1. Client sends `{ type: "event", handler: "increment" }`
+2. Server executes handler, updates count
+3. Server sends `{ type: "update", state: { count: 1 } }`
+4. Client re-renders with new count
 
 ## Comparison
 
-| Feature | Vanilla Mode | Server-Driven Mode |
-|---------|--------------|-------------------|
+| Feature | Vanilla | Server-Driven |
+|---------|---------|---------------|
 | State location | Client | Server |
-| Updates | Local only | All clients |
-| Latency | Instant | Network dependent |
-| Offline support | Yes | No |
-| Server required | No | Yes |
+| Events | Local execution | WebSocket |
+| Real-time sync | No | Yes |
+| Complexity | Lower | Higher |
+| Dependencies | None | WebSocket |
 
-## Best Practices
+## Use Cases
 
-1. **Minimize update frequency** - Don't flood clients with updates
-2. **Batch updates** - Group related changes
-3. **Handle disconnections** - Client should reconnect gracefully
+### Chat Application
 
-## Next Steps
+```hjx
+component Chat
 
-- [Component Composition](/guide/components) - Reusable components
-- [Production Build](/guide/production) - Deploy your app
-- [API Reference](/api/server-session) - Server session API
+state:
+  messages = []
+
+layout:
+  view.chat:
+    for (msg in messages):
+      view.message: "{{msg.text}}"
+
+handlers:
+  sendMessage:
+    set messages = messages + [inputText]
+```
+
+### Live Dashboard
+
+Multiple clients viewing the same dashboard see real-time updates.
+
+### Collaborative Editing
+
+Multiple users editing the same document see each other's changes.
+
+## Performance Considerations
+
+- WebSocket overhead for each event
+- Server must maintain state for each session
+- Consider vanilla mode for simple, client-only apps
+
+## Security
+
+The server executes handlers from client events. Ensure:
+- Validate all input
+- Sanitize data before storage
+- Use authentication if needed

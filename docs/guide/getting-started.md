@@ -1,149 +1,78 @@
 # Getting Started
 
-Welcome to HJX! This guide will walk you through setting up HJX and building your first component.
+Welcome to HJX! This guide will help you get up and running with your first component.
 
-## Prerequisites
+## What is HJX?
 
-Before you begin, make sure you have:
-
-- **Node.js** v18 or higher
-- **npm** v9 or higher (or yarn/pnpm)
-
-You can verify your Node.js version by running:
-
-```bash
-node --version
-```
+HJX is a compiled UI language that unifies structure, style, and logic into a single `.hjx` file. It compiles to clean, dependency-free HTML + CSS + JavaScript.
 
 ## Installation
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/loayabdalslam/hjx.git
-cd hjx
-```
-
-### 2. Install Dependencies
-
 ```bash
 npm install
-```
-
-### 3. Build the Compiler
-
-```bash
 npm run build
 ```
 
-This compiles the TypeScript source to JavaScript. The CLI will be available at `dist/cli.js`.
-
 ## Your First Component
 
-Create a file called `hello.hjx`:
+Create a file named `counter.hjx`:
 
 ```hjx
-component Hello
+component Counter
 
 state:
-  name = "World"
+  count = 0
 
 layout:
-  view.card:
-    text.title: "Hello {{name}}!"
-    input (bind value <-> name)
+  view#root.card:
+    text.title: "Count: {{count}}"
+    button.primary (on click -> inc): "Increase"
+    button.ghost (on click -> dec): "Decrease"
 
 style:
-  .card {
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: system-ui, sans-serif;
-  }
-  .title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 12px;
-  }
+  .card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; display: inline-flex; flex-direction: column; gap: 12px; }
+  .title { font-size: 18px; font-weight: 600; }
+  .primary { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 0; }
+  .ghost { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 1px solid #ddd; background: transparent; }
+
+handlers:
+  inc:
+    set count = count + 1
+  dec:
+    set count = count - 1
 ```
 
-## Build and Run
+## Running Your Component
 
-### Build to Static Files
+### Development Mode
 
 ```bash
-node dist/cli.js build hello.hjx --out dist-app
+node dist/cli.js dev examples/counter.hjx --out dist-app --port 5172
 ```
 
-This generates:
-- `dist-app/index.html` - The HTML page
-- `dist-app/app.css` - Scoped CSS styles
-- `dist-app/app.js` - JavaScript runtime and component
+This starts a development server with hot reload. Open the port you specified in your browser.
 
-### Start Development Server
+### Building for Production
 
 ```bash
-node dist/cli.js dev hello.hjx --out dist-app --port 5173
+node dist/cli.js build examples/counter.hjx --out dist-app
 ```
 
-Open http://localhost:5173 in your browser!
+This compiles your `.hjx` file to `index.html`, `app.css`, and `app.js` in the `dist-app` directory.
 
-The dev server includes:
-- **Hot Module Replacement (HMR)** - Changes reload instantly
-- **Live reload** - Browser refreshes on file changes
-- **Error overlay** - Shows compilation errors in the browser
+## Parsing for Debugging
 
-## Parse and Inspect AST
-
-To see how HJX parses your component into an Abstract Syntax Tree:
+To see the AST (Abstract Syntax Tree) generated from your HJX file:
 
 ```bash
-node dist/cli.js parse hello.hjx
+node dist/cli.js parse examples/counter.hjx
 ```
 
-This is useful for debugging and understanding how the compiler works.
-
-## Project Structure
-
-A typical HJX project looks like:
-
-```
-my-project/
-├── components/
-│   ├── Button.hjx
-│   ├── Card.hjx
-│   └── Input.hjx
-├── pages/
-│   ├── home.hjx
-│   └── about.hjx
-├── dist-app/          # Compiled output
-└── hjx.config.js     # Optional config
-```
-
-## What Just Happened?
-
-Let's break down what each part of the `.hjx` file does:
-
-| Block | Purpose |
-|-------|---------|
-| `component` | Declares the component name |
-| `state` | Defines reactive variables |
-| `layout` | Defines the UI structure |
-| `style` | Defines scoped CSS |
-| `handlers` | Defines event handlers |
+This outputs the internal representation of your component, useful for debugging and understanding how HJX processes your code.
 
 ## Next Steps
 
-Now that you have HJX running, explore these topics:
-
-- [State Management](/guide/state) - Learn about reactive state
-- [Event Handling](/guide/events) - Handle user interactions
-- [Styling](/guide/styling) - Write scoped CSS
-- [Control Flow](/language/conditionals) - Conditionals and loops
-- [Server-Driven Mode](/guide/server-driven) - Real-time updates from server
-
-## Need Help?
-
-- Found a bug? [Open an issue](https://github.com/loayabdalslam/hjx/issues)
-- Have questions? [Join our Discord](https://discord.gg/hjx)
-- Want to contribute? [Check out the repo](https://github.com/loayabdalslam/hjx)
+- Learn about the [Syntax](/guide/syntax) in detail
+- Explore [Components](/guide/components) and how to compose them
+- Understand [State Management](/guide/state)
+- Check out [Server-Driven Mode](/guide/server-driven) for advanced use cases

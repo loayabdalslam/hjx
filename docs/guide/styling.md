@@ -1,197 +1,188 @@
 # Styling
 
-HJX provides powerful CSS scoping and several convenience features for styling your components.
+HJX provides scoped CSS styling for each component.
 
-## Basic Syntax
+## The Style Block
 
 Define styles in the `style:` block:
 
 ```hjx
 style:
-  .card { padding: 16px; border: 1px solid #ddd; }
-  .title { font-size: 24px; font-weight: bold; }
+  .container {
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+  }
 ```
 
 ## CSS Scoping
 
-Styles are automatically scoped to your component using data attributes:
+All styles are automatically scoped to prevent conflicts:
 
 ```hjx
-component MyComponent
-
-layout:
-  view.card: "Hello"
+component Card
 
 style:
-  .card { color: red; }
+  .card { border: 1px solid #ddd; }
 ```
 
 Compiles to:
 
-```html
-<div class="card" data-hjx-scope="mycomponent-abc123">
-  Hello
-</div>
-```
-
 ```css
-.card[data-hjx-scope="mycomponent-abc123"] {
-  color: red;
-}
+.hjx-card .card { border: 1px solid #ddd; }
 ```
 
-This prevents style conflicts between components.
+## Selectors
 
-## Class Syntax
-
-HJX supports Tailwind-like class syntax with colons:
-
-```hjx
-layout:
-  view.flex.flex-col.gap-4.p-4:
-    text: "Hello"
-```
-
-This adds classes `flex`, `flex-col`, `gap-4`, and `p-4`.
-
-### Supported Special Characters
-
-- `.` - Class separator
-- `:` - CSS-like notation (converted to `-`)
-- `#` - ID (e.g., `view#main`)
-- `[` `]` - Attribute selectors (future)
-
-## ID and Classes in Layout
-
-```hjx
-layout:
-  view#main.container.centered:
-    text#title: "Hello"
-    button.primary.large:
-      "Click me"
-```
-
-Renders:
-
-```html
-<div id="main" class="container centered">
-  <span id="title">Hello</span>
-  <button class="primary large">Click me</button>
-</div>
-```
-
-## Style Block Features
-
-### Multiple Properties
+### Class Selectors
 
 ```hjx
 style:
-  .card {
-    padding: 16px;
-    margin: 8px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: white;
+  .button { padding: 10px; }
+  .primary { background: blue; }
+  .large { font-size: 18px; }
+```
+
+### ID Selectors
+
+```hjx
+style:
+  #header { background: #333; }
+```
+
+### Element Selectors
+
+```hjx
+style:
+  button { cursor: pointer; }
+  input { border: 1px solid #ccc; }
+```
+
+### Multiple Classes
+
+```hjx
+style:
+  .btn.primary { background: blue; }
+  .btn.secondary { background: gray; }
+```
+
+## Pseudo-classes
+
+```hjx
+style:
+  .button:hover {
+    background: darkblue;
+  }
+  
+  .input:focus {
+    border-color: blue;
   }
 ```
 
-### Pseudo-classes
+## Responsive Design
 
 ```hjx
 style:
-  .button:hover { background: #0056b3; }
-  .button:active { transform: scale(0.98); }
-  input:focus { border-color: #007bff; outline: none; }
-```
-
-### Media Queries
-
-```hjx
-style:
-  .container { width: 100%; }
+  .container {
+    width: 100%;
+  }
+  
   @media (min-width: 768px) {
-    .container { width: 750px; margin: 0 auto; }
+    .container {
+      width: 750px;
+      margin: 0 auto;
+    }
   }
 ```
 
-### Keyframes
+## CSS Variables
 
 ```hjx
 style:
+  :root {
+    --primary: #007bff;
+    --secondary: #6c757d;
+  }
+  
+  .button {
+    background: var(--primary);
+  }
+```
+
+## Animations
+
+```hjx
+style:
+  .fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  .fade-in { animation: fadeIn 0.3s ease; }
 ```
 
-## Complete Example
+## Flexbox Layout
 
 ```hjx
-component StyledCard
-
-state:
-  isExpanded = false
-
-layout:
-  view.card (on click -> toggle):
-    view.header:
-      text.title: "Card Title"
-      text.icon: "{{isExpanded ? '▼' : '▶'}}"
-    if (isExpanded):
-      view.content:
-        text: "This is the expanded content."
-
 style:
-  .card {
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: box-shadow 0.2s;
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
-  .card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-  }
-  .header {
+  
+  .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    background: #f8f9fa;
-    cursor: pointer;
   }
-  .title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-  }
-  .icon {
-    font-size: 12px;
-    color: #666;
-  }
-  .content {
-    padding: 16px;
-    border-top: 1px solid #e0e0e0;
-    color: #555;
-    line-height: 1.6;
-  }
-
-handlers:
-  toggle:
-    set isExpanded = !isExpanded
 ```
 
-## Best Practices
+## Grid Layout
 
-1. **Use semantic class names** - `.card` > `.c1`
-2. **Scope styles to component** - Don't rely on global styles
-3. **Use CSS variables** - For theming
-4. **Keep it simple** - Avoid deep nesting
+```hjx
+style:
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+```
 
-## Next Steps
+## Example
 
-- [Component Composition](/guide/components) - Reusable components
-- [Server-Driven Mode](/guide/server-driven) - Real-time updates
-- [Production Build](/guide/production) - Deploy your app
+```hjx
+component Card
+
+state:
+  title = "Welcome"
+
+layout:
+  view.card:
+    text.title: "{{title}}"
+    text.content: "This is card content"
+
+style:
+  .card {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+  }
+  
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .content {
+    color: #666;
+    line-height: 1.5;
+  }
+```

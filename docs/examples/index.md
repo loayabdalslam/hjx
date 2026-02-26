@@ -1,74 +1,34 @@
 # Examples
 
-Learn HJX by exploring working examples. Each example demonstrates different features.
+Browse interactive examples to learn HJX by example.
 
-## Getting Started Examples
+## Available Examples
 
-### [Counter](/examples/counter)
-A simple counter with increment/decrement buttons.
-
-**Concepts:** State, event handlers, text interpolation, styling
-
-```hjx
-component Counter
-
-state:
-  count = 0
-
-layout:
-  view: "Count: {{count}}"
-  button (on click -> inc): "+"
-  button (on click -> dec): "-"
-
-handlers:
-  inc:
-    set count = count + 1
-  dec:
-    set count = count - 1
-```
-
-### [Form](/examples/form)
-Newsletter subscription form with two-way binding.
-
-**Concepts:** Input binding, form handling, validation, state updates
-
-### [Todo List](/examples/todo)
-A full todo list with add, remove, and filter.
-
-**Concepts:** Arrays, loops, conditionals, multiple handlers
-
-### [Dashboard](/examples/dashboard)
-Real-time server-driven dashboard.
-
-**Concepts:** Server-driven mode, WebSocket, script block, computed values
-
-### [Composition](/examples/composition)
-Reusable components with props and slots.
-
-**Concepts:** Imports, props, slots, component composition
-
----
+- [Counter](/examples/counter) - Basic counter with increment/decrement
+- [Conditional Rendering](/examples/conditional) - Show/hide elements based on state
+- [Forms](/examples/form) - Input handling and form validation
+- [Lists](/examples/list) - Rendering lists with `for`
+- [Composition](/examples/composition) - Using multiple components together
 
 ## Running Examples
 
 ```bash
-# Build an example
-node dist/cli.js build examples/counter.hjx --out dist-app
+# Start development server
+npm run dev
 
-# Run with dev server
-node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173
+# Or build a specific example
+node dist/cli.js build examples/counter.hjx --out dist-app
 ```
 
----
+## Learning Path
 
-## More Examples
+1. **Start with Counter** - Learn basic state and handlers
+2. **Move to Conditional** - Learn conditional rendering with `if`
+3. **Try Forms** - Learn input binding and validation
+4. **Explore Lists** - Learn list rendering with `for`
+5. **Composition** - Put it all together
 
-Check the `examples/` folder in the repository for more:
-
-- `examples/counter.hjx` - Basic counter
-- `examples/form.hjx` - Form with binding
-- `examples/list.hjx` - List rendering
-- `examples/conditional.hjx` - Conditional rendering
-- `examples/dashboard.hjx` - Server-driven dashboard
-- `examples/composition_demo.hjx` - Component composition
-- `examples/components/` - Reusable component library
+Each example includes:
+- Source code
+- Expected output
+- Key concepts explained

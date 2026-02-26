@@ -1,8 +1,8 @@
 # Counter Example
 
-A simple counter demonstrating core HJX features: state, event handlers, and text interpolation.
+A simple counter demonstrating basic state management and event handlers.
 
-## The Code
+## Source Code
 
 ```hjx
 component Counter
@@ -15,123 +15,39 @@ layout:
     text.title: "Count: {{count}}"
     button.primary (on click -> inc): "Increase"
     button.ghost (on click -> dec): "Decrease"
-    button.danger (on click -> reset): "Reset"
 
 style:
-  .card { 
-    padding: 16px; 
-    border: 1px solid #ddd; 
-    border-radius: 12px; 
-    display: inline-flex; 
-    flex-direction: column; 
-    gap: 12px; 
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
-    min-width: 200px;
-  }
-  .title { font-size: 24px; font-weight: 600; text-align: center; }
-  .primary { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 0; background: #007bff; color: white; }
-  .primary:hover { background: #0056b3; }
+  .card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; display: inline-flex; flex-direction: column; gap: 12px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+  .title { font-size: 18px; font-weight: 600; }
+  .primary { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 0; }
   .ghost { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 1px solid #ddd; background: transparent; }
-  .ghost:hover { background: #f8f9fa; }
-  .danger { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 0; background: #dc3545; color: white; }
-  .danger:hover { background: #c82333; }
-  button { font-size: 14px; font-weight: 500; transition: all 0.2s; }
 
 handlers:
   inc:
     set count = count + 1
   dec:
     set count = count - 1
-  reset:
-    set count = 0
 ```
 
-## Features Demonstrated
+## Key Concepts
 
-### 1. State Declaration
-```hjx
-state:
-  count = 0
-```
-Defines a reactive variable that triggers UI updates when changed.
-
-### 2. Text Interpolation
-```hjx
-text.title: "Count: {{count}}"
-```
-The `{{count}}` syntax inserts the state value into the text.
-
-### 3. Event Binding
-```hjx
-button (on click -> inc): "Increase"
-```
-Binds the click event to the `inc` handler.
-
-### 4. Handler Logic
-```hjx
-handlers:
-  inc:
-    set count = count + 1
-```
-Updates the state, which automatically updates the UI.
-
-### 5. Scoped Styling
-```hjx
-style:
-  .card { ... }
-```
-CSS is scoped to prevent conflicts with other components.
+- **State**: Defines a `count` variable initialized to 0
+- **Text interpolation**: Uses `{{count}}` to display the value
+- **Event handlers**: `on click` attaches click events
+- **Handlers**: `inc` and `dec` update the state
 
 ## How It Works
 
-1. **Initial render**: `count` is 0, displays "Count: 0"
-2. **Click "+"**: Handler runs, sets `count = 1`, UI updates
-3. **Click "-"**: Handler runs, sets `count = 0`, UI updates
-4. **Click "Reset"**: Handler runs, sets `count = 0`, UI updates
+1. The `state` block defines `count = 0`
+2. The `layout` displays `{{count}}` in the text element
+3. When the "Increase" button is clicked, the `inc` handler runs
+4. The handler updates `count = count + 1`
+5. The UI automatically re-renders with the new value
 
-## Try It
+## Running
 
 ```bash
-# Build
-node dist/cli.js build examples/counter.hjx --out dist-app
-
-# Run dev server
-node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173
+node dist/cli.js dev examples/counter.hjx --out dist-app --port 5172
 ```
 
-Open http://localhost:5173
-
-## Variations
-
-### With Validation
-
-```hjx
-handlers:
-  dec:
-    if (count > 0):
-      set count = count - 1
-```
-
-### With Steps
-
-```hjx
-state:
-  count = 0
-  step = 1
-
-handlers:
-  inc:
-    set count = count + step
-```
-
-### With Min/Max
-
-```hjx
-handlers:
-  inc:
-    if (count < 100):
-      set count = count + 1
-  dec:
-    if (count > 0):
-      set count = count - 1
-```
+Open the specified port in your browser to see the counter.
