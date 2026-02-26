@@ -1,15 +1,74 @@
 # Examples
 
-Explore HJX through practical examples. Each example demonstrates different features of the language.
+Learn HJX by exploring working examples. Each example demonstrates different features.
 
-## [Counter](/examples/counter)
+## Getting Started Examples
 
-A simple counter with increment/decrement buttons. Demonstrates **state**, **event handlers**, and **text interpolation**.
+### [Counter](/examples/counter)
+A simple counter with increment/decrement buttons.
 
-## [Form](/examples/form)
+**Concepts:** State, event handlers, text interpolation, styling
 
-A newsletter form with input binding. Demonstrates **two-way binding**, **dynamic text**, and **state updates**.
+```hjx
+component Counter
 
-## [Composition](/examples/composition)
+state:
+  count = 0
 
-Multiple components working together. Demonstrates **imports**, **props**, **slots**, and **component composition**.
+layout:
+  view: "Count: {{count}}"
+  button (on click -> inc): "+"
+  button (on click -> dec): "-"
+
+handlers:
+  inc:
+    set count = count + 1
+  dec:
+    set count = count - 1
+```
+
+### [Form](/examples/form)
+Newsletter subscription form with two-way binding.
+
+**Concepts:** Input binding, form handling, validation, state updates
+
+### [Todo List](/examples/todo)
+A full todo list with add, remove, and filter.
+
+**Concepts:** Arrays, loops, conditionals, multiple handlers
+
+### [Dashboard](/examples/dashboard)
+Real-time server-driven dashboard.
+
+**Concepts:** Server-driven mode, WebSocket, script block, computed values
+
+### [Composition](/examples/composition)
+Reusable components with props and slots.
+
+**Concepts:** Imports, props, slots, component composition
+
+---
+
+## Running Examples
+
+```bash
+# Build an example
+node dist/cli.js build examples/counter.hjx --out dist-app
+
+# Run with dev server
+node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173
+```
+
+---
+
+## More Examples
+
+Check the `examples/` folder in the repository for more:
+
+- `examples/counter.hjx` - Basic counter
+- `examples/form.hjx` - Form with binding
+- `examples/list.hjx` - List rendering
+- `examples/conditional.hjx` - Conditional rendering
+- `examples/dashboard.hjx` - Server-driven dashboard
+- `examples/composition_demo.hjx` - Component composition
+- `examples/components/` - Reusable component library
