@@ -1,4 +1,5 @@
 node_modules
+dist
 ACTION_ITEMS.md
 CONTROL_FLOW_IMPLEMENTATION.md
 CONTROL_FLOW.md
@@ -11,3 +12,8 @@ HJX_VS_OTHERS.md
 package-lock.json
 hjx-v0.1
 dist-demo
+dist-*
+test-*
+.test
+dist-app
+dist-counter
