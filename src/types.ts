@@ -31,4 +31,5 @@ export type HJXAst = {
   layout: HJXNode | null;
   style: string;
   handlers: Record<string, HJXHandler>;
+  computed: Record<string, string>; // computed state variables
 };

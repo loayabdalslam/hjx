@@ -166,3 +166,345 @@ function parseValue(v: string) {
 }
 
 export function mount() {}
+// ==============================================
+// Minimal runtime for signal tracking
+// This is the only code that runs in the browser
+// ==============================================
+// Signal Types
+export interface Signal<T> {
+  get(): T;
+  set(value: T | ((prev: T) => T)): void;
+  peek(): T;
+  subscribe(fn: () => void): () => void;
+}
+
+// Effect stack for dependency tracking
+let currentEffect: (() => void) | null = null;
+const effectStack: Array<() => void> = [];
+
+// Batch management
+let batching = false;
+let batchDepth = 0;
+const batchedEffects = new Set<() => void>();
+
+// Microtask scheduling
+let pendingMicrotask: Promise<void> | null = null;
+const pendingEffects = new Set<() => void>();
+
+// Performance tracking (dev only)
+let renderCount = 0;
+const renderTimes: number[] = [];
+
+/**
+ * Start a batch operation
+ */
+export function startBatch(): void {
+  batching = true;
+  batchDepth++;
+}
+
+/**
+ * End a batch operation
+ */
+export function endBatch(): void {
+  batchDepth--;
+  if (batchDepth === 0) {
+    batching = false;
+    // Execute batched effects
+    batchedEffects.forEach(fn => fn());
+    batchedEffects.clear();
+  }
+}
+
+/**
+ * Execute a function in a batch
+ */
+export function batch<T>(fn: () => T): T {
+  startBatch();
+  try {
+    return fn();
+  } finally {
+    endBatch();
+  }
+}
+
+/**
+ * Create a signal
+ */
+export function createSignal<T>(initial: T): Signal<T> {
+  let value = initial;
+  const subscribers = new Set<() => void>();
+  
+  const signal: Signal<T> = {
+    get: () => {
+      if (currentEffect) {
+        subscribers.add(currentEffect);
+      }
+      return value;
+    },
+    
+    set: (newValue: T | ((prev: T) => T)) => {
+      const next = typeof newValue === 'function'
+        ? (newValue as (prev: T) => T)(value)
+        : newValue;
+      
+      if (Object.is(value, next)) return;
+      
+      value = next;
+      renderCount++;
+      
+      if (batching) {
+        // Add to batched effects
+        subscribers.forEach(fn => batchedEffects.add(fn));
+      } else {
+        // Schedule in microtask to avoid duplicate updates
+        if (!pendingMicrotask) {
+          pendingMicrotask = Promise.resolve().then(() => {
+            pendingMicrotask = null;
+            const start = performance.now();
+            pendingEffects.forEach(fn => fn());
+            pendingEffects.clear();
+            renderTimes.push(performance.now() - start);
+          });
+        }
+        subscribers.forEach(fn => pendingEffects.add(fn));
+      }
+    },
+    
+    peek: () => value,
+    
+    subscribe: (fn: () => void) => {
+      subscribers.add(fn);
+      return () => subscribers.delete(fn);
+    }
+  };
+  
+  return signal;
+}
+
+/**
+ * Create an effect
+ */
+export function createEffect(fn: () => void): () => void {
+  const effect = () => {
+    try {
+      effectStack.push(effect);
+      currentEffect = effect;
+      fn();
+    } finally {
+      effectStack.pop();
+      currentEffect = effectStack[effectStack.length - 1] || null;
+    }
+  };
+  
+  effect();
+  
+  return () => {
+    // Cleanup would be implemented here
+  };
+}
+
+/**
+ * Create a memoized computed value
+ */
+export function createMemo<T>(fn: () => T): Signal<T> {
+  // Create signal with initial computed value
+  const signal = createSignal<T>(fn());
+  
+  // Re-run computation when dependencies change
+  createEffect(() => {
+    signal.set(fn());
+  });
+  
+  return signal;
+}
+
+// If you need both the signal and a way to mark it as dirty
+export function createDirtyMemo<T>(fn: () => T): { value: Signal<T>; dirty: () => void } {
+  const signal = createSignal<T>(fn());
+  let dirty = true;
+  
+  const update = () => {
+    if (dirty) {
+      signal.set(fn());
+      dirty = false;
+    }
+  };
+  
+  createEffect(update);
+  
+  return {
+    value: signal,
+    dirty: () => {
+      dirty = true;
+      update();
+    }
+  };
+}
+
+// Development tools interface
+export interface HJXDevTools {
+  graph: {
+    stateToElements: Array<[string, string[]]>;
+    computedDeps: Array<[string, string[]]>;
+    metrics: {
+      totalElements: number;
+      totalExpressions: number;
+      hotStates: string[];
+    };
+    elementExpressions: Array<[string, Array<{ type: string; deps: string[] }>]>;
+  };
+  signals: Record<string, any>;
+}
+
+declare global {
+  interface Window {
+    __HJX_DEV__?: boolean;
+    __HJX__?: HJXDevTools;
+     __HJX_VISUALIZE__: Function;
+    __HJX_MONITOR__?: (interval?: number) => () => void;
+    __HJX_RENDERS__?: Array<{ time: number; fn: string }>;
+    __HJX_PERFORMANCE__?: {
+      renderCount: number;
+      averageRenderTime: number;
+      totalRenderTime: number;
+    };
+  }
+  
+  // For Node.js environment
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV?: string;
+    }
+  }
+}
+
+// Environment detection
+function isDevelopment(): boolean {
+  if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
+    return process.env.NODE_ENV === 'development';
+  }
+  
+  if (typeof window !== 'undefined' && window.location) {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1';
+  }
+  
+  return false;
+}
+
+// Safe setTimeout patching for development
+function setupDevTools(): void {
+  if (typeof window === 'undefined') return;
+  
+  const isDev = isDevelopment();
+  
+  if (isDev) {
+    window.__HJX_DEV__ = true;
+    window.__HJX_RENDERS__ = [];
+    
+    // Store original setTimeout
+    const originalSetTimeout = window.setTimeout;
+    
+    // Type-safe wrapper
+    window.setTimeout = function<TArgs extends any[]>(
+      callback: (...args: TArgs) => void,
+      delay?: number,
+      ...args: TArgs
+    ): number {
+      if (delay === 0 && callback.name?.includes('updateDOM')) {
+        window.__HJX_RENDERS__!.push({
+          time: Date.now(),
+          fn: callback.name || 'anonymous'
+        });
+      }
+      return originalSetTimeout(callback, delay, ...args);
+    } as typeof window.setTimeout;
+    
+    // Add performance metrics
+    window.__HJX_PERFORMANCE__ = {
+      get renderCount() { return renderCount; },
+      get averageRenderTime() { 
+        return renderTimes.length > 0 
+          ? renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length 
+          : 0;
+      },
+      get totalRenderTime() {
+        return renderTimes.reduce((a, b) => a + b, 0);
+      }
+    };
+
+    window.__HJX_VISUALIZE__ = function() {
+    const graph = window.__HJX__?.graph;
+    if (!graph) {
+        console.warn("HJX: No graph data found. Ensure your generator has populated window.__HJX__.graph");
+        return;
+    }
+
+    console.group("📊 HJX Dependency Graph");
+    console.log("State to Elements:", Object.fromEntries(graph.stateToElements));
+    console.log("Computed Dependencies:", Object.fromEntries(graph.computedDeps));
+    console.log("Metrics:", graph.metrics);
+    console.groupEnd();
+    
+    alert("Check the browser console (F12) to see the dependency graph details!");
+    };
+    
+    console.log('%c🔧 HJX Runtime Ready (Development Mode)', 'color: #3b82f6; font-weight: bold;');
+  }
+}
+
+// Initialize dev tools
+setupDevTools();
+
+/**
+ * Enable development tools manually
+ */
+export function enableDevTools(): void {
+  if (typeof window === 'undefined') return;
+  
+  window.__HJX_DEV__ = true;
+
+  // Implementation of the visualize function
+  window.__HJX_VISUALIZE__ = () => {
+    console.log("%c📊 HJX Dependency Graph", "color: #3b82f6; font-weight: bold; font-size: 12px;");
+    console.log("HJX Graph:", window.__HJX__?.graph || "No graph data available.");
+  };
+
+  console.log('%c✨ HJX DevTools Enabled', 'background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px;');
+  console.log('Use: window.__HJX_VISUALIZE__()');
+  
+  if (!window.__HJX_RENDERS__) {
+    window.__HJX_RENDERS__ = [];
+  }
+  
+  console.log('%c✨ HJX DevTools Enabled', 'background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px;');
+  console.log('Run window.__HJX_VISUALIZE__() to see dependency graph');
+}
+
+/**
+ * Get performance metrics
+ */
+export function getPerformanceMetrics(): {
+  renderCount: number;
+  averageRenderTime: number;
+  totalRenderTime: number;
+} {
+  return {
+    renderCount,
+    averageRenderTime: renderTimes.length > 0 
+      ? renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length 
+      : 0,
+    totalRenderTime: renderTimes.reduce((a, b) => a + b, 0)
+  };
+}
+
+// Export for use in compiled code
+export default {
+  createSignal,
+  createEffect,
+  createMemo,
+  batch,
+  enableDevTools,
+  getPerformanceMetrics
+};

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="./app.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "hsl(var(--border))",
+            input: "hsl(var(--input))",
+            ring: "hsl(var(--ring))",
+            background: "hsl(var(--background))",
+            foreground: "hsl(var(--foreground))",
+            primary: {
+              DEFAULT: "hsl(var(--primary))",
+              foreground: "hsl(var(--primary-foreground))",
+            },
+            secondary: {
+              DEFAULT: "hsl(var(--secondary))",
+              foreground: "hsl(var(--secondary-foreground))",
+            },
+            destructive: {
+              DEFAULT: "hsl(var(--destructive))",
+              foreground: "hsl(var(--destructive-foreground))",
+            },
+            muted: {
+              DEFAULT: "hsl(var(--muted))",
+              foreground: "hsl(var(--muted-foreground))",
+            },
+            accent: {
+              DEFAULT: "hsl(var(--accent))",
+              foreground: "hsl(var(--accent-foreground))",
+            },
+            popover: {
+              DEFAULT: "hsl(var(--popover))",
+              foreground: "hsl(var(--popover-foreground))",
+            },
+            card: {
+              DEFAULT: "hsl(var(--card))",
+              foreground: "hsl(var(--card-foreground))",
+            },
+          },
+          borderRadius: {
+            lg: "var(--radius)",
+            md: "calc(var(--radius) - 2px)",
+            sm: "calc(var(--radius) - 4px)",
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 222.2 84% 4.9%;
+      --primary: 222.2 47.4% 11.2%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --accent: 210 40% 96.1%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --ring: 222.2 84% 4.9%;
+      --radius: 0.5rem;
+    }
+    .dark {
+      --background: 222.2 84% 4.9%;
+      --foreground: 210 40% 98%;
+      --card: 222.2 84% 4.9%;
+      --card-foreground: 210 40% 98%;
+      --popover: 222.2 84% 4.9%;
+      --popover-foreground: 210 40% 98%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 222.2 47.4% 11.2%;
+      --secondary: 217.2 32.6% 17.5%;
+      --secondary-foreground: 210 40% 98%;
+      --muted: 217.2 32.6% 17.5%;
+      --muted-foreground: 215 20.2% 65.1%;
+      --accent: 217.2 32.6% 17.5%;
+      --accent-foreground: 210 40% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 217.2 32.6% 17.5%;
+      --input: 217.2 32.6% 17.5%;
+      --ring: 212.7 26.8% 83.9%;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    // Inline runtime module
+    
+const runtimeCode = "// HJX runtime v0.1 (Server Driven)\n\nexport function createRemoteStore(wsUrl, initial, rootEl) {\n  const state = { ...initial };\n  const listeners = new Set();\n  let ws;\n\n  function connect() {\n    ws = new WebSocket(wsUrl);\n    ws.onmessage = (msg) => {\n      try {\n        const data = JSON.parse(msg.data);\n        if (data.type === \"state\") {\n          Object.assign(state, data.payload);\n          notify();\n        } else if (data.type === \"patch\") {\n          if (data.payload._html) {\n            rootEl.innerHTML = data.payload._html;\n            if (window._hjx_rebind) window._hjx_rebind();\n          }\n          applyPatch(state, data.payload);\n          notify();\n        }\n      } catch (e) {}\n    };\n    ws.onclose = () => {\n      console.log(\"Disconnected. Reconnecting...\");\n      setTimeout(connect, 1000);\n    };\n  }\n\n  connect();\n\n  function notify() {\n    listeners.forEach(fn => fn());\n  }\n\n  return {\n    get: () => state,\n    set: (patch) => {\n      applyPatch(state, patch);\n      notify();\n      if (ws && ws.readyState === WebSocket.OPEN) {\n        ws.send(JSON.stringify({ type: \"state_update\", payload: patch }));\n      }\n    },\n    sendEvent: (handlerName, payload = {}) => {\n      if (ws && ws.readyState === WebSocket.OPEN) {\n        ws.send(JSON.stringify({ type: \"event\", name: handlerName, payload }));\n      }\n    },\n    subscribe: (fn) => { listeners.add(fn); return () => listeners.delete(fn); }\n  };\n}\n\nfunction applyPatch(state, patch) {\n  console.log(\"HJX Applying patch:\", patch);\n  for (const [key, value] of Object.entries(patch)) {\n    if (key.includes(\".\")) {\n      const parts = key.split(\".\");\n      let target = state;\n      for (let i = 0; i < parts.length - 1; i++) {\n        if (!target[parts[i]]) target[parts[i]] = {};\n        target = target[parts[i]];\n      }\n      target[parts[parts.length - 1]] = value;\n    } else {\n      state[key] = value;\n    }\n  }\n}\n\nfunction getByPath(obj, path) {\n  return path.split(\".\").reduce((acc, part) => acc && acc[part], obj);\n}\n\nexport function textBinder(store, root, selector, template) {\n  const el = root.querySelector(selector);\n  if (!el) return;\n  const render = () => {\n    const s = store.get();\n    const out = template.replace(/\\{\\{\\s*([A-Za-z_][A-Za-z0-9_.]*)\\s*\\}\\}/g, (_, key) => String(getByPath(s, key) ?? \"\"));\n    el.textContent = out;\n  };\n  render();\n  store.subscribe(render);\n}\n\nexport function attrBinder(store, root, selector, attr, template) {\n  const el = root.querySelector(selector);\n  if (!el) return;\n  const render = () => {\n    const s = store.get();\n    const out = template.replace(/\\{\\{\\s*([A-Za-z_][A-Za-z0-9_.]*)\\s*\\}\\}/g, (_, key) => String(getByPath(s, key) ?? \"\"));\n\n    if (out === \"false\" || out === \"null\" || out === \"undefined\") {\n      el.removeAttribute(attr);\n    } else {\n      el.setAttribute(attr, out);\n    }\n\n    if (attr === \"value\" && \"value\" in el) {\n        el.value = out;\n    }\n  };\n  render();\n  store.subscribe(render);\n}\n\nexport function clickBinder(store, root, selector, fn) {\n  const el = root.querySelector(selector);\n  if (!el) return;\n  el.addEventListener(\"click\", () => fn({ store }));\n}\n\nexport function inputBinder(store, root, selector, stateKey) {\n  const el = root.querySelector(selector);\n  if (!el) return;\n  const render = () => {\n    const s = store.get();\n    const val = getByPath(s, stateKey);\n    if (el.value !== String(val ?? \"\")) el.value = String(val ?? \"\");\n  };\n  render();\n  store.subscribe(render);\n  el.addEventListener(\"input\", (e) => {\n    const v = e.target.value;\n    store.set({ [stateKey]: v });\n  });\n}\n\nexport function mount() {}\n";
+const blob = new Blob([runtimeCode], { type: "text/javascript" });
+const runtimeUrl = URL.createObjectURL(blob);
+window.__HJX_RUNTIME_URL__ = runtimeUrl;
+
+  </script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

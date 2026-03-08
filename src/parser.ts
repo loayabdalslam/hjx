@@ -23,7 +23,8 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
     state: {},
     layout: null,
     style: "",
-    handlers: {}
+    handlers: {},
+    computed: {}
   };
 
   // helper: count leading spaces
