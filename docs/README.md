@@ -1,36 +1,41 @@
-# HJX Documentation
+# Website
 
-This directory contains the documentation website for HJX, built with VitePress.
+This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
-## Development
+## Installation
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run docs:dev
-
-# Build for production
-npm run docs:build
-
-# Preview production build
-npm run docs:preview
+yarn
 ```
 
-## Structure
+## Local Development
 
-- `docs/index.md` - Home page
-- `docs/guide/` - Getting started guides
-- `docs/examples/` - Code examples
-- `docs/reference/` - API and language reference
-- `docs/.vitepress/` - VitePress configuration
+```bash
+yarn start
+```
 
-## Contributing
+This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
-When adding new documentation:
+## Build
 
-1. Create or edit `.md` files in the appropriate directory
-2. Follow the existing structure and formatting
-3. Test locally with `npm run docs:dev`
-4. Update the sidebar navigation in `docs/.vitepress/config.ts` if needed
+```bash
+yarn build
+```
+
+This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+## Deployment
+
+Using SSH:
+
+```bash
+USE_SSH=true yarn deploy
+```
+
+Not using SSH:
+
+```bash
+GIT_USER=<Your GitHub username> yarn deploy
+```
+
+If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
