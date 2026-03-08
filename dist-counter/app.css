@@ -1,4 +1,0 @@
-[data-hjx-scope="hjx-counter"] .card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; display: inline-flex; flex-direction: column; gap: 12px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-[data-hjx-scope="hjx-counter"] .title { font-size: 18px; font-weight: 600; }
-[data-hjx-scope="hjx-counter"] .primary { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 0; }
-[data-hjx-scope="hjx-counter"] .ghost { padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 1px solid #ddd; background: transparent; }
