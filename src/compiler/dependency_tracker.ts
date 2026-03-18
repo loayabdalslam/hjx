@@ -166,13 +166,13 @@ export class DependencyTracker {
   private traverseNode(node: HJXNode, context: AnalysisContext) {
     const elementId = node.id || this.generateElementId(context.path);
     const wasDynamic = context.inDynamicBlock;
-    
+
     // Track dynamic blocks
     if (node.kind === 'if' || node.kind === 'for' || node.kind === 'else') {
       context.inDynamicBlock = true;
       this.graph.dynamicElements.add(elementId);
     }
-    
+
     // Analyze all possible dependency sources
     this.analyzeText(node.text, elementId, context);
     this.analyzeAttributes(node.attrs, elementId, context);
@@ -180,14 +180,15 @@ export class DependencyTracker {
     this.analyzeLoop(node.iterator, elementId, context);
     this.analyzeEvents(node.events, elementId, context);
     this.analyzeBindings(node.bind, elementId, context);
-    
+
     // Recurse into children
     if (node.children) {
       node.children.forEach((child, index) => {
         const childPath = [...context.path, index];
-        const childId = this.generateElementId(childPath);
+        // Use the same ID generation logic as the child will use
+        const childId = child.id || this.generateElementId(childPath);
         this.graph.elementParents.set(childId, elementId);
-        
+
         // Pass context modifications to children
         let childContext: AnalysisContext = {
           ...context,
@@ -195,7 +196,7 @@ export class DependencyTracker {
           inDynamicBlock: context.inDynamicBlock || node.kind === 'if' || node.kind === 'for',
           currentIfCondition: node.kind === 'if' ? node.condition : context.currentIfCondition
         };
-        
+
         // Add loop-specific context
         if (node.kind === 'for' && node.iterator) {
           childContext = {
@@ -204,11 +205,11 @@ export class DependencyTracker {
             currentLoopListSource: node.iterator.list
           };
         }
-        
+
         this.traverseNode(child, childContext);
       });
     }
-    
+
     context.inDynamicBlock = wasDynamic;
   }
   

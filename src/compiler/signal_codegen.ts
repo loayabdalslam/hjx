@@ -207,7 +207,7 @@ update_${key}();
     // Replace state variable references with their signal getters
     return expr.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\b/g, (match) => {
       if (this.graph.stateToElements.has(match) || this.graph.computedDeps.has(match)) {
-        return `${match}Val`;
+        return `${match}.get()`;
       }
       return match;
     });
@@ -272,20 +272,23 @@ function updateDOM_${stateKey}() {
    */
   private generateTextUpdate(elementId: string, expr: ElementExpression): string {
     const parts = expr.expression.split(/(\{\{\s*[^}]+\s*\}\})/g);
-    const templateParts = parts.map(part => {
+    const jsParts: string[] = [];
+    
+    for (const part of parts) {
       if (part.startsWith('{{') && part.endsWith('}}')) {
-        const key = part.replace(/\{\{\s*|\s*\}\}/g, '');
-        const getter = key.includes('.') 
+        const key = part.replace(/\{\{\s*|\s*\}\}/g, '').trim();
+        const getter = key.includes('.')
           ? key.split('.').map((k, i) => i === 0 ? `${k}.get()` : `['${k}']`).join('')
           : `${key}.get()`;
-        return `\${${getter}}`;
+        jsParts.push(`String(${getter} ?? '')`);
+      } else if (part.trim()) {
+        jsParts.push(JSON.stringify(part));
       }
-      return JSON.stringify(part);
-    }).join(' + ');
-    
+    }
+
     return `
   if (el.getAttribute('data-hjx-id') === '${elementId}') {
-    el.textContent = ${templateParts};
+    el.textContent = ${jsParts.join(' + ')};
   }`;
   }
   
@@ -456,49 +459,50 @@ window.${handlerName} = function(event, element) {
    */
   private compileHandlerBody(lines: string[]): string {
     const jsLines: string[] = [];
-    
+
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
-      
-      // set count++ 
+
+      // set count++
       const incMatch = trimmed.match(/^set\s+([A-Za-z_][A-Za-z0-9_]*)\+\+$/);
       if (incMatch) {
         jsLines.push(`    ${incMatch[1]}.set(${incMatch[1]}.get() + 1);`);
         continue;
       }
-      
+
       // set count += value
       const compoundMatch = trimmed.match(/^set\s+([A-Za-z_][A-Za-z0-9_]*)\s*\+=\s*(.+)$/);
       if (compoundMatch) {
-        jsLines.push(`    ${compoundMatch[1]}.set(${compoundMatch[1]}.get() + ${compoundMatch[2]});`);
+        jsLines.push(`    ${compoundMatch[1]}.set(${compoundMatch[1]}.get() + ${this.convertExpression(compoundMatch[2])});`);
         continue;
       }
-      
+
       // set count = expression
       const setMatch = trimmed.match(/^set\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
       if (setMatch) {
-        jsLines.push(`    ${setMatch[1]}.set(${setMatch[2]});`);
+        const convertedExpr = this.convertExpression(setMatch[2]);
+        jsLines.push(`    ${setMatch[1]}.set(${convertedExpr});`);
         continue;
       }
-      
+
       // log "message"
       const logMatch = trimmed.match(/^log\s+(.+)$/);
       if (logMatch) {
         jsLines.push(`    console.log(${logMatch[1]});`);
         continue;
       }
-      
+
       // batch: { ... }
       if (trimmed === 'batch:') {
         jsLines.push(`    batch(() => {`);
         continue;
       }
-      
+
       // Unknown line - preserve as comment
       jsLines.push(`    // ${trimmed}`);
     }
-    
+
     return jsLines.join('\n');
   }
   

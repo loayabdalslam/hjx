@@ -67,6 +67,27 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
+    if (trimmed === "computed:") {
+      i++;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (isSkippable(l)) { i++; continue; }
+        if (indentOf(l) === 0) break;
+
+        const t = l.trim();
+        const m = t.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+        if (!m) err("Invalid computed line. Expected: name = expression", i);
+        const key = m[1];
+        const raw = m[2].trim();
+        // Computed values store the expression as a string (may be quoted or bare expression)
+        ast.computed[key] = (raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'")) 
+          ? raw.slice(1, -1) 
+          : raw;
+        i++;
+      }
+      continue;
+    }
+
     if (trimmed === "imports:") {
       i++;
       while (i < lines.length) {

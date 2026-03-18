@@ -157,7 +157,8 @@ export class DependencyTracker {
         if (node.children) {
             node.children.forEach((child, index) => {
                 const childPath = [...context.path, index];
-                const childId = this.generateElementId(childPath);
+                // Use the same ID generation logic as the child will use
+                const childId = child.id || this.generateElementId(childPath);
                 this.graph.elementParents.set(childId, elementId);
                 // Pass context modifications to children
                 let childContext = {
