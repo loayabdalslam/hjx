@@ -16,5 +16,6 @@ dist-*
 test-*
 test*
 *-test*
+*.test.*
 dist-app
 dist-counter
