@@ -1,115 +1,174 @@
-# HJX Studio — Voice-Driven Project Builder
+# HJX Studio — Vibe Coding Without LLM
 
-Build HJX applications using only your voice. Speak what you want,
-the NLP engine generates it in real-time, and see the live preview instantly.
-
-## How It Works
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        HJX Studio                                   │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  🎤 Voice Input                                                     │
-│  "I want a top navbar with logo, links, and cart badge"             │
-│         ↓                                                           │
-│  ┌─────────────────────────────────────────────────────────┐       │
-│  │  Speech Recognition (Web Speech API)                     │       │
-│  │  → Transcribes voice to text in real-time                │       │
-│  └──────────────────────┬──────────────────────────────────┘       │
-│                         ↓                                           │
-│  ┌─────────────────────────────────────────────────────────┐       │
-│  │  NLP Engine (Intent + Entities + Generation)             │       │
-│  │  → Understands what user wants                           │       │
-│  │  → Extracts component names, properties, actions         │       │
-│  │  → Generates HJX code                                    │       │
-│  └──────────────────────┬──────────────────────────────────┘       │
-│                         ↓                                           │
-│  ┌─────────────────────────────────────────────────────────┐       │
-│  │  Live Compiler (Real-time HJX → HTML/CSS/JS)             │       │
-│  │  → Compiles generated code instantly                     │       │
-│  │  → Updates preview in real-time                          │       │
-│  └──────────────────────┬──────────────────────────────────┘       │
-│                         ↓                                           │
-│  ┌─────────────────────────────────────────────────────────┐       │
-│  │  Live Preview Panel                                      │       │
-│  │  → Shows the running application                         │       │
-│  │  → Updates as you speak                                  │       │
-│  └─────────────────────────────────────────────────────────┘       │
-│                                                                     │
-│  Voice Commands:                                                    │
-│    "Add a navbar"          → Generates NavBar component             │
-│    "Add a hero section"    → Generates Hero component               │
-│    "Make it blue"          → Applies theme changes                  │
-│    "Connect to API"        → Adds data fetching                     │
-│    "Add dark mode"         → Adds theme toggle                      │
-│    "Export project"        → Downloads as zip                       │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+Voice-driven project builder powered by the HJX NLP engine. Speak what you want,
+it generates HJX code instantly, compiles it in real-time, and shows the live preview.
 
 ## Quick Start
 
 ```bash
-# Build the compiler
+# 1. Build the NLP engine
 npm run build
 
-# Start the studio server
+# 2. Start HJX Studio
 node examples/hjx-studio/server/index.mjs
 
-# Open http://localhost:3300
-# Click the microphone and start speaking!
+# 3. Open http://localhost:3300
 ```
 
-## Voice Commands Reference
+## How It Works
 
-### Layout Commands
-| Say | Generates |
-|-----|-----------|
-| "Add a top navbar" | Navigation bar with logo and links |
-| "Add a hero section" | Hero with heading and CTA button |
-| "Add a card grid" | Responsive card layout |
-| "Add a footer" | Footer with links |
+```
+🎤 Voice → 📝 Transcript → 🧠 NLP Engine → 💻 HJX Code → ⚡ Compile → 👁 Live Preview
+     or
+💬 Chat → 📝 Text Input → 🧠 NLP Engine → 💻 HJX Code → ⚡ Compile → 👁 Live Preview
+```
+
+No LLM needed. The HJX NLP engine uses pattern matching + template generation + rule-based classification.
+
+## Voice Commands
+
+| Say This | Generates |
+|----------|-----------|
+| "Add a navbar" | Sticky nav with logo, links, mobile menu |
+| "Add a hero section" | Gradient hero with headline, CTA, stats |
+| "Add feature cards" | 3-column grid of feature cards |
+| "Add a footer" | Dark footer with columns |
+| "Add a modal" | Overlay dialog with header/body/footer |
+| "Add a search bar" | Search input with focus states |
+| "Add a contact form" | Form with name/email/message |
+| "Add API data card" | Card that fetches from JSONPlaceholder |
+| "Add dark mode toggle" | Theme switcher button |
 | "Add a sidebar" | Side navigation panel |
-| "Add a modal" | Dialog overlay |
+| "Undo" | Remove last component |
+| "Clear" | Reset entire project |
 
-### Component Commands
-| Say | Generates |
-|-----|-----------|
-| "Add a button" | Styled button component |
-| "Add an input field" | Text input with label |
-| "Add a search bar" | Search input with icon |
-| "Add a toggle switch" | Boolean toggle |
-| "Add a dropdown" | Select menu |
-| "Add a data table" | Sortable table |
+## Chat Input
 
-### Style Commands
-| Say | Generates |
-|-----|-----------|
-| "Make it blue" | Changes primary color |
-| "Use dark mode" | Applies dark theme |
-| "Add rounded corners" | Border radius |
-| "Add shadow" | Box shadow |
-| "Make it centered" | Center alignment |
+The bottom bar accepts typed commands. Same as voice commands but typed.
+Press Enter or click → to send.
 
-### Data Commands
-| Say | Generates |
-|-----|-----------|
-| "Connect to API" | Adds fetch calls |
-| "Add a list from data" | Loop rendering |
-| "Show loading state" | Loading spinner |
-| "Add form validation" | Input validation |
+## Export to Vite
+
+Click "Export Vite →" to download a ready-to-run project:
+- `package.json` with Vite dependency
+- `vite.config.js` configured
+- `index.html` with compiled HJX
+- `src/main.js` bootstrap
+- `README.md` with setup instructions
+
+Run `npm install && npm dev` on the exported project.
+
+## Design System — "Studio Dark"
+
+### Color Tokens
+
+| Token | ID | Value | Usage |
+|-------|-----|-------|-------|
+| `--studio-bg` | `studio-bg` | `#0a0a0f` | Root background — deep black-blue |
+| `--studio-surface` | `studio-surface` | `#12121a` | Elevated surfaces — topbar, status |
+| `--studio-card` | `studio-card` | `#1a1a2e` | Card/panel backgrounds |
+| `--studio-card-hover` | `studio-card-hover` | `#22223a` | Hover state |
+| `--studio-input-bg` | `studio-input-bg` | `#16162a` | Input field background |
+| `--studio-border` | `studio-border` | `#2a2a4a` | Border color — muted purple |
+| `--studio-border-focus` | `studio-border-focus` | `#4a4a8a` | Focused border |
+| `--studio-text` | `studio-text` | `#e8e8f0` | Primary text |
+| `--studio-text-dim` | `studio-text-dim` | `#8888aa` | Secondary text |
+| `--studio-text-muted` | `studio-text-muted` | `#5a5a7a` | Tertiary text |
+| `--studio-accent` | `studio-accent` | `#6366f1` | Primary accent — indigo |
+| `--studio-accent-hover` | `studio-accent-hover` | `#5558e6` | Accent hover |
+| `--studio-accent-glow` | `studio-accent-glow` | `rgba(99,102,241,0.25)` | Glow effect |
+| `--studio-green` | `studio-green` | `#22c55e` | Success |
+| `--studio-red` | `studio-red` | `#ef4444` | Error |
+| `--studio-yellow` | `studio-yellow` | `#eab308` | Warning |
+| `--studio-cyan` | `studio-cyan` | `#06b6d4` | Info |
+| `--studio-purple` | `studio-purple` | `#a855f7` | Secondary accent |
+
+### Typography
+
+| Token | Value |
+|-------|-------|
+| `--font-sans` | `'Inter', system-ui, -apple-system, sans-serif` |
+| `--font-mono` | `'JetBrains Mono', 'Fira Code', monospace` |
+
+### Spacing
+
+| Token | Value |
+|-------|-------|
+| `--space-xs` | `4px` |
+| `--space-sm` | `8px` |
+| `--space-md` | `16px` |
+| `--space-lg` | `24px` |
+| `--space-xl` | `32px` |
+| `--space-2xl` | `48px` |
+
+### Border Radius
+
+| Token | Value |
+|-------|-------|
+| `--radius-sm` | `6px` |
+| `--radius-md` | `10px` |
+| `--radius-lg` | `14px` |
+| `--radius-xl` | `20px` |
+| `--radius-full` | `50%` |
+
+### Key Element IDs
+
+| ID | Element |
+|----|---------|
+| `studio-app` | Root app container |
+| `studio-topbar` | Top navigation bar |
+| `studio-logo` | Logo section |
+| `studio-logo-mark` | Logo icon box |
+| `studio-badge` | "VIBE CODING" badge |
+| `studio-nav` | Top navigation tabs |
+| `studio-main` | Main 3-column grid |
+| `studio-panel-header` | Panel headers |
+| `studio-panel-body` | Panel content area |
+| `mic-btn` | Microphone button |
+| `mic-status` | Voice status text |
+| `voice-provider` | STT provider info |
+| `transcript-box` | Transcript container |
+| `transcript-text` | Live transcript |
+| `quick-grid` | Quick command grid |
+| `theme-row` | Theme selector |
+| `component-list` | Component list |
+| `preview-frame` | Preview container |
+| `preview-iframe` | Preview iframe |
+| `preview-toolbar` | Preview toolbar |
+| `device-btns` | Device switcher |
+| `code-tabs` | Code/Activity tabs |
+| `code-body` | Code display area |
+| `chat-bar` | Bottom chat bar |
+| `chat-container` | Chat input wrapper |
+| `chat-input` | Chat text input |
+| `chat-send` | Chat send button |
+| `export-overlay` | Export modal overlay |
+| `export-modal` | Export modal dialog |
+| `export-file-list` | Export file list |
+| `studio-status` | Bottom status bar |
 
 ## Architecture
 
-| File | Purpose |
-|------|---------|
-| `app.hjx` | Main studio application |
-| `components/VoicePanel.hjx` | Voice recording UI |
-| `components/LivePreview.hjx` | Real-time preview |
-| `components/ComponentTree.hjx` | Visual component tree |
-| `components/ThemeEditor.hjx` | Theme customization |
-| `components/CodeViewer.hjx` | Generated code display |
-| `theme/tokens.hjx` | Design tokens |
-| `theme/presets.hjx` | Theme presets |
-| `server/index.mjs` | WebSocket NLP server |
+```
+examples/hjx-studio/
+├── server/index.mjs          # WebSocket + HTTP server
+│                               - Serves UI at /
+│                               - Compiles HJX via /api/compile
+│                               - Real-time via WebSocket
+│                               - Vite export via /api/export
+├── public/index.html         # Complete frontend
+│                               - Voice recording (Web Speech API)
+│                               - Chat input (bottom bar)
+│                               - Live preview (iframe)
+│                               - Code viewer
+│                               - Component management
+├── app.hjx                   # HJX root component
+├── components/
+│   ├── VoicePanel.hjx        # Voice + manual input
+│   ├── LivePreview.hjx       # Preview with device switcher
+│   ├── ComponentTree.hjx     # Visual component list
+│   └── ThemeEditor.hjx       # Theme customization
+└── theme/
+    ├── tokens.md             # Design token definitions
+    └── presets.hjx           # 8 theme presets
+```
