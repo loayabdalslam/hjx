@@ -32,10 +32,15 @@ function walkDir(dir: string) {
     if (entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "nlp" && entry.name !== "projects") {
       walkDir(fullPath);
     } else if (entry.name.endsWith(".hjx")) {
-      files.push({
-        path: fullPath,
-        source: readFileSync(fullPath, "utf-8"),
-      });
+      try {
+        const source = readFileSync(fullPath, "utf-8");
+        files.push({
+          path: fullPath,
+          source: source,
+        });
+      } catch (error) {
+        console.warn(`Skipping ${fullPath}: ${(error as Error).message}`);
+      }
     }
   }
 }
@@ -53,10 +58,14 @@ const labels: Record<string, string[]> = {
 
 for (const file of files) {
   const name = file.path.split(/[/\\]/).pop()?.replace(".hjx", "") ?? "unknown";
-  const features = extractFeatures(file.source, name);
-  const fileLabels = labels[name] || [];
-  const id = store.addComponent(file.path, file.source, features, fileLabels);
-  console.log(`Added: ${name} → ${id} (labels: ${fileLabels.join(", ") || "none"})`);
+  try {
+    const features = extractFeatures(file.source, name);
+    const fileLabels = labels[name] || [];
+    const id = store.addComponent(file.path, file.source, features, fileLabels);
+    console.log(`Added: ${name} → ${id} (labels: ${fileLabels.join(", ") || "none"})`);
+  } catch (error) {
+    console.warn(`Skipping ${name}: ${(error as Error).message}`);
+  }
 }
 
 // ─── Get Component ───────────────────────────────────────────────────────────
@@ -192,8 +201,12 @@ const featuresMap = new Map<string, any>();
 
 for (const file of files) {
   const name = file.path.split(/[/\\]/).pop()?.replace(".hjx", "") ?? "unknown";
-  fileContents.set(file.path, file.source);
-  featuresMap.set(file.path, extractFeatures(file.source, name));
+  try {
+    fileContents.set(file.path, file.source);
+    featuresMap.set(file.path, extractFeatures(file.source, name));
+  } catch (error) {
+    console.warn(`Skipping ${name}: ${(error as Error).message}`);
+  }
 }
 
 const count = store2.processDirectory(fileContents, featuresMap);

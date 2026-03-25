@@ -510,23 +510,29 @@ function matchCommand(text) {
   return null;
 }
 
+// ─── Preview Compiler (Bulletproof - Direct Bundle) ─────────────────────────
+
 function compileHJX(code) {
   try {
     const ast = parseHJX(code);
     const bundle = buildVanilla(ast);
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>${bundle.css}</style>
-</head>
-<body>
-  ${bundle.html}
-  <script>${bundle.js}<\/script>
-</body>
-</html>`;
+
+    // bundle.html is ALREADY complete HTML with runtime inlined!
+    // Just inline CSS and clean JS (remove import/export statements)
+    let js = bundle.js
+      .replace(/import\s*\{[^}]+\}\s*from\s*["']\.\/runtime\.js["'];?\s*/g, '')
+      .replace(/export function/g, 'function')
+      .replace(/export const/g, 'const')
+      .replace(/export /g, '')
+      .replace(/if\s*\(import\.meta\.hot\)\s*\{[\s\S]*?\}/g, '// HMR disabled');
+    
+    const completeHTML = bundle.html
+      .replace('<link rel="stylesheet" href="./app.css"/>', `<style>${bundle.css}</style>`)
+      .replace('<script type="module" src="./app.js"></script>', `<script>${js}</script>`);
+
+    return completeHTML;
   } catch (e) {
+    console.error('Compilation error:', e.message);
     return `<!DOCTYPE html><html><body style="font-family:system-ui;padding:40px;color:#ef4444;">
       <h3>Compilation Error</h3><pre>${e.message}</pre></body></html>`;
   }
@@ -546,37 +552,9 @@ function buildProjectHTML(components) {
     </body></html>`;
   }
 
-  // Compile each component and compose them
-  let allCSS = "";
-  let allJS = "";
-  let allHTML = "";
-
-  for (const comp of components) {
-    try {
-      const ast = parseHJX(comp.code);
-      const bundle = buildVanilla(ast);
-      allCSS += bundle.css + "\n";
-      allJS += bundle.js + "\n";
-      allHTML += `<div data-component="${comp.name}">${bundle.html}</div>\n`;
-    } catch (e) {
-      allHTML += `<div style="padding:20px;background:#fee2e2;color:#dc2626;border-radius:8px;margin:8px;">
-        <strong>${comp.name}</strong>: ${e.message}</div>\n`;
-    }
-  }
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HJX Project</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;}${allCSS}</style>
-</head>
-<body>
-  ${allHTML}
-  <script>${allJS}<\/script>
-</body>
-</html>`;
+  // Return the most recently added component
+  const latest = components[components.length - 1];
+  return compileHJX(latest.code);
 }
 
 // ─── Vite Project Exporter ───────────────────────────────────────────────────

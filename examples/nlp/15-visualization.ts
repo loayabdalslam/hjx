@@ -34,11 +34,19 @@ function walkDir(dir: string) {
     if (entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "nlp" && entry.name !== "projects") {
       walkDir(fullPath);
     } else if (entry.name.endsWith(".hjx")) {
-      files.push({
-        path: fullPath,
-        name: entry.name.replace(".hjx", ""),
-        source: readFileSync(fullPath, "utf-8"),
-      });
+      try {
+        const source = readFileSync(fullPath, "utf-8");
+        // Skip files with array/object state (parser limitation)
+        if (!source.match(/state:\s*\n\s*\w+\s*=\s*[\[{]/)) {
+          files.push({
+            path: fullPath,
+            name: entry.name.replace(".hjx", ""),
+            source: source,
+          });
+        }
+      } catch (error) {
+        console.warn(`Skipping ${fullPath}: ${(error as Error).message}`);
+      }
     }
   }
 }
@@ -48,8 +56,12 @@ walkDir(examplesDir);
 
 const store = new FeatureStore();
 for (const file of files) {
-  const features = extractFeatures(file.source, file.name);
-  store.addComponent(file.path, file.source, features);
+  try {
+    const features = extractFeatures(file.source, file.name);
+    store.addComponent(file.path, file.source, features);
+  } catch (error) {
+    console.warn(`Skipping ${file.name}: ${(error as Error).message}`);
+  }
 }
 
 const visualizer = new FeatureVisualizer(store, {

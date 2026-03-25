@@ -32,11 +32,19 @@ function walkDir(dir: string) {
     if (entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "nlp" && entry.name !== "projects") {
       walkDir(fullPath);
     } else if (entry.name.endsWith(".hjx")) {
-      files.push({
-        path: fullPath,
-        name: entry.name.replace(".hjx", ""),
-        source: readFileSync(fullPath, "utf-8"),
-      });
+      try {
+        const source = readFileSync(fullPath, "utf-8");
+        // Skip files with array/object state (parser limitation)
+        if (!source.match(/state:\s*\n\s*\w+\s*=\s*[\[{]/)) {
+          files.push({
+            path: fullPath,
+            name: entry.name.replace(".hjx", ""),
+            source: source,
+          });
+        }
+      } catch (error) {
+        console.warn(`Skipping ${fullPath}: ${(error as Error).message}`);
+      }
     }
   }
 }
@@ -49,18 +57,23 @@ console.log(`Loaded ${files.length} HJX files\n`);
 console.log("=== Batch Feature Extraction ===\n");
 
 const featureResults = files.map(file => {
-  const features = extractFeatures(file.source, file.name);
-  return {
-    name: file.name,
-    loc: features.structural.linesOfCode,
-    handlers: features.structural.handlerCount,
-    stateVars: features.lexical.stateVariableCount,
-    events: features.lexical.eventHandlerCount,
-    complexity: features.structural.complexity,
-    elements: Object.keys(features.lexical.elementCounts).length,
-    embedding: getEmbedding(file.source),
-  };
-});
+  try {
+    const features = extractFeatures(file.source, file.name);
+    return {
+      name: file.name,
+      loc: features.structural.linesOfCode,
+      handlers: features.structural.handlerCount,
+      stateVars: features.lexical.stateVariableCount,
+      events: features.lexical.eventHandlerCount,
+      complexity: features.structural.complexity,
+      elements: Object.keys(features.lexical.elementCounts).length,
+      embedding: getEmbedding(file.source),
+    };
+  } catch (error) {
+    console.warn(`Error processing ${file.name}: ${(error as Error).message}`);
+    return null;
+  }
+}).filter(r => r !== null);
 
 console.log("Component".padEnd(20) + "LOC".padStart(5) + "Handlers".padStart(10) + "State".padStart(8) + "Events".padStart(8) + "Cmplx".padStart(8));
 console.log("─".repeat(59));
@@ -143,8 +156,12 @@ const fileContents = new Map<string, string>();
 const featuresMap = new Map<string, any>();
 
 for (const file of files) {
-  fileContents.set(file.path, file.source);
-  featuresMap.set(file.path, extractFeatures(file.source, file.name));
+  try {
+    fileContents.set(file.path, file.source);
+    featuresMap.set(file.path, extractFeatures(file.source, file.name));
+  } catch (error) {
+    console.warn(`Skipping ${file.name}: ${(error as Error).message}`);
+  }
 }
 
 const indexed = store.processDirectory(fileContents, featuresMap);

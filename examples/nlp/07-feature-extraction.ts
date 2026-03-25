@@ -27,7 +27,7 @@ function walkDir(dir: string) {
   for (const entry of entries) {
     const fullPath = resolve(dir, entry.name);
     if (entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "nlp" && entry.name !== "projects") {
-      walkDir(fullDir);
+      walkDir(fullPath);
     } else if (entry.name.endsWith(".hjx")) {
       components.push({
         name: entry.name.replace(".hjx", ""),
@@ -43,20 +43,24 @@ walkDir(examplesDir);
 console.log("=== Structural Features ===\n");
 
 for (const comp of components) {
-  const features = extractFeatures(comp.source, comp.name);
-  const s = features.structural;
-  console.log(`${comp.name}:`);
-  console.log(`  Lines of code: ${s.linesOfCode}`);
-  console.log(`  Tokens: ${s.tokenCount}`);
-  console.log(`  Max nesting depth: ${s.maxNestingDepth}`);
-  console.log(`  Avg nesting depth: ${s.avgNestingDepth}`);
-  console.log(`  Layout tree size: ${s.layoutTreeSize}`);
-  console.log(`  Layout tree depth: ${s.layoutTreeDepth}`);
-  console.log(`  Handlers: ${s.handlerCount}`);
-  console.log(`  Imports: ${s.importCount}`);
-  console.log(`  Complexity: ${s.complexity}`);
-  console.log(`  Blocks: state=${s.blockCount.state} layout=${s.blockCount.layout} style=${s.blockCount.style} handlers=${s.blockCount.handlers}`);
-  console.log();
+  try {
+    const features = extractFeatures(comp.source, comp.name);
+    const s = features.structural;
+    console.log(`${comp.name}:`);
+    console.log(`  Lines of code: ${s.linesOfCode}`);
+    console.log(`  Tokens: ${s.tokenCount}`);
+    console.log(`  Max nesting depth: ${s.maxNestingDepth}`);
+    console.log(`  Avg nesting depth: ${s.avgNestingDepth}`);
+    console.log(`  Layout tree size: ${s.layoutTreeSize}`);
+    console.log(`  Layout tree depth: ${s.layoutTreeDepth}`);
+    console.log(`  Handlers: ${s.handlerCount}`);
+    console.log(`  Imports: ${s.importCount}`);
+    console.log(`  Complexity: ${s.complexity}`);
+    console.log(`  Blocks: state=${s.blockCount.state} layout=${s.blockCount.layout} style=${s.blockCount.style} handlers=${s.blockCount.handlers}`);
+    console.log();
+  } catch (error) {
+    console.warn(`Skipping ${comp.name}: ${(error as Error).message}`);
+  }
 }
 
 // ─── Lexical Features ────────────────────────────────────────────────────────

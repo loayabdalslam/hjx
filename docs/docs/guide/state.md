@@ -67,18 +67,26 @@ handlers:
 
 ## Computed Values
 
-While HJX doesn't have computed properties, you can compute values in handlers:
+Computed values are derived state that automatically update when dependencies change. See [Computed Values](./computed-values.md) for the complete guide.
 
 ```hjx
 state:
-  a = 10
-  b = 5
-  sum = 0
+  price = 25
+  quantity = 3
 
-handlers:
-  calculate:
-    set sum = a + b
+computed:
+  total = "price * quantity"
+  formattedTotal = "'$' + total"
+
+layout:
+  text: "Total: {{formattedTotal}}"
 ```
+
+Computed values support:
+- **Automatic updates** when dependencies change
+- **Chaining** (computed values can depend on other computed values)
+- **Expressions** (math, string operations, array methods)
+- **Memoization** (only recalculates when needed)
 
 ## State with Arrays
 

@@ -675,22 +675,36 @@ const STUDIO = {
 
 // ─── WebSocket ──────────────────────────────────────────────────
 function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  STUDIO.ws = new WebSocket(`${proto}//${location.host}`);
+  // Use explicit ws:// URL
+  const wsUrl = `ws://localhost:3300`;
+  console.log('🔌 Connecting to WebSocket:', wsUrl);
+  
+  STUDIO.ws = new WebSocket(wsUrl);
 
   STUDIO.ws.onopen = () => {
+    console.log('✅ WebSocket connected');
     setWSStatus(true);
     log('🚀', 'Connected to HJX Studio');
   };
 
   STUDIO.ws.onclose = () => {
+    console.log('❌ WebSocket closed');
     setWSStatus(false);
     setTimeout(connectWS, 2000);
   };
+  
+  STUDIO.ws.onerror = (error) => {
+    console.error('❌ WebSocket error:', error);
+    log('❌', 'WebSocket connection failed');
+  };
 
   STUDIO.ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    handleWSMessage(msg);
+    try {
+      const msg = JSON.parse(e.data);
+      handleWSMessage(msg);
+    } catch (err) {
+      console.error('Failed to parse message:', err);
+    }
   };
 }
 
@@ -717,6 +731,10 @@ function handleWSMessage(msg) {
       break;
 
     case 'added':
+      console.log('📨 Received "added" message:', msg.name);
+      console.log('📄 liveHTML length:', msg.liveHTML?.length);
+      console.log('📄 liveHTML preview:', msg.liveHTML?.substring(0, 100) + '...');
+      
       STUDIO.components.push({ name: msg.name, code: msg.code, method: msg.method });
       updatePreview(msg.liveHTML);
       updateComponentList();
@@ -830,14 +848,52 @@ function sendChat() {
   processCommand(text);
 }
 
-// ─── Preview ─────────────────────────────────────────────────
+// ─── Preview (Bulletproof - Force Reload) ───────────────────────────────────
 function updatePreview(html) {
   const iframe = document.getElementById('preview-iframe');
-  iframe.srcdoc = html;
-  document.getElementById('preview-status-text').textContent = 'Updated';
-  setTimeout(() => {
-    document.getElementById('preview-status-text').textContent = 'Live';
-  }, 500);
+  if (!iframe) {
+    console.error('❌ Preview iframe not found');
+    return;
+  }
+  
+  console.log('🖼️ Preview update:', html ? `${html.length} bytes` : 'empty');
+  
+  // Force reload by recreating iframe element
+  const parent = iframe.parentNode;
+  const newIframe = document.createElement('iframe');
+  newIframe.id = 'preview-iframe';
+  newIframe.style.width = '100%';
+  newIframe.style.height = '100%';
+  newIframe.style.border = 'none';
+  newIframe.style.background = 'white';
+  
+  // Add load listener for debugging
+  newIframe.onload = () => {
+    console.log('✅ Iframe loaded successfully');
+  };
+  
+  newIframe.onerror = () => {
+    console.error('❌ Iframe failed to load');
+  };
+  
+  parent.replaceChild(newIframe, iframe);
+  
+  // Set content - this triggers the load
+  if (html && html.trim().length > 0) {
+    newIframe.srcdoc = html;
+    console.log('✅ Content set, length:', html.length);
+  } else {
+    console.warn('⚠️ Empty HTML provided');
+  }
+  
+  // Update status
+  const statusEl = document.getElementById('preview-status-text');
+  if (statusEl) {
+    statusEl.textContent = 'Updated';
+    setTimeout(() => {
+      statusEl.textContent = 'Live';
+    }, 500);
+  }
 }
 
 function setDevice(device, btn) {
