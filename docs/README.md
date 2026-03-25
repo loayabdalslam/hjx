@@ -1,41 +1,70 @@
-# Website
+# HJX Documentation - VitePress
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
-
-## Installation
+## Quick Start
 
 ```bash
-yarn
+cd docs
+npm install
+npm run docs:dev
 ```
 
-## Local Development
-
-```bash
-yarn start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Open http://localhost:5173
 
 ## Build
 
 ```bash
-yarn build
+npm run docs:build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Output: `.vitepress/dist/`
 
-## Deployment
+## Deploy to GitHub Pages
 
-Using SSH:
+### Option 1: GitHub Actions (Automatic)
+Push to `main` branch → Auto-deploys
+
+### Option 2: Manual Deploy
 
 ```bash
-USE_SSH=true yarn deploy
+# Install gh-pages
+npm install -g gh-pages
+
+# Build and deploy
+cd docs
+npm run docs:build
+npx gh-pages -d .vitepress/dist
 ```
 
-Not using SSH:
+## Configuration
 
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
+**Base URL**: `/hjx/` (set in `.vitepress/config.ts`)
+
+**GitHub Pages URL**: `https://loayabdalslam.github.io/hjx/`
+
+## File Structure
+
+```
+docs/
+├── .vitepress/          # VitePress config
+│   └── config.ts        # Main config file
+├── guide/               # User guide
+├── reference/           # API reference
+├── examples/            # Code examples
+└── index.md             # Homepage
 ```
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+## Troubleshooting
+
+### 404 on GitHub Pages
+- Check `base: '/hjx/'` in config.ts matches repo name
+- Ensure GitHub Pages is enabled in repo settings
+- Check GitHub Actions workflow ran successfully
+
+### Broken Links
+- Use absolute paths: `/guide/getting-started`
+- Or relative: `./getting-started.md`
+
+### Build Fails
+- Node version >= 18 required
+- Run `npm install` in docs folder
+- Check for MDX syntax errors

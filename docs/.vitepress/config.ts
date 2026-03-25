@@ -3,14 +3,18 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'HJX',
   description: 'The Unified UI Language — One file. HTML + CSS + JS. Zero config.',
-  base: '/hjx/',
+  
+  // GitHub Pages deployment
+  base: process.env.GITHUB_PAGES ? '/hjx/' : '/',
+  
   ignoreDeadLinks: true,
+  cleanUrls: true,
 
   head: [
     ['meta', { name: 'theme-color', content: '#3b82f6' }],
     ['meta', { property: 'og:title', content: 'HJX — Unified UI Language' }],
     ['meta', { property: 'og:description', content: 'Build web UIs from a single .hjx file. Compiles to vanilla HTML/CSS/JS.' }],
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/hjx/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
   ],
 
   themeConfig: {
