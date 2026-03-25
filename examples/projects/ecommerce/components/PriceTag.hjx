@@ -1,0 +1,10 @@
+component PriceTag
+layout:
+  view.price-tag:
+    text.dollar: "$"
+    text.amount: "{{price.toFixed(2)}}"
+
+style:
+  .price-tag { display: inline-flex; align-items: baseline; }
+  .dollar { font-size: 14px; font-weight: 600; color: #111827; }
+  .amount { font-size: 20px; font-weight: 700; color: #111827; }

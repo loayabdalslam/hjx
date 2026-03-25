@@ -1,125 +1,146 @@
 # Components
 
-HJX supports composing UIs from multiple reusable components using the `imports:` block.
+HJX supports component composition - building complex UIs from smaller, reusable components.
 
-## Importing Components
+## Creating Components
 
-Import other `.hjx` files at the top of your component:
+A component is simply a `.hjx` file. Create `Button.hjx`:
 
-```yaml
-component MyApp
+```hjx
+component Button
 
-imports:
-  Button from "./components/Button.hjx"
-  Card from "./components/Card.hjx"
-  Input from "./components/Input.hjx"
+state:
+  label = "Click me"
+  variant = "primary"
+
+layout:
+  button.btn (on click -> handleClick):
+    text: "{{label}}"
+
+style:
+  .btn { padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+  .primary { background: #007bff; color: white; border: none; }
+  .secondary { background: #6c757d; color: white; border: none; }
+
+handlers:
+  handleClick:
+    log "Button clicked"
 ```
-
-Each import maps a **local name** to a `.hjx` file path (relative to the current file).
 
 ## Using Components
 
-Use imported components in your `layout:` block just like built-in elements:
+Import and use components in other files:
 
-```yaml
-layout:
-  Card (title="Welcome"):
-    text: "Hello from HJX!"
-    Button (variant="primary" on click -> save): "Save"
-```
-
-## Props
-
-Pass data to child components using attributes:
-
-```yaml
-layout:
-  Card (title="Dashboard" description="System overview"):
-    text: "Content here"
-  Button (variant="outline" size="icon" on click -> action): "Click"
-```
-
-Props are passed as string attributes. The child component receives them and can use them in its layout via interpolation.
-
-## Slots
-
-Child content placed inside a component tag becomes **slot content**. The child component renders it using a `slot` element:
-
-### Parent
-```yaml
-layout:
-  Card (title="My Card"):
-    text: "This text goes into the slot"
-    Button (on click -> save): "Save"
-```
-
-### Child (Card.hjx)
-```yaml
-component Card
-
-layout:
-  view.card:
-    text.title: "{{title}}"
-    slot:
-```
-
-Everything inside `Card (...):`  in the parent is rendered where `slot:` appears in the child.
-
-## Events on Components
-
-You can bind events to imported components the same way as built-in elements:
-
-```yaml
-layout:
-  Button (on click -> increment): "+"
-  Button (on click -> decrement): "-"
-```
-
-## Full Example
-
-### `App.hjx`
-```yaml
+```hjx
 component App
 
 imports:
   Button from "./components/Button.hjx"
-  Card from "./components/Card.hjx"
-
-state:
-  count = 0
-  name = ""
 
 layout:
-  view.container:
-    Card (title="Counter Demo"):
-      view.row:
-        Button (variant="outline" on click -> dec): "-"
-        text.count: "{{count}}"
-        Button (on click -> inc): "+"
-      Button (class="w-full" on click -> reset): "Reset"
+  view.app:
+    Button variant="primary"
+    Button variant="secondary"
+```
+
+## Component Props
+
+Pass data to components using attributes:
+
+```hjx
+component Card
+
+state:
+  title = "Default Title"
+  content = ""
+
+layout:
+  div.card:
+    div.header:
+      text: "{{title}}"
+    div.body:
+      text: "{{content}}"
 
 style:
-  .container { padding: 20px; display: flex; justify-content: center; }
-  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .count { font-size: 24px; font-weight: bold; }
-
-handlers:
-  inc:
-    set count = count + 1
-  dec:
-    set count = count - 1
-  reset:
-    set count = 0
+  .card { border: 1px solid #ddd; border-radius: 8px; }
+  .header { font-weight: bold; padding: 12px; border-bottom: 1px solid #eee; }
+  .body { padding: 12px; }
 ```
 
-### Running
+Usage:
 
-```bash
-node dist/cli.js dev App.hjx --out dist-app --port 5173
+```hjx
+component App
+
+imports:
+  Card from "./Card.hjx"
+
+layout:
+  view.app:
+    Card title="Hello" content="This is a card"
+    Card title="Another" content="More content"
 ```
 
-The compiler automatically resolves imports, loads the full component tree, and compiles everything together.
+## Nested Components
 
----
+Components can contain other components:
 
-**Next:** [Server-Driven Mode →](/guide/server-driven)
+```hjx
+component Dashboard
+
+imports:
+  Card from "./Card.hjx"
+  Button from "./Button.hjx"
+
+layout:
+  view.dashboard:
+    Card title="Stats" content="Some stats here"
+    Button label="Refresh"
+```
+
+## Composition Patterns
+
+### List of Components
+
+```hjx
+component ItemList
+
+state:
+  items = ["Item 1", "Item 2", "Item 3"]
+
+imports:
+  Card from "./Card.hjx"
+
+layout:
+  view.list:
+    for (item in items):
+      Card title="{{item}}"
+```
+
+### Conditional Components
+
+```hjx
+component App
+
+state:
+  isLoggedIn = false
+
+imports:
+  LoginForm from "./LoginForm.hjx"
+  Dashboard from "./Dashboard.hjx"
+
+layout:
+  view.app:
+    if (isLoggedIn):
+      Dashboard
+    
+    if (!isLoggedIn):
+      LoginForm
+```
+
+## Best Practices
+
+1. **Keep components focused** - Each component should do one thing well
+2. **Use descriptive names** - `SubmitButton` is better than `Button1`
+3. **Extract common styles** - Share CSS using the style block
+4. **Compose from the top down** - Start with a layout, then extract components

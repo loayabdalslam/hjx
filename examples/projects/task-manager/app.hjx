@@ -1,0 +1,131 @@
+component TaskManager
+
+imports:
+  KanbanBoard from "./kanban-board.hjx"
+  TaskDetail from "./task-detail.hjx"
+  TaskForm from "./task-form.hjx"
+  TeamPanel from "./team-panel.hjx"
+  Analytics from "./analytics.hjx"
+
+state:
+  view = "board"
+  tasks = [
+    { id: "1", title: "Design landing page", description: "Create wireframes and mockups", status: "todo", priority: "high", labels: ["design"], assignee: "alice", dueDate: "2026-04-01", subtasks: 3, completedSubtasks: 0, comments: 2 },
+    { id: "2", title: "Set up database schema", description: "Create tables for users, tasks, projects", status: "in_progress", priority: "high", labels: ["backend"], assignee: "bob", dueDate: "2026-03-28", subtasks: 5, completedSubtasks: 3, comments: 4 },
+    { id: "3", title: "Implement auth flow", description: "JWT tokens, refresh, password reset", status: "in_progress", priority: "medium", labels: ["backend", "security"], assignee: "carol", dueDate: "2026-03-30", subtasks: 4, completedSubtasks: 1, comments: 1 },
+    { id: "4", title: "Write API documentation", description: "OpenAPI spec for all endpoints", status: "todo", priority: "low", labels: ["docs"], assignee: "", dueDate: "2026-04-05", subtasks: 0, completedSubtasks: 0, comments: 0 },
+    { id: "5", title: "Set up CI/CD pipeline", description: "GitHub Actions for build, test, deploy", status: "done", priority: "medium", labels: ["devops"], assignee: "bob", dueDate: "2026-03-22", subtasks: 3, completedSubtasks: 3, comments: 6 },
+    { id: "6", title: "Create component library", description: "Reusable UI components with Storybook", status: "review", priority: "medium", labels: ["frontend"], assignee: "alice", dueDate: "2026-03-29", subtasks: 8, completedSubtasks: 6, comments: 3 }
+  ]
+  selectedTaskId = ""
+  showTaskForm = false
+  filterLabel = "all"
+  filterAssignee = "all"
+  searchQuery = ""
+  teamMembers = [
+    { id: "alice", name: "Alice", avatar: "A", color: "#3b82f6" },
+    { id: "bob", name: "Bob", avatar: "B", color: "#10b981" },
+    { id: "carol", name: "Carol", avatar: "C", color: "#f59e0b" }
+  ]
+  labels = [
+    { name: "design", color: "#8b5cf6" },
+    { name: "backend", color: "#3b82f6" },
+    { name: "frontend", color: "#06b6d4" },
+    { name: "devops", color: "#f97316" },
+    { name: "security", color: "#ef4444" },
+    { name: "docs", color: "#6b7280" }
+  ]
+
+layout:
+  view.app:
+    view.topbar:
+      view.topbar-left:
+        text.logo: "📋 TaskFlow"
+      view.topbar-center:
+        button.nav-btn(class="nav-{{view === 'board' ? 'active' : ''}}" on click -> setView): "Board"
+        button.nav-btn(class="nav-{{view === 'analytics' ? 'active' : ''}}" on click -> setView): "Analytics"
+        button.nav-btn(class="nav-{{view === 'team' ? 'active' : ''}}" on click -> setView): "Team"
+      view.topbar-right:
+        button.create-btn (on click -> createTask): "+ New Task"
+        view.avatar-stack:
+          for (member in teamMembers):
+            view.user-avatar(style="background: {{member.color}}"): "{{member.avatar}}"
+
+    view.content:
+      if (view === "board"):
+        view.board-header:
+          view.filters:
+            input.search-input (placeholder="Search tasks..." bind value <-> searchQuery)
+            view.filter-group:
+              for (label in ["all", "design", "backend", "frontend", "devops"]):
+                button.label-filter(class="filter-{{filterLabel === label ? 'active' : ''}}" on click -> setFilter): "{{label}}"
+          view.board-stats:
+            text.stat: "{{todoCount}} To Do"
+            text.stat: "{{inProgressCount}} In Progress"
+            text.stat: "{{doneCount}} Done"
+
+        KanbanBoard (tasks="{{filteredTasks}}" labels="{{labels}}" teamMembers="{{teamMembers}}" on selectTask -> selectTask on moveTask -> moveTask)
+
+      if (view === "analytics"):
+        Analytics (tasks="{{tasks}}" teamMembers="{{teamMembers}}")
+
+      if (view === "team"):
+        TeamPanel (members="{{teamMembers}}")
+
+    if (selectedTaskId):
+      TaskDetail (task="{{selectedTask}}" labels="{{labels}}" teamMembers="{{teamMembers}}" on close -> closeTask on update -> updateTask on delete -> deleteTask)
+
+    if (showTaskForm):
+      TaskForm (labels="{{labels}}" teamMembers="{{teamMembers}}" on save -> saveTask on cancel -> cancelTaskForm)
+
+style:
+  .app { min-height: 100vh; background: #f1f5f9; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: white; border-bottom: 1px solid #e2e8f0; }
+  .logo { font-size: 20px; font-weight: 800; }
+  .topbar-center { display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px; padding: 4px; }
+  .nav-btn { padding: 8px 16px; border: none; background: none; cursor: pointer; border-radius: 8px; font-size: 14px; font-weight: 500; color: #64748b; }
+  .nav-active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .create-btn { padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .avatar-stack { display: flex; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin-left: -8px; border: 2px solid white; }
+  .content { padding: 24px; }
+  .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .filters { display: flex; gap: 12px; align-items: center; }
+  .search-input { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; width: 200px; }
+  .filter-group { display: flex; gap: 4px; }
+  .label-filter { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; font-size: 12px; text-transform: capitalize; }
+  .filter-active { background: #0f172a; color: white; border-color: #0f172a; }
+  .board-stats { display: flex; gap: 16px; }
+  .stat { font-size: 13px; color: #64748b; font-weight: 500; }
+
+computed:
+  selectedTask = tasks.find(t => t.id === selectedTaskId)
+  filteredTasks = tasks.filter(t => (filterLabel === "all" || t.labels.includes(filterLabel)) && (filterAssignee === "all" || t.assignee === filterAssignee) && (searchQuery === "" || t.title.toLowerCase().includes(searchQuery.toLowerCase())))
+  todoCount = tasks.filter(t => t.status === "todo").length
+  inProgressCount = tasks.filter(t => t.status === "in_progress").length
+  doneCount = tasks.filter(t => t.status === "done").length
+
+handlers:
+  setView:
+    set view = ctx.el.dataset.view
+  selectTask:
+    set selectedTaskId = ctx.el.dataset.taskId
+  closeTask:
+    set selectedTaskId = ""
+  createTask:
+    set showTaskForm = true
+  cancelTaskForm:
+    set showTaskForm = false
+  saveTask:
+    log "Save task"
+    set showTaskForm = false
+  updateTask:
+    log "Update task"
+  deleteTask:
+    set tasks = tasks.filter(t => t.id !== selectedTaskId)
+    set selectedTaskId = ""
+  moveTask:
+    log "Move task"
+  setFilter:
+    set filterLabel = ctx.el.dataset.label

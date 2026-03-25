@@ -1,0 +1,89 @@
+component TaskForm
+
+state:
+  title = ""
+  description = ""
+  priority = "medium"
+  selectedLabels = []
+  assignee = ""
+  dueDate = ""
+
+layout:
+  view.form-overlay(on click -> cancel):
+    view.form-panel(on click -> stopPropagation):
+      text.form-title: "Create New Task"
+
+      view.form-fields:
+        view.form-group:
+          text.form-label: "Title"
+          input.form-input (placeholder="What needs to be done?" bind value <-> title)
+
+        view.form-group:
+          text.form-label: "Description"
+          textarea.form-textarea (placeholder="Add details..." bind value <-> description)
+
+        view.form-row:
+          view.form-group:
+            text.form-label: "Priority"
+            view.priority-options:
+              button.pri-btn(class="pri-{{priority === 'low' ? 'active' : ''}}" on click -> setPriority): "Low"
+              button.pri-btn(class="pri-{{priority === 'medium' ? 'active' : ''}}" on click -> setPriority): "Medium"
+              button.pri-btn(class="pri-{{priority === 'high' ? 'active' : ''}}" on click -> setPriority): "High"
+          view.form-group:
+            text.form-label: "Due Date"
+            input.form-input (type="date" bind value <-> dueDate)
+
+        view.form-group:
+          text.form-label: "Labels"
+          view.label-options:
+            for (label in labels):
+              button.label-btn(class="label-sel-{{selectedLabels.includes(label.name) ? 'active' : ''}}" on click -> toggleLabel data-label="{{label.name}}"): "{{label.name}}"
+
+        view.form-group:
+          text.form-label: "Assignee"
+          view.assignee-options:
+            button.assignee-btn(class="assignee-sel-{{assignee === '' ? 'active' : ''}}" on click -> setAssignee): "Unassigned"
+            for (member in teamMembers):
+              button.assignee-btn(class="assignee-sel-{{assignee === member.id ? 'active' : ''}}" on click -> setAssignee): "{{member.name}}"
+
+      view.form-actions:
+        button.cancel-btn (on click -> cancel): "Cancel"
+        button.save-btn (on click -> save class="disabled-{{title.length === 0}}" disabled="{{title.length === 0}}"): "Create Task"
+
+style:
+  .form-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .form-panel { background: white; border-radius: 16px; width: 520px; max-height: 90vh; overflow-y: auto; padding: 28px; }
+  .form-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+  .form-fields { display: flex; flex-direction: column; gap: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 13px; font-weight: 600; color: #374151; }
+  .form-input { padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; }
+  .form-textarea { padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; min-height: 80px; resize: vertical; font-family: inherit; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .priority-options { display: flex; gap: 8px; }
+  .pri-btn { padding: 6px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; }
+  .pri-active { background: #0f172a; color: white; border-color: #0f172a; }
+  .label-options { display: flex; gap: 6px; flex-wrap: wrap; }
+  .label-btn { padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; cursor: pointer; font-size: 12px; text-transform: capitalize; }
+  .label-sel-active { background: #3b82f6; color: white; border-color: #3b82f6; }
+  .assignee-options { display: flex; gap: 8px; }
+  .assignee-btn { padding: 6px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; }
+  .assignee-sel-active { background: #3b82f6; color: white; border-color: #3b82f6; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+  .cancel-btn { padding: 10px 20px; background: none; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; font-size: 14px; }
+  .save-btn { padding: 10px 24px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .disabled-true { background: #94a3b8; cursor: not-allowed; }
+
+handlers:
+  cancel:
+    log "Cancel form"
+  stopPropagation:
+    log "Stop"
+  setPriority:
+    set priority = ctx.el.dataset.priority
+  toggleLabel:
+    log "Toggle label"
+  setAssignee:
+    log "Set assignee"
+  save:
+    log "Save task"

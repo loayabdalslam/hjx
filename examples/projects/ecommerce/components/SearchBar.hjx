@@ -1,0 +1,20 @@
+component SearchBar
+layout:
+  view.search-bar:
+    text.search-icon: "🔍"
+    input.search-input (placeholder="Search products..." bind value <-> searchQuery on keyup -> search)
+    if (searchQuery):
+      button.clear-btn (on click -> clearSearch): "×"
+
+style:
+  .search-bar { display: flex; align-items: center; gap: 8px; background: #f3f4f6; border-radius: 12px; padding: 0 16px; flex: 1; max-width: 400px; border: 1px solid transparent; transition: all 0.2s; }
+  .search-bar:focus-within { background: white; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .search-icon { font-size: 16px; color: #9ca3af; }
+  .search-input { flex: 1; padding: 12px 0; border: none; background: none; font-size: 14px; outline: none; }
+  .clear-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #9ca3af; padding: 4px; }
+
+handlers:
+  search:
+    log "Searching"
+  clearSearch:
+    set searchQuery = ""

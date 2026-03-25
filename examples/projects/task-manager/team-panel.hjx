@@ -1,0 +1,59 @@
+component TeamPanel
+
+state:
+  showInvite = false
+  inviteEmail = ""
+
+layout:
+  view.team-panel:
+    view.team-header:
+      text.team-title: "Team Members"
+      button.invite-btn (on click -> toggleInvite): "+ Invite"
+
+    view.team-grid:
+      for (member in members):
+        view.member-card:
+          view.member-avatar-large(style="background: {{member.color}}"): "{{member.avatar}}"
+          text.member-name: "{{member.name}}"
+          text.member-role: "Member"
+          view.member-stats:
+            text: "{{getMemberTasks(member.id).length}} tasks"
+          button.member-actions: "⋯"
+
+    if (showInvite):
+      view.invite-form:
+        text.invite-title: "Invite Team Member"
+        input.invite-input (placeholder="Enter email address" bind value <-> inviteEmail)
+        view.invite-actions:
+          button.invite-cancel (on click -> toggleInvite): "Cancel"
+          button.invite-send (on click -> sendInvite): "Send Invite"
+
+style:
+  .team-panel { max-width: 800px; margin: 0 auto; }
+  .team-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .team-title { font-size: 24px; font-weight: 700; }
+  .invite-btn { padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .member-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; text-align: center; }
+  .member-avatar-large { width: 56px; height: 56px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 0 auto 12px; }
+  .member-name { font-size: 16px; font-weight: 600; }
+  .member-role { font-size: 13px; color: #64748b; margin-top: 2px; }
+  .member-stats { font-size: 13px; color: #3b82f6; margin-top: 8px; }
+  .member-actions { margin-top: 12px; background: none; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 12px; cursor: pointer; }
+  .invite-form { margin-top: 24px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+  .invite-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .invite-input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; margin-bottom: 12px; }
+  .invite-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .invite-cancel { padding: 8px 16px; background: none; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; }
+  .invite-send { padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; }
+
+computed:
+  getMemberTasks = (id) => tasks.filter(t => t.assignee === id)
+
+handlers:
+  toggleInvite:
+    set showInvite = !showInvite
+  sendInvite:
+    log "Send invite to {{inviteEmail}}"
+    set showInvite = false
+    set inviteEmail = ""

@@ -1,0 +1,143 @@
+component ChatApp
+
+imports:
+  Sidebar from "./sidebar.hjx"
+  ChatWindow from "./chat-window.hjx"
+  SettingsPanel from "./settings-panel.hjx"
+  WelcomeScreen from "./welcome-screen.hjx"
+
+state:
+  conversations = [
+    { id: "1", title: "Build a landing page", preview: "Sure, let me create...", timestamp: Date.now() - 3600000 },
+    { id: "2", title: "Debug React component", preview: "The issue is in...", timestamp: Date.now() - 7200000 },
+    { id: "3", title: "Explain async/await", preview: "Async/await is...", timestamp: Date.now() - 86400000 }
+  ]
+  activeConversationId = ""
+  messages = []
+  isStreaming = false
+  streamingContent = ""
+  showSettings = false
+  provider = "groq"
+  model = "llama-3.3-70b-versatile"
+  sidebarOpen = true
+  isDarkMode = false
+  totalTokens = 0
+
+script:
+  const API_BASE = "/api";
+
+  async function sendMessage(content) {
+    const userMsg = { role: "user", content, timestamp: Date.now() };
+    store.set({
+      messages: [...store.get("messages"), userMsg],
+      isStreaming: true,
+      streamingContent: ""
+    });
+
+    // Create conversation if needed
+    let convId = store.get("activeConversationId");
+    if (!convId) {
+      const res = await fetch(`${API_BASE}/conversations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: content.slice(0, 50) })
+      });
+      const conv = await res.json();
+      convId = conv.id;
+      store.set({
+        activeConversationId: convId,
+        conversations: [{ id: convId, title: conv.title, preview: "", timestamp: Date.now() }, ...store.get("conversations")]
+      });
+    }
+
+    // Stream response via WebSocket
+    const ws = new WebSocket(`ws://${location.host}${API_BASE}/conversations/${convId}/messages`);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "token") {
+        const current = store.get("streamingContent");
+        store.set({ streamingContent: current + data.content });
+      }
+      if (data.type === "done") {
+        const assistantMsg = { role: "assistant", content: store.get("streamingContent"), timestamp: Date.now() };
+        store.set({
+          messages: [...store.get("messages"), assistantMsg],
+          isStreaming: false,
+          streamingContent: "",
+          totalTokens: store.get("totalTokens") + data.usage.totalTokens
+        });
+        ws.close();
+      }
+    };
+    ws.send(JSON.stringify({ content, provider: store.get("provider"), model: store.get("model") }));
+  }
+
+  async function loadConversation(id) {
+    const res = await fetch(`${API_BASE}/conversations/${id}/messages`);
+    const msgs = await res.json();
+    store.set({ activeConversationId: id, messages: msgs });
+  }
+
+  export function init(store) {
+    store.set({ isDarkMode: false, sidebarOpen: true });
+  }
+
+layout:
+  view.chat-app(class="dark-{{isDarkMode}}"):
+    if (sidebarOpen):
+      Sidebar (conversations="{{conversations}}" activeId="{{activeConversationId}}" on select -> selectConversation on newChat -> newChat on delete -> deleteConversation on toggleSettings -> toggleSettings)
+
+    view.chat-main:
+      view.chat-header:
+        if (!sidebarOpen):
+          button.menu-btn (on click -> toggleSidebar): "☰"
+        text.header-title: "{{activeConversation ? activeConversation.title : 'HJX AI Chat'}}"
+        view.header-actions:
+          button.icon-btn (on click -> toggleDarkMode): "{{isDarkMode ? '☀️' : '🌙'}}"
+          text.token-count: "{{totalTokens}} tokens"
+
+      if (!activeConversationId):
+        WelcomeScreen (on startChat -> startChat)
+
+      if (activeConversationId):
+        ChatWindow (messages="{{messages}}" isStreaming="{{isStreaming}}" streamingContent="{{streamingContent}}" on send -> sendMessage)
+
+    if (showSettings):
+      SettingsPanel (provider="{{provider}}" model="{{model}}" on close -> toggleSettings on save -> saveSettings)
+
+style:
+  .chat-app { display: flex; height: 100vh; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
+  .chat-app.dark-true { background: #0f172a; color: #e2e8f0; }
+  .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .chat-header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #e5e7eb; background: white; }
+  .dark-true .chat-header { background: #1e293b; border-bottom-color: #334155; }
+  .menu-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; }
+  .header-title { font-weight: 600; font-size: 16px; flex: 1; }
+  .header-actions { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 8px; border-radius: 8px; }
+  .icon-btn:hover { background: #f3f4f6; }
+  .token-count { font-size: 12px; color: #9ca3af; }
+
+computed:
+  activeConversation = conversations.find(c => c.id === activeConversationId)
+
+handlers:
+  selectConversation:
+    loadConversation(ctx.el.dataset.convId)
+  newChat:
+    set activeConversationId = ""
+    set messages = []
+  deleteConversation:
+    log "Delete conversation"
+  toggleSettings:
+    set showSettings = !showSettings
+  toggleSidebar:
+    set sidebarOpen = !sidebarOpen
+  toggleDarkMode:
+    set isDarkMode = !isDarkMode
+  startChat:
+    log "Start new chat"
+  saveSettings:
+    log "Save settings"
+  sendMessage:
+    log "Sending message"

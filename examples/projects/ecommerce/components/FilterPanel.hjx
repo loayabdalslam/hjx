@@ -1,0 +1,16 @@
+component FilterPanel
+layout:
+  view.filter-panel:
+    view.category-filters:
+      for (cat in categories):
+        button.filter-chip(class="active-{{selected === cat}}" on click -> filter): "{{cat}}"
+
+style:
+  .filter-panel { display: flex; gap: 8px; }
+  .category-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-chip { padding: 8px 16px; border: 1px solid #e5e7eb; border-radius: 20px; background: white; cursor: pointer; font-size: 13px; text-transform: capitalize; }
+  .active-true { background: #111827; color: white; border-color: #111827; }
+
+handlers:
+  filter:
+    log "Filter by category"

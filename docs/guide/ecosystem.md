@@ -71,3 +71,42 @@ After installing, type the snippet prefix and press Tab:
 | `state` | State block |
 | `layout` | Layout block |
 | `handler` | Handler block |
+
+## CLI
+
+The HJX CLI is the primary tool for working with `.hjx` files:
+
+```bash
+# Parse a file (see AST)
+node dist/cli.js parse examples/counter.hjx
+
+# Build to HTML/CSS/JS
+node dist/cli.js build examples/counter.hjx --out dist-app
+
+# Development server with hot reload
+node dist/cli.js dev examples/counter.hjx --out dist-app --port 5172
+```
+
+## NLP Engine
+
+The built-in NLP engine enables AI-powered development with intent classification, code generation, error detection, and semantic search. See the [NLP Engine](/guide/nlp-engine) guide for details.
+
+## Project Templates
+
+Production-ready example projects demonstrating full-stack HJX applications:
+
+| Project | Description |
+|---------|-------------|
+| [E-Commerce Store](https://github.com/loayabdalslam/hjx/tree/main/examples/projects/ecommerce) | Product catalog, cart, checkout, admin dashboard |
+| [AI Chat](https://github.com/loayabdalslam/hjx/tree/main/examples/projects/ai-chat) | Multi-conversation chat with streaming responses |
+| [Task Manager](https://github.com/loayabdalslam/hjx/tree/main/examples/projects/task-manager) | Kanban board, team assignments, analytics |
+
+## Contributing
+
+HJX is open source. Contributions welcome at [github.com/loayabdalslam/hjx](https://github.com/loayabdalslam/hjx).
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `npm test`
+5. Submit a pull request

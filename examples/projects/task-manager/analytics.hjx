@@ -1,0 +1,124 @@
+component Analytics
+
+state:
+  timeRange = "week"
+
+layout:
+  view.analytics:
+    text.analytics-title: "Project Analytics"
+    view.time-range-tabs:
+      button.range-tab(class="range-{{timeRange === 'week' ? 'active' : ''}}" on click -> setTimeRange): "Week"
+      button.range-tab(class="range-{{timeRange === 'month' ? 'active' : ''}}" on click -> setTimeRange): "Month"
+      button.range-tab(class="range-{{timeRange === 'quarter' ? 'active' : ''}}" on click -> setTimeRange): "Quarter"
+
+    view.stats-row:
+      view.stat-card:
+        text.stat-number: "{{tasks.length}}"
+        text.stat-label: "Total Tasks"
+      view.stat-card:
+        text.stat-number: "{{completedTasks.length}}"
+        text.stat-label: "Completed"
+      view.stat-card:
+        text.stat-number: "{{completionRate}}%"
+        text.stat-label: "Completion Rate"
+      view.stat-card:
+        text.stat-number: "{{overdueTasks.length}}"
+        text.stat-label: "Overdue"
+
+    view.charts-grid:
+      view.chart-card:
+        text.chart-title: "Tasks by Status"
+        view.bar-chart:
+          view.bar-row:
+            text.bar-label: "To Do"
+            view.bar-track:
+              view.bar-fill (style="width: {{todoPercent}}%"): "{{todoCount}}"
+          view.bar-row:
+            text.bar-label: "In Progress"
+            view.bar-track:
+              view.bar-fill.bar-blue (style="width: {{inProgressPercent}}%"): "{{inProgressCount}}"
+          view.bar-row:
+            text.bar-label: "Review"
+            view.bar-track:
+              view.bar-fill.bar-yellow (style="width: {{reviewPercent}}%"): "{{reviewCount}}"
+          view.bar-row:
+            text.bar-label: "Done"
+            view.bar-track:
+              view.bar-fill.bar-green (style="width: {{donePercent}}%"): "{{doneCount}}"
+
+      view.chart-card:
+        text.chart-title: "Tasks by Priority"
+        view.donut-legend:
+          view.legend-item:
+            view.legend-dot.dot-high:
+            text: "High — {{highPriorityCount}}"
+          view.legend-item:
+            view.legend-dot.dot-med:
+            text: "Medium — {{medPriorityCount}}"
+          view.legend-item:
+            view.legend-dot.dot-low:
+            text: "Low — {{lowPriorityCount}}"
+
+      view.chart-card:
+        text.chart-title: "Team Workload"
+        for (member in teamMembers):
+          view.member-row:
+            view.member-avatar(style="background: {{member.color}}"): "{{member.avatar}}"
+            text.member-name: "{{member.name}}"
+            view.workload-bar:
+              view.workload-fill (style="width: {{getMemberTasks(member.id).length * 20}}%"): "{{getMemberTasks(member.id).length}} tasks"
+
+style:
+  .analytics { max-width: 960px; margin: 0 auto; }
+  .analytics-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
+  .time-range-tabs { display: flex; gap: 4px; background: #f1f5f9; border-radius: 8px; padding: 4px; width: fit-content; margin-bottom: 24px; }
+  .range-tab { padding: 6px 16px; border: none; background: none; cursor: pointer; border-radius: 6px; font-size: 13px; }
+  .range-active { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-number { font-size: 32px; font-weight: 700; }
+  .stat-label { font-size: 13px; color: #64748b; margin-top: 4px; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+  .chart-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .bar-chart { display: flex; flex-direction: column; gap: 12px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { width: 80px; font-size: 13px; color: #64748b; }
+  .bar-track { flex: 1; height: 28px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #94a3b8; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: 600; color: white; min-width: 24px; }
+  .bar-blue { background: #3b82f6; }
+  .bar-yellow { background: #f59e0b; }
+  .bar-green { background: #10b981; }
+  .donut-legend { display: flex; flex-direction: column; gap: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-high { background: #ef4444; }
+  .dot-med { background: #f59e0b; }
+  .dot-low { background: #10b981; }
+  .chart-card:last-child { grid-column: 1 / -1; }
+  .member-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .member-avatar { width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+  .member-name { width: 80px; font-size: 14px; font-weight: 500; }
+  .workload-bar { flex: 1; height: 24px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+  .workload-fill { height: 100%; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 600; color: white; }
+
+computed:
+  completedTasks = tasks.filter(t => t.status === "done")
+  overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "done")
+  completionRate = tasks.length > 0 ? Math.round(completedTasks.length / tasks.length * 100) : 0
+  todoCount = tasks.filter(t => t.status === "todo").length
+  inProgressCount = tasks.filter(t => t.status === "in_progress").length
+  reviewCount = tasks.filter(t => t.status === "review").length
+  doneCount = completedTasks.length
+  todoPercent = tasks.length > 0 ? todoCount / tasks.length * 100 : 0
+  inProgressPercent = tasks.length > 0 ? inProgressCount / tasks.length * 100 : 0
+  reviewPercent = tasks.length > 0 ? reviewCount / tasks.length * 100 : 0
+  donePercent = tasks.length > 0 ? doneCount / tasks.length * 100 : 0
+  highPriorityCount = tasks.filter(t => t.priority === "high").length
+  medPriorityCount = tasks.filter(t => t.priority === "medium").length
+  lowPriorityCount = tasks.filter(t => t.priority === "low").length
+  getMemberTasks = (id) => tasks.filter(t => t.assignee === id)
+
+handlers:
+  setTimeRange:
+    set timeRange = ctx.el.dataset.range

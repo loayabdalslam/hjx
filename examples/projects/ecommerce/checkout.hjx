@@ -1,0 +1,143 @@
+component Checkout
+
+state:
+  step = 1
+  email = ""
+  firstName = ""
+  lastName = ""
+  address = ""
+  city = ""
+  zipCode = ""
+  country = "United States"
+  cardNumber = ""
+  cardExpiry = ""
+  cardCVC = ""
+  shippingMethod = "standard"
+  agreedToTerms = false
+  errors = {}
+
+layout:
+  view.checkout-page:
+    text.page-title: "Checkout"
+
+    view.steps-indicator:
+      view.step(class="step-{{step >= 1 ? 'active' : ''}}"):
+        text.step-num: "1"
+        text.step-label: "Shipping"
+      view.step-line(class="line-{{step >= 2 ? 'active' : ''}}"):
+      view.step(class="step-{{step >= 2 ? 'active' : ''}}"):
+        text.step-num: "2"
+        text.step-label: "Payment"
+      view.step-line(class="line-{{step >= 3 ? 'active' : ''}}"):
+      view.step(class="step-{{step >= 3 ? 'active' : ''}}"):
+        text.step-num: "3"
+        text.step-label: "Confirm"
+
+    if (step === 1):
+      view.form-section:
+        text.section-title: "Contact Information"
+        input.form-input (placeholder="Email address" type="email" bind value <-> email)
+
+        text.section-title: "Shipping Address"
+        view.form-row:
+          input.form-input (placeholder="First name" bind value <-> firstName)
+          input.form-input (placeholder="Last name" bind value <-> lastName)
+        input.form-input.full (placeholder="Street address" bind value <-> address)
+        view.form-row:
+          input.form-input (placeholder="City" bind value <-> city)
+          input.form-input (placeholder="ZIP code" bind value <-> zipCode)
+
+        text.section-title: "Shipping Method"
+        view.shipping-options:
+          view.shipping-option(class="selected-{{shippingMethod === 'standard'}}" on click -> selectShipping):
+            text.option-name: "Standard"
+            text.option-detail: "5-7 business days"
+            text.option-price: "Free"
+          view.shipping-option(class="selected-{{shippingMethod === 'express'}}" on click -> selectShipping):
+            text.option-name: "Express"
+            text.option-detail: "2-3 business days"
+            text.option-price: "$14.99"
+
+        button.next-btn (on click -> nextStep): "Continue to Payment"
+
+    if (step === 2):
+      view.form-section:
+        text.section-title: "Payment Details"
+        input.form-input.full (placeholder="Card number" bind value <-> cardNumber)
+        view.form-row:
+          input.form-input (placeholder="MM/YY" bind value <-> cardExpiry)
+          input.form-input (placeholder="CVC" bind value <-> cardCVC)
+
+        view.secure-note:
+          text: "🔒 Your payment info is encrypted and secure"
+
+        view.form-actions:
+          button.back-btn (on click -> prevStep): "← Back"
+          button.next-btn (on click -> nextStep): "Review Order"
+
+    if (step === 3):
+      view.form-section:
+        text.section-title: "Order Review"
+
+        view.review-section:
+          text.review-label: "Ship to:"
+          text: "{{firstName}} {{lastName}}"
+          text: "{{address}}"
+          text: "{{city}}, {{zipCode}}"
+
+        view.review-section:
+          text.review-label: "Payment:"
+          text: "Card ending in {{cardNumber.slice(-4)}}"
+
+        view.review-section:
+          text.review-label: "Shipping:"
+          text: "{{shippingMethod === 'standard' ? 'Standard (5-7 days)' : 'Express (2-3 days)'}}"
+
+        view.terms-check:
+          input.checkbox (type="checkbox" bind value <-> agreedToTerms)
+          text: "I agree to the Terms of Service and Privacy Policy"
+
+        view.form-actions:
+          button.back-btn (on click -> prevStep): "← Back"
+          button.place-order-btn (on click -> placeOrder): "Place Order — ${{total}}"
+
+style:
+  .checkout-page { max-width: 640px; margin: 0 auto; }
+  .page-title { font-size: 28px; font-weight: 700; margin-bottom: 32px; }
+  .steps-indicator { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #9ca3af; }
+  .step-active .step-num { background: #3b82f6; color: white; }
+  .step-label { font-size: 12px; color: #9ca3af; }
+  .step-active .step-label { color: #3b82f6; font-weight: 600; }
+  .step-line { width: 60px; height: 2px; background: #e5e7eb; margin: 0 8px; margin-bottom: 20px; }
+  .line-active { background: #3b82f6; }
+  .form-section { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; }
+  .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px; color: #111827; }
+  .form-input { width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; margin-bottom: 12px; }
+  .full { grid-column: 1 / -1; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .shipping-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .shipping-option { padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; text-align: center; }
+  .selected-true { border-color: #3b82f6; background: #eff6ff; }
+  .option-name { font-weight: 600; margin-bottom: 4px; }
+  .option-detail { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+  .option-price { font-weight: 600; color: #059669; }
+  .form-actions { display: flex; justify-content: space-between; margin-top: 24px; }
+  .next-btn { padding: 12px 32px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
+  .back-btn { padding: 12px 24px; background: none; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; }
+  .secure-note { text-align: center; color: #6b7280; font-size: 13px; margin-top: 16px; }
+  .review-section { padding: 16px 0; border-bottom: 1px solid #f3f4f6; }
+  .review-label { font-weight: 600; color: #6b7280; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+  .terms-check { display: flex; align-items: center; gap: 8px; margin: 24px 0; font-size: 14px; color: #4b5563; }
+  .place-order-btn { padding: 14px 32px; background: #059669; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 16px; }
+
+handlers:
+  nextStep:
+    set step = step + 1
+  prevStep:
+    set step = step - 1
+  selectShipping:
+    set shippingMethod = ctx.el.dataset.method
+  placeOrder:
+    log "Placing order"

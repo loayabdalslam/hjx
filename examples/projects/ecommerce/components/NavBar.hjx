@@ -1,0 +1,82 @@
+component NavBar
+
+state:
+  isMobileMenuOpen = false
+  isScrolled = false
+
+script:
+  export function init(store) {
+    // Listen for scroll
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", () => {
+        store.set({ isScrolled: window.scrollY > 20 });
+      });
+    }
+  }
+
+layout:
+  view.navbar(class="scrolled-{{isScrolled}}"):
+    view.nav-container:
+      view.logo:
+        text.logo-text: "🛍 StoreApp"
+
+      view.nav-links:
+        button.nav-link (on click -> goHome): "Home"
+        button.nav-link (on click -> goShop): "Shop"
+        button.nav-link (on click -> goAbout): "About"
+
+      view.nav-actions:
+        button.icon-btn (on click -> goSearch): "🔍"
+        button.icon-btn (on click -> goWishlist): "♡"
+        button.cart-btn (on click -> goCart):
+          text: "🛒"
+          if (cartCount > 0):
+            view.cart-badge: "{{cartCount}}"
+        button.icon-btn (on click -> toggleTheme): "🌙"
+        button.icon-btn (on click -> goAdmin): "⚙️"
+
+      button.mobile-toggle (on click -> toggleMobile): "☰"
+
+    if (isMobileMenuOpen):
+      view.mobile-menu:
+        button.mobile-link (on click -> goHome): "Home"
+        button.mobile-link (on click -> goShop): "Shop"
+        button.mobile-link (on click -> goCart): "Cart ({{cartCount}})"
+        button.mobile-link (on click -> goAdmin): "Admin"
+
+style:
+  .navbar { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: all 0.3s; }
+  .scrolled-true { border-bottom-color: #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .nav-container { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-size: 20px; font-weight: 800; color: #111827; cursor: pointer; }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-link { background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500; color: #4b5563; padding: 8px 0; }
+  .nav-link:hover { color: #111827; }
+  .nav-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn { width: 40px; height: 40px; border: none; background: none; cursor: pointer; font-size: 18px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .icon-btn:hover { background: #f3f4f6; }
+  .cart-btn { position: relative; width: 40px; height: 40px; border: none; background: none; cursor: pointer; font-size: 18px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .cart-badge { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: #ef4444; color: white; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+  .mobile-menu { display: none; padding: 16px 24px; border-top: 1px solid #e5e7eb; }
+  .mobile-link { display: block; width: 100%; padding: 12px 0; background: none; border: none; cursor: pointer; font-size: 16px; text-align: left; }
+
+handlers:
+  goHome:
+    log "Navigate home"
+  goShop:
+    log "Navigate shop"
+  goAbout:
+    log "Navigate about"
+  goCart:
+    log "Navigate cart"
+  goSearch:
+    log "Open search"
+  goWishlist:
+    log "Open wishlist"
+  goAdmin:
+    log "Navigate admin"
+  toggleTheme:
+    log "Toggle theme"
+  toggleMobile:
+    set isMobileMenuOpen = !isMobileMenuOpen

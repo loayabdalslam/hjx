@@ -1,0 +1,69 @@
+component ChatWindow
+
+state:
+  inputValue = ""
+  showScrollButton = false
+
+layout:
+  view.chat-window:
+    view.messages-container:
+      for (msg in messages):
+        view.message-row(class="role-{{msg.role}}"):
+          view.avatar:
+            text: "{{msg.role === 'assistant' ? '🤖' : '👤'}}"
+          view.message-content:
+            if (msg.role === "assistant"):
+              view.assistant-bubble:
+                text: "{{msg.content}}"
+            if (msg.role === "user"):
+              view.user-bubble:
+                text: "{{msg.content}}"
+            text.timestamp: "{{formatTime(msg.timestamp)}}"
+
+      if (isStreaming):
+        view.message-row.role-assistant:
+          view.avatar:
+            text: "🤖"
+          view.message-content:
+            view.assistant-bubble:
+              text: "{{streamingContent}}"
+              view.typing-cursor: "▋"
+
+    view.input-area:
+      view.input-container:
+        textarea.message-input (placeholder="Type your message..." bind value <-> inputValue on keydown -> handleKey)
+        view.input-actions:
+          button.send-btn (on click -> send class="active-{{inputValue.length > 0}}" disabled="{{inputValue.length === 0}}"):
+            text: "↑"
+
+style:
+  .chat-window { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .messages-container { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+  .message-row { display: flex; gap: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
+  .role-user { flex-direction: row-reverse; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .role-assistant .avatar { background: #dbeafe; }
+  .role-user .avatar { background: #dcfce7; }
+  .message-content { flex: 1; max-width: 70%; }
+  .assistant-bubble { padding: 16px 20px; background: #f8fafc; border-radius: 16px; border-top-left-radius: 4px; line-height: 1.7; font-size: 14px; color: #1e293b; }
+  .user-bubble { padding: 16px 20px; background: #3b82f6; color: white; border-radius: 16px; border-top-right-radius: 4px; line-height: 1.6; font-size: 14px; }
+  .timestamp { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+  .role-user .timestamp { text-align: right; }
+  .typing-cursor { display: inline; animation: blink 1s infinite; }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .input-area { padding: 16px 24px 24px; border-top: 1px solid #e5e7eb; background: white; }
+  .input-container { max-width: 800px; margin: 0 auto; display: flex; gap: 12px; align-items: flex-end; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 16px; padding: 8px 8px 8px 16px; }
+  .input-container:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .message-input { flex: 1; border: none; background: none; font-size: 14px; resize: none; outline: none; min-height: 24px; max-height: 120px; line-height: 1.5; padding: 4px 0; font-family: inherit; }
+  .input-actions { display: flex; gap: 4px; }
+  .send-btn { width: 36px; height: 36px; border-radius: 10px; border: none; background: #e5e7eb; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .active-true { background: #3b82f6; color: white; }
+
+computed:
+  formatTime = (ts) => new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+
+handlers:
+  send:
+    log "Send message"
+  handleKey:
+    log "Key pressed"

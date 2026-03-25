@@ -1,0 +1,144 @@
+component StoreApp
+
+imports:
+  Storefront from "./storefront.hjx"
+  ProductDetail from "./product-detail.hjx"
+  Cart from "./cart.hjx"
+  Checkout from "./checkout.hjx"
+  AdminDashboard from "./admin-dashboard.hjx"
+  NavBar from "./components/NavBar.hjx"
+  CartBadge from "./components/CartBadge.hjx"
+  Footer from "./components/Footer.hjx"
+
+state:
+  currentRoute = "home"
+  selectedProductId = ""
+  cartItems = []
+  cartCount = 0
+  cartTotal = 0
+  user = { name: "", email: "", isLoggedIn: false }
+  theme = "light"
+  notifications = []
+  isLoading = false
+
+script:
+  const API_BASE = "/api";
+
+  async function fetchProducts(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_BASE}/products?${query}`);
+    return res.json();
+  }
+
+  async function fetchCart() {
+    const res = await fetch(`${API_BASE}/cart`);
+    const data = await res.json();
+    store.set({
+      cartItems: data.items,
+      cartCount: data.items.reduce((sum, i) => sum + i.quantity, 0),
+      cartTotal: data.total
+    });
+  }
+
+  async function addToCart(productId, quantity = 1) {
+    await fetch(`${API_BASE}/cart/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, quantity })
+    });
+    await fetchCart();
+  }
+
+  async function checkout(paymentMethod, address) {
+    store.set({ isLoading: true });
+    const res = await fetch(`${API_BASE}/checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentMethod, address })
+    });
+    const order = await res.json();
+    store.set({
+      isLoading: false,
+      currentRoute: "order-confirmation",
+      cartItems: [],
+      cartCount: 0,
+      cartTotal: 0,
+      notifications: [...store.get("notifications"), {
+        id: Date.now(),
+        type: "success",
+        message: `Order #${order.id} placed!`
+      }]
+    });
+  }
+
+  export function init(store) {
+    fetchCart();
+    store.set({ isLoading: false });
+  }
+
+layout:
+  view.app-container(class="theme-{{theme}}"):
+    NavBar (cartCount="{{cartCount}}" on navigate -> navigate on toggleTheme -> toggleTheme)
+
+    view.main-content:
+      if (isLoading):
+        view.loading-overlay:
+          view.spinner:
+          text: "Loading..."
+
+      if (currentRoute === "home"):
+        Storefront (on viewProduct -> viewProduct on addToCart -> addToCart)
+
+      if (currentRoute === "product"):
+        ProductDetail (productId="{{selectedProductId}}" on addToCart -> addToCart on back -> goHome)
+
+      if (currentRoute === "cart"):
+        Cart (items="{{cartItems}}" total="{{cartTotal}}" on updateQuantity -> updateQuantity on checkout -> goCheckout)
+
+      if (currentRoute === "checkout"):
+        Checkout (total="{{cartTotal}}" on submit -> checkout on back -> goCart)
+
+      if (currentRoute === "admin"):
+        AdminDashboard
+
+    view.notification-container:
+      for (notif in notifications):
+        view.notification(class="notif-{{notif.type}}"):
+          text: "{{notif.message}}"
+          button.close (on click -> dismissNotification): "×"
+
+    Footer
+
+style:
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .app-container { min-height: 100vh; display: flex; flex-direction: column; }
+  .main-content { flex: 1; padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+  .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .notification-container { position: fixed; top: 80px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+  .notification { padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
+  .notif-success { background: #dcfce7; color: #166534; }
+  .notif-error { background: #fee2e2; color: #991b1b; }
+  .notif-info { background: #dbeafe; color: #1e40af; }
+  .close { background: none; border: none; cursor: pointer; font-size: 18px; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
+
+handlers:
+  navigate:
+    set currentRoute = ctx.el.dataset.route
+  viewProduct:
+    set selectedProductId = ctx.el.dataset.productId
+    set currentRoute = "product"
+  goHome:
+    set currentRoute = "home"
+  goCart:
+    set currentRoute = "cart"
+  goCheckout:
+    set currentRoute = "checkout"
+  toggleTheme:
+    set theme = theme === "light" ? "dark" : "light"
+  updateQuantity:
+    log "Updating quantity"
+  dismissNotification:
+    set notifications = notifications.filter(n => n.id != ctx.el.dataset.notifId)

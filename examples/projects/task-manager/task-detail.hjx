@@ -1,0 +1,147 @@
+component TaskDetail
+
+state:
+  isEditing = false
+  newComment = ""
+  activeTab = "details"
+
+layout:
+  view.overlay(on click -> close):
+    view.detail-panel(on click -> stopPropagation):
+      view.detail-header:
+        view.detail-title-row:
+          text.task-status: "{{task.status.replace('_', ' ').toUpperCase()}}"
+          button.close-btn (on click -> close): "×"
+        text.detail-title: "{{task.title}}"
+
+      view.detail-tabs:
+        button.dtab(class="dtab-{{activeTab === 'details' ? 'active' : ''}}" on click -> setTab): "Details"
+        button.dtab(class="dtab-{{activeTab === 'comments' ? 'active' : ''}}" on click -> setTab): "Comments ({{task.comments}})"
+        button.dtab(class="dtab-{{activeTab === 'activity' ? 'active' : ''}}" on click -> setTab): "Activity"
+
+      if (activeTab === "details"):
+        view.detail-body:
+          view.field-group:
+            text.field-label: "Description"
+            text.field-value: "{{task.description}}"
+
+          view.field-row:
+            view.field-group:
+              text.field-label: "Priority"
+              view.priority-select:
+                button.pri-opt(class="pri-{{task.priority === 'high' ? 'active' : ''}}"): "High"
+                button.pri-opt(class="pri-{{task.priority === 'medium' ? 'active' : ''}}"): "Medium"
+                button.pri-opt(class="pri-{{task.priority === 'low' ? 'active' : ''}}"): "Low"
+            view.field-group:
+              text.field-label: "Due Date"
+              text.field-value: "{{task.dueDate}}"
+
+          view.field-group:
+            text.field-label: "Assignee"
+            if (task.assignee):
+              view.assignee-row:
+                view.assignee-av: "{{getInitial(task.assignee)}}"
+                text.assignee-name: "{{getName(task.assignee)}}"
+            if (!task.assignee):
+              text.unassigned: "Unassigned — click to assign"
+
+          view.field-group:
+            text.field-label: "Labels"
+            view.labels-row:
+              for (label in task.labels):
+                view.detail-label(class="lbl-{{label}}"): "{{label}}"
+
+          if (task.subtasks > 0):
+            view.field-group:
+              text.field-label: "Subtasks ({{task.completedSubtasks}}/{{task.subtasks}})"
+              view.progress-bar:
+                view.progress-fill (style="width: {{(task.completedSubtasks / task.subtasks * 100)}}%")
+
+      if (activeTab === "comments"):
+        view.comments-section:
+          view.comment:
+            view.comment-avatar: "A"
+            view.comment-body:
+              text.comment-author: "Alice"
+              text.comment-text: "This looks great! Just need to update the color scheme."
+              text.comment-time: "2 hours ago"
+          view.comment:
+            view.comment-avatar: "B"
+            view.comment-body:
+              text.comment-author: "Bob"
+              text.comment-text: "I'll handle the backend integration."
+              text.comment-time: "5 hours ago"
+
+          view.comment-input-row:
+            input.comment-input (placeholder="Write a comment..." bind value <-> newComment)
+            button.comment-send (on click -> addComment): "Send"
+
+      view.detail-actions:
+        button.edit-btn (on click -> toggleEdit): "Edit"
+        button.delete-btn (on click -> deleteTask): "Delete"
+
+style:
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; justify-content: flex-end; z-index: 100; }
+  .detail-panel { width: 520px; background: white; height: 100%; overflow-y: auto; padding: 24px; box-shadow: -4px 0 24px rgba(0,0,0,0.1); }
+  .detail-header { margin-bottom: 20px; }
+  .detail-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .task-status { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #3b82f6; letter-spacing: 1px; }
+  .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; }
+  .detail-title { font-size: 22px; font-weight: 700; }
+  .detail-tabs { display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; }
+  .dtab { padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 13px; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .dtab-active { color: #3b82f6; border-bottom-color: #3b82f6; }
+  .detail-body { display: flex; flex-direction: column; gap: 20px; }
+  .field-group { }
+  .field-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .field-value { font-size: 14px; color: #1e293b; line-height: 1.6; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .priority-select { display: flex; gap: 6px; }
+  .pri-opt { padding: 4px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 12px; cursor: pointer; }
+  .pri-active { background: #0f172a; color: white; border-color: #0f172a; }
+  .assignee-row { display: flex; align-items: center; gap: 8px; }
+  .assignee-av { width: 28px; height: 28px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+  .assignee-name { font-size: 14px; font-weight: 500; }
+  .unassigned { font-size: 13px; color: #94a3b8; cursor: pointer; }
+  .labels-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .detail-label { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; text-transform: capitalize; }
+  .lbl-design { background: #ede9fe; color: #7c3aed; }
+  .lbl-backend { background: #dbeafe; color: #2563eb; }
+  .lbl-frontend { background: #cffafe; color: #0891b2; }
+  .lbl-devops { background: #ffedd5; color: #ea580c; }
+  .lbl-security { background: #fee2e2; color: #dc2626; }
+  .lbl-docs { background: #f3f4f6; color: #4b5563; }
+  .progress-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #3b82f6; border-radius: 3px; transition: width 0.3s; }
+  .comments-section { display: flex; flex-direction: column; gap: 16px; }
+  .comment { display: flex; gap: 10px; }
+  .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .comment-body { flex: 1; }
+  .comment-author { font-weight: 600; font-size: 13px; }
+  .comment-text { font-size: 14px; color: #475569; line-height: 1.5; margin-top: 2px; }
+  .comment-time { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+  .comment-input-row { display: flex; gap: 8px; margin-top: 8px; }
+  .comment-input { flex: 1; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+  .comment-send { padding: 10px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .detail-actions { display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+  .edit-btn { padding: 8px 16px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 13px; }
+  .delete-btn { padding: 8px 16px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; }
+
+computed:
+  getInitial = (id) => (teamMembers.find(m => m.id === id) || { avatar: "?" }).avatar
+  getName = (id) => (teamMembers.find(m => m.id === id) || { name: "Unknown" }).name
+
+handlers:
+  close:
+    log "Close detail"
+  stopPropagation:
+    log "Stop"
+  setTab:
+    set activeTab = ctx.el.dataset.tab
+  toggleEdit:
+    set isEditing = !isEditing
+  deleteTask:
+    log "Delete task"
+  addComment:
+    log "Add comment"
+    set newComment = ""

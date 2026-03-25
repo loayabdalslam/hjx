@@ -3,21 +3,24 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'HJX',
   description: 'The Unified UI Language — One file. HTML + CSS + JS. Zero config.',
+  base: '/hjx/',
   ignoreDeadLinks: true,
 
   head: [
     ['meta', { name: 'theme-color', content: '#3b82f6' }],
     ['meta', { property: 'og:title', content: 'HJX — Unified UI Language' }],
     ['meta', { property: 'og:description', content: 'Build web UIs from a single .hjx file. Compiles to vanilla HTML/CSS/JS.' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/hjx/logo.svg' }],
   ],
 
   themeConfig: {
-    logo: '/logo.png',
+    logo: '/logo.svg',
 
     nav: [
-      { text: 'Guide', link: '/guide/' },
-      { text: 'Reference', link: '/reference/' },
+      { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'Reference', link: '/reference/spec' },
       { text: 'Examples', link: '/examples/' },
+      { text: 'NLP Engine', link: '/guide/nlp-engine' },
       { text: 'GitHub', link: 'https://github.com/loayabdalslam/hjx' },
     ],
 
@@ -34,15 +37,26 @@ export default defineConfig({
         {
           text: 'Core Concepts',
           items: [
-            { text: 'Control Flow', link: '/guide/control-flow' },
+            { text: 'Syntax', link: '/guide/syntax' },
+            { text: 'State', link: '/guide/state' },
             { text: 'Components', link: '/guide/components' },
+            { text: 'Styling', link: '/guide/styling' },
+            { text: 'Handlers', link: '/guide/handlers' },
+            { text: 'Control Flow', link: '/guide/control-flow' },
+          ]
+        },
+        {
+          text: 'Advanced',
+          items: [
             { text: 'Server-Driven Mode', link: '/guide/server-driven' },
+            { text: 'CLI', link: '/guide/cli' },
+            { text: 'NLP Engine', link: '/guide/nlp-engine' },
           ]
         },
         {
           text: 'Ecosystem',
           items: [
-            { text: 'Vite Plugin & VS Code', link: '/guide/ecosystem' },
+            { text: 'Ecosystem & Tools', link: '/guide/ecosystem' },
           ]
         }
       ],
@@ -50,9 +64,8 @@ export default defineConfig({
         {
           text: 'Reference',
           items: [
-            { text: 'Overview', link: '/reference/' },
             { text: 'Language Spec', link: '/reference/spec' },
-            { text: 'CLI', link: '/reference/cli' },
+            { text: 'CLI Commands', link: '/reference/cli' },
             { text: 'API', link: '/reference/api' },
           ]
         }
@@ -64,6 +77,8 @@ export default defineConfig({
             { text: 'Overview', link: '/examples/' },
             { text: 'Counter', link: '/examples/counter' },
             { text: 'Form', link: '/examples/form' },
+            { text: 'Todo List', link: '/examples/list' },
+            { text: 'Conditional', link: '/examples/conditional' },
             { text: 'Composition', link: '/examples/composition' },
           ]
         }
@@ -77,6 +92,19 @@ export default defineConfig({
     footer: {
       message: 'Released under the MIT License.',
       copyright: '© 2026 Loay Abdalslam'
+    },
+
+    search: {
+      provider: 'local'
+    },
+
+    editLink: {
+      pattern: 'https://github.com/loayabdalslam/hjx/edit/main/docs/:path',
+      text: 'Edit this page on GitHub'
+    },
+
+    lastUpdated: {
+      text: 'Last updated'
     }
   }
 })
