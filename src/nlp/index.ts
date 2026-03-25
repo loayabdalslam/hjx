@@ -50,6 +50,9 @@ export type { Diagnostic, QuickFix } from "./errors/detector.js";
 export { ErrorCorrector, correctCode, suggestFixes } from "./errors/corrector.js";
 export type { CorrectedCode, CodeChange, FixSuggestion } from "./errors/corrector.js";
 
+export { SemanticCodeSearch, createSearchIndex } from "./completion/search.js";
+export type { SearchIndexEntry, SemanticSearchResult, Usage } from "./completion/search.js";
+
 import { IntentClassifier } from "./intent/classifier.js";
 import { EntityExtractor } from "./entities/extractor.js";
 import { RelationExtractor } from "./entities/relations.js";

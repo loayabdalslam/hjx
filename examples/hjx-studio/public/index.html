@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HJX Studio — Vibe Coding Without LLM</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   HJX Studio Design System
+   Theme: "Studio Dark" — Deep black-blue with indigo accents
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Colors — "Studio Dark" palette */
+  --studio-bg:           #0a0a0f;     /* id="studio-bg" — root background */
+  --studio-surface:      #12121a;     /* id="studio-surface" — elevated surfaces */
+  --studio-card:         #1a1a2e;     /* id="studio-card" — card/panel bg */
+  --studio-card-hover:   #22223a;     /* id="studio-card-hover" — hover lift */
+  --studio-input-bg:     #16162a;     /* id="studio-input-bg" — input fields */
+  --studio-border:       #2a2a4a;     /* id="studio-border" — borders */
+  --studio-border-focus: #4a4a8a;     /* id="studio-border-focus" — focus ring */
+  --studio-text:         #e8e8f0;     /* id="studio-text" — primary text */
+  --studio-text-dim:     #8888aa;     /* id="studio-text-dim" — secondary */
+  --studio-text-muted:   #5a5a7a;     /* id="studio-text-muted" — tertiary */
+  --studio-accent:       #6366f1;     /* id="studio-accent" — primary indigo */
+  --studio-accent-hover: #5558e6;     /* id="studio-accent-hover" */
+  --studio-accent-glow:  rgba(99,102,241,0.25);  /* id="studio-accent-glow" */
+  --studio-green:        #22c55e;     /* id="studio-green" — success */
+  --studio-green-glow:   rgba(34,197,94,0.3);
+  --studio-red:          #ef4444;     /* id="studio-red" — error */
+  --studio-yellow:       #eab308;     /* id="studio-yellow" — warning */
+  --studio-cyan:         #06b6d4;     /* id="studio-cyan" — info */
+  --studio-purple:       #a855f7;     /* id="studio-purple" — secondary */
+
+  /* Typography */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --space-xs: 4px;  --space-sm: 8px;  --space-md: 16px;
+  --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+
+  /* Radius */
+  --radius-sm: 6px;  --radius-md: 10px; --radius-lg: 14px;
+  --radius-xl: 20px; --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 24px var(--studio-accent-glow);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--studio-bg);
+  color: var(--studio-text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── App Shell ────────────────────────────────────────────── */
+#studio-app { display: grid; grid-template-rows: 48px 1fr 56px; height: 100vh; }
+
+/* ─── Top Bar ──────────────────────────────────────────────── */
+#studio-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--space-md);
+  background: var(--studio-surface);
+  border-bottom: 1px solid var(--studio-border);
+}
+
+#studio-logo {
+  display: flex; align-items: center; gap: var(--space-sm);
+  font-weight: 800; font-size: 15px;
+}
+
+#studio-logo-mark {
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, var(--studio-accent), var(--studio-purple));
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: white;
+}
+
+#studio-badge {
+  padding: 3px 10px;
+  background: var(--studio-accent);
+  color: white; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+}
+
+#studio-nav {
+  display: flex; gap: 2px;
+}
+
+.studio-nav-btn {
+  padding: 5px 14px; border: none; background: none;
+  color: var(--studio-text-dim); cursor: pointer;
+  border-radius: var(--radius-sm); font-size: 12px; font-weight: 500;
+  transition: all 0.15s;
+}
+
+.studio-nav-btn.active { background: var(--studio-card); color: var(--studio-text); }
+.studio-nav-btn:hover { color: var(--studio-text); }
+
+#studio-topbar-actions { display: flex; gap: 6px; }
+
+.studio-action-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--studio-border);
+  background: var(--studio-card); border-radius: var(--radius-sm);
+  color: var(--studio-text-dim); cursor: pointer; font-size: 11px;
+  transition: all 0.15s;
+}
+
+.studio-action-btn:hover { border-color: var(--studio-accent); color: var(--studio-accent); }
+.studio-action-btn.primary { background: var(--studio-accent); color: white; border-color: var(--studio-accent); }
+
+/* ─── Main Grid ────────────────────────────────────────────── */
+#studio-main {
+  display: grid;
+  grid-template-columns: 300px 1fr 340px;
+  overflow: hidden;
+}
+
+.studio-panel {
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--studio-border);
+  overflow: hidden;
+}
+
+.studio-panel:last-child { border-right: none; }
+
+#studio-panel-header {
+  padding: 10px var(--space-md);
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--studio-text-dim);
+  border-bottom: 1px solid var(--studio-border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--studio-surface);
+}
+
+#studio-panel-body {
+  flex: 1; overflow-y: auto; padding: var(--space-md);
+}
+
+/* ─── Voice Section ────────────────────────────────────────── */
+#voice-section { text-align: center; margin-bottom: var(--space-lg); }
+
+#mic-btn {
+  width: 72px; height: 72px;
+  border-radius: var(--radius-full);
+  border: 3px solid var(--studio-border);
+  background: var(--studio-card);
+  cursor: pointer; font-size: 28px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto var(--space-sm);
+  transition: all 0.3s;
+  position: relative;
+}
+
+#mic-btn.recording {
+  border-color: var(--studio-red);
+  background: rgba(239,68,68,0.1);
+  animation: studio-pulse-red 1.5s infinite;
+}
+
+#mic-btn.listening {
+  border-color: var(--studio-green);
+  background: rgba(34,197,94,0.1);
+  animation: studio-pulse-green 1.5s infinite;
+}
+
+@keyframes studio-pulse-red {
+  0% { box-shadow: 0 0 0 0 var(--studio-red); }
+  70% { box-shadow: 0 0 0 16px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes studio-pulse-green {
+  0% { box-shadow: 0 0 0 0 var(--studio-green-glow); }
+  70% { box-shadow: 0 0 0 16px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+#mic-status {
+  font-size: 12px; color: var(--studio-text-dim); margin-bottom: 6px;
+}
+
+#mic-status.active { color: var(--studio-green); }
+#mic-status.recording { color: var(--studio-red); }
+
+#voice-provider {
+  font-size: 10px; color: var(--studio-text-muted); margin-bottom: var(--space-sm);
+}
+
+#transcript-box {
+  background: var(--studio-card);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  min-height: 50px; text-align: left;
+  margin-bottom: var(--space-md);
+}
+
+#transcript-label {
+  font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--studio-text-muted);
+  margin-bottom: 6px;
+}
+
+#transcript-text {
+  font-size: 13px; line-height: 1.5; min-height: 20px;
+}
+
+#transcript-text.interim { color: var(--studio-text-dim); font-style: italic; }
+
+/* ─── Quick Commands ───────────────────────────────────────── */
+.studio-section-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--studio-text-dim);
+  margin-bottom: var(--space-sm);
+}
+
+#quick-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; margin-bottom: var(--space-lg);
+}
+
+.quick-btn {
+  padding: 10px;
+  background: var(--studio-card);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+
+.quick-btn:hover { border-color: var(--studio-accent); background: var(--studio-card-hover); }
+
+.quick-icon { font-size: 18px; margin-bottom: 4px; display: block; }
+.quick-name { font-size: 11px; font-weight: 500; }
+
+/* ─── Theme Selector ───────────────────────────────────────── */
+#theme-row { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+
+.theme-opt {
+  flex: 1; padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+  background: var(--studio-card); cursor: pointer;
+  text-align: center; font-size: 12px;
+  transition: all 0.15s;
+}
+
+.theme-opt.active { border-color: var(--studio-accent); background: rgba(99,102,241,0.1); }
+
+/* ─── Component List ───────────────────────────────────────── */
+#component-list { display: flex; flex-direction: column; gap: 6px; }
+
+.comp-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: 8px 12px;
+  background: var(--studio-card);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  animation: studio-slide-in 0.3s ease;
+}
+
+@keyframes studio-slide-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.comp-dot { width: 7px; height: 7px; border-radius: var(--radius-full); background: var(--studio-green); flex-shrink: 0; }
+.comp-name { flex: 1; font-weight: 500; }
+.comp-method { font-size: 10px; color: var(--studio-text-muted); }
+.comp-remove {
+  background: none; border: none; color: var(--studio-text-dim);
+  cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: var(--radius-sm);
+}
+.comp-remove:hover { background: rgba(239,68,68,0.1); color: var(--studio-red); }
+
+/* ─── Preview (Center) ─────────────────────────────────────── */
+#preview-area { display: flex; flex-direction: column; height: 100%; }
+
+#preview-toolbar {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: 6px var(--space-md);
+  border-bottom: 1px solid var(--studio-border);
+  background: var(--studio-surface);
+}
+
+#device-btns {
+  display: flex; gap: 2px;
+  background: var(--studio-bg);
+  border-radius: var(--radius-sm); padding: 2px;
+}
+
+.device-btn {
+  padding: 4px 10px; border: none; background: none;
+  color: var(--studio-text-dim); cursor: pointer;
+  border-radius: var(--radius-sm); font-size: 11px;
+  transition: all 0.15s;
+}
+
+.device-btn.active { background: var(--studio-card); color: var(--studio-text); }
+
+#preview-status {
+  margin-left: auto; font-size: 10px; color: var(--studio-text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.ws-dot {
+  width: 6px; height: 6px; border-radius: var(--radius-full);
+}
+
+.ws-dot.connected { background: var(--studio-green); }
+.ws-dot.disconnected { background: var(--studio-red); }
+
+#preview-frame {
+  flex: 1; background: white; overflow: hidden; position: relative;
+}
+
+#preview-iframe {
+  width: 100%; height: 100%; border: none;
+}
+
+#preview-frame.mobile { max-width: 375px; margin: 0 auto; border-left: 1px solid var(--studio-border); border-right: 1px solid var(--studio-border); }
+#preview-frame.tablet { max-width: 768px; margin: 0 auto; border-left: 1px solid var(--studio-border); border-right: 1px solid var(--studio-border); }
+
+/* ─── Code Panel (Right) ───────────────────────────────────── */
+#code-tabs {
+  display: flex; gap: 2px; padding: 0 var(--space-md);
+  background: var(--studio-surface);
+  border-bottom: 1px solid var(--studio-border);
+}
+
+.code-tab {
+  padding: 8px 12px; border: none; background: none;
+  color: var(--studio-text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.code-tab.active { color: var(--studio-accent); border-bottom-color: var(--studio-accent); }
+
+#code-body {
+  flex: 1; overflow-y: auto; padding: var(--space-md);
+}
+
+.code-block {
+  background: var(--studio-bg);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 11px; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-all;
+  color: var(--studio-text);
+  margin-bottom: var(--space-md);
+  animation: studio-slide-in 0.3s ease;
+}
+
+.code-block-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--studio-border);
+}
+
+.code-block-name {
+  font-weight: 600; font-size: 12px; color: var(--studio-cyan);
+  font-family: var(--font-sans);
+}
+
+.code-copy-btn {
+  padding: 3px 8px;
+  background: var(--studio-card);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 10px; color: var(--studio-text-dim);
+}
+
+/* ─── Chat Input (Bottom Center) ───────────────────────────── */
+#chat-bar {
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--studio-surface);
+  border-top: 1px solid var(--studio-border);
+}
+
+#chat-container {
+  display: flex; align-items: center; gap: var(--space-sm);
+  width: 100%; max-width: 700px;
+  background: var(--studio-card);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-xl);
+  padding: 4px 4px 4px var(--space-md);
+  transition: border-color 0.2s;
+}
+
+#chat-container:focus-within {
+  border-color: var(--studio-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+#chat-icon { font-size: 16px; color: var(--studio-text-dim); flex-shrink: 0; }
+
+#chat-input {
+  flex: 1; padding: 10px 0;
+  border: none; background: none;
+  color: var(--studio-text);
+  font-size: 14px; font-family: var(--font-sans);
+  outline: none;
+}
+
+#chat-input::placeholder { color: var(--studio-text-muted); }
+
+#chat-send {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--studio-accent);
+  color: white; cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+#chat-send:hover { background: var(--studio-accent-hover); }
+
+#chat-send:disabled { background: var(--studio-border); cursor: default; }
+
+/* ─── Activity Log ─────────────────────────────────────────── */
+.activity-item {
+  display: flex; align-items: flex-start; gap: var(--space-sm);
+  padding: 8px 10px;
+  background: var(--studio-card);
+  border-radius: var(--radius-md);
+  margin-bottom: 6px; font-size: 12px;
+}
+
+.activity-icon { font-size: 14px; flex-shrink: 0; }
+.activity-text { flex: 1; line-height: 1.4; }
+.activity-time { font-size: 10px; color: var(--studio-text-muted); }
+
+/* ─── Status Bar ───────────────────────────────────────────── */
+#studio-status {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--space-md);
+  background: var(--studio-surface);
+  border-top: 1px solid var(--studio-border);
+  font-size: 10px; color: var(--studio-text-dim);
+}
+
+#studio-status-left, #studio-status-right { display: flex; gap: var(--space-md); }
+
+/* ─── Export Modal ─────────────────────────────────────────── */
+#export-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); z-index: 100;
+  display: none; align-items: center; justify-content: center;
+}
+
+#export-overlay.visible { display: flex; }
+
+#export-modal {
+  background: var(--studio-card);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  width: 500px; max-width: 90vw;
+}
+
+#export-modal h3 { font-size: 18px; margin-bottom: var(--space-md); }
+
+#export-file-list {
+  background: var(--studio-bg);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  max-height: 200px; overflow-y: auto;
+  margin-bottom: var(--space-md);
+}
+
+.export-file-row { padding: 4px 0; color: var(--studio-text-dim); }
+.export-file-row .size { color: var(--studio-text-muted); float: right; }
+
+#export-actions { display: flex; gap: var(--space-sm); justify-content: flex-end; }
+
+.export-btn {
+  padding: 10px 20px; border-radius: var(--radius-md);
+  border: 1px solid var(--studio-border);
+  background: var(--studio-card); color: var(--studio-text);
+  cursor: pointer; font-size: 13px;
+}
+
+.export-btn.primary { background: var(--studio-accent); border-color: var(--studio-accent); color: white; }
+</style>
+</head>
+<body>
+
+<div id="studio-app">
+  <!-- ═══ Top Bar ═══ -->
+  <div id="studio-topbar">
+    <div id="studio-logo">
+      <div id="studio-logo-mark">H</div>
+      <span>Studio</span>
+      <span id="studio-badge">VIBE CODING</span>
+    </div>
+
+    <div id="studio-nav">
+      <button class="studio-nav-btn active" onclick="switchView('build')">Build</button>
+      <button class="studio-nav-btn" onclick="switchView('code')">Code</button>
+    </div>
+
+    <div id="studio-topbar-actions">
+      <button class="studio-action-btn" onclick="undoLast()">↩ Undo</button>
+      <button class="studio-action-btn" onclick="clearAll()">Clear</button>
+      <button class="studio-action-btn primary" onclick="openExport()">Export Vite →</button>
+    </div>
+  </div>
+
+  <!-- ═══ Main Content ═══ -->
+  <div id="studio-main">
+    <!-- ─── Left: Voice + Commands ─── -->
+    <div class="studio-panel">
+      <div id="studio-panel-header">
+        <span>Voice Control</span>
+        <span id="ws-indicator"><span class="ws-dot disconnected"></span> <span id="ws-text">Connecting</span></span>
+      </div>
+      <div id="studio-panel-body">
+
+        <!-- Voice Input -->
+        <div id="voice-section">
+          <button id="mic-btn" onclick="toggleVoice()">🎤</button>
+          <div id="mic-status">Click to start speaking</div>
+          <div id="voice-provider">Web Speech API • en-US</div>
+
+          <div id="transcript-box">
+            <div id="transcript-label">Transcript</div>
+            <div id="transcript-text">Ready for voice input...</div>
+          </div>
+        </div>
+
+        <!-- Quick Commands -->
+        <div class="studio-section-label">Quick Add</div>
+        <div id="quick-grid">
+          <div class="quick-btn" onclick="sendCommand('Add a navbar')"><span class="quick-icon">🧭</span><span class="quick-name">Navbar</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a hero section')"><span class="quick-icon">🎯</span><span class="quick-name">Hero</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a feature cards section')"><span class="quick-icon">🃏</span><span class="quick-name">Features</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a footer')"><span class="quick-icon">🦶</span><span class="quick-name">Footer</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a modal')"><span class="quick-icon">💬</span><span class="quick-name">Modal</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a search bar')"><span class="quick-icon">🔍</span><span class="quick-name">Search</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a contact form')"><span class="quick-icon">📝</span><span class="quick-name">Form</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add API data card')"><span class="quick-icon">🔌</span><span class="quick-name">API Card</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add dark mode toggle')"><span class="quick-icon">🌙</span><span class="quick-name">Dark Mode</span></div>
+          <div class="quick-btn" onclick="sendCommand('Add a sidebar')"><span class="quick-icon">📐</span><span class="quick-name">Sidebar</span></div>
+        </div>
+
+        <!-- Theme -->
+        <div class="studio-section-label">Theme</div>
+        <div id="theme-row">
+          <div class="theme-opt active" id="theme-light" onclick="setTheme('light')">☀️ Light</div>
+          <div class="theme-opt" id="theme-dark" onclick="setTheme('dark')">🌙 Dark</div>
+        </div>
+
+        <!-- Components -->
+        <div class="studio-section-label">Components <span id="comp-count-badge"></span></div>
+        <div id="component-list"></div>
+
+      </div>
+    </div>
+
+    <!-- ─── Center: Live Preview ─── -->
+    <div class="studio-panel">
+      <div id="studio-panel-header">
+        <span>Live Preview</span>
+        <span id="preview-label">0 components</span>
+      </div>
+      <div id="preview-area">
+        <div id="preview-toolbar">
+          <div id="device-btns">
+            <button class="device-btn active" onclick="setDevice('desktop',this)">🖥 Desktop</button>
+            <button class="device-btn" onclick="setDevice('tablet',this)">📱 Tablet</button>
+            <button class="device-btn" onclick="setDevice('mobile',this)">📲 Mobile</button>
+          </div>
+          <div id="preview-status">
+            <span class="ws-dot disconnected" id="preview-dot"></span>
+            <span id="preview-status-text">Ready</span>
+          </div>
+        </div>
+        <div id="preview-frame">
+          <iframe id="preview-iframe"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Right: Code / Activity ─── -->
+    <div class="studio-panel">
+      <div id="code-tabs">
+        <button class="code-tab active" onclick="switchCodeTab('components',this)">Components</button>
+        <button class="code-tab" onclick="switchCodeTab('activity',this)">Activity</button>
+      </div>
+      <div id="code-body"></div>
+    </div>
+  </div>
+
+  <!-- ═══ Chat Bar (Bottom Center) ═══ -->
+  <div id="chat-bar">
+    <div id="chat-container">
+      <span id="chat-icon">💬</span>
+      <input id="chat-input" type="text"
+        placeholder="Type a command or describe what you want to build..."
+        onkeydown="if(event.key==='Enter')sendChat()"
+      >
+      <button id="chat-send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+
+  <!-- ═══ Status Bar ═══ -->
+  <div id="studio-status">
+    <div id="studio-status-left">
+      <span>HJX Studio v2.0</span>
+      <span id="status-mode">Build Mode</span>
+    </div>
+    <div id="studio-status-right">
+      <span id="status-latency">—</span>
+      <span id="status-components">0 components</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Export Modal ═══ -->
+<div id="export-overlay">
+  <div id="export-modal">
+    <h3>Export Vite Project</h3>
+    <p style="color:var(--studio-text-dim);font-size:13px;margin-bottom:16px;">
+      Download a ready-to-run Vite project with all your components.
+    </p>
+    <div id="export-file-list"></div>
+    <div id="export-actions">
+      <button class="export-btn" onclick="closeExport()">Cancel</button>
+      <button class="export-btn primary" onclick="downloadExport()">Download .zip</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// HJX Studio Client — "Vibe Coding Without LLM"
+// ═══════════════════════════════════════════════════════════════
+
+const STUDIO = {
+  ws: null,
+  recognition: null,
+  isRecording: false,
+  components: [],
+  activity: [],
+  currentCodeTab: 'components',
+  currentView: 'build',
+  theme: 'light',
+};
+
+// ─── WebSocket ──────────────────────────────────────────────────
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  STUDIO.ws = new WebSocket(`${proto}//${location.host}`);
+
+  STUDIO.ws.onopen = () => {
+    setWSStatus(true);
+    log('🚀', 'Connected to HJX Studio');
+  };
+
+  STUDIO.ws.onclose = () => {
+    setWSStatus(false);
+    setTimeout(connectWS, 2000);
+  };
+
+  STUDIO.ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    handleWSMessage(msg);
+  };
+}
+
+function setWSStatus(connected) {
+  const dot = document.querySelector('#ws-indicator .ws-dot');
+  const text = document.getElementById('ws-text');
+  const previewDot = document.getElementById('preview-dot');
+
+  if (connected) {
+    dot.className = 'ws-dot connected';
+    text.textContent = 'Live';
+    previewDot.className = 'ws-dot connected';
+  } else {
+    dot.className = 'ws-dot disconnected';
+    text.textContent = 'Disconnected';
+    previewDot.className = 'ws-dot disconnected';
+  }
+}
+
+function handleWSMessage(msg) {
+  switch (msg.type) {
+    case 'connected':
+      log('🎤', msg.message);
+      break;
+
+    case 'added':
+      STUDIO.components.push({ name: msg.name, code: msg.code, method: msg.method });
+      updatePreview(msg.liveHTML);
+      updateComponentList();
+      showCodeBlock(msg.name, msg.code);
+      log('✨', `Added ${msg.name} (${msg.method})`);
+      break;
+
+    case 'info':
+      log('ℹ️', msg.message);
+      break;
+
+    case 'undone':
+      STUDIO.components = (msg.project?.components || []).map(n => ({ name: n, code: '', method: '' }));
+      updatePreview(msg.liveHTML);
+      updateComponentList();
+      log('↩', 'Undid last action');
+      break;
+
+    case 'cleared':
+      STUDIO.components = [];
+      updatePreview(msg.liveHTML);
+      updateComponentList();
+      clearCodePanel();
+      log('🧹', 'Project cleared');
+      break;
+
+    case 'export_data':
+      showExportModal(msg.files);
+      break;
+  }
+}
+
+// ─── Voice Recognition (Web Speech API with smart config) ─────────
+function initSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('mic-status').textContent = 'Speech not supported — use chat input';
+    document.getElementById('voice-provider').textContent = 'Not available in this browser';
+    return;
+  }
+
+  STUDIO.recognition = new SR();
+  STUDIO.recognition.continuous = true;
+  STUDIO.recognition.interimResults = true;
+  STUDIO.recognition.lang = 'en-US';
+  STUDIO.recognition.maxAlternatives = 1;
+
+  STUDIO.recognition.onstart = () => {
+    STUDIO.isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    const status = document.getElementById('mic-status');
+    status.textContent = 'Listening... speak now';
+    status.className = 'recording';
+  };
+
+  STUDIO.recognition.onend = () => {
+    STUDIO.isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    const status = document.getElementById('mic-status');
+    status.textContent = 'Click to start speaking';
+    status.className = '';
+  };
+
+  STUDIO.recognition.onresult = (event) => {
+    let final = '', interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t; else interim += t;
+    }
+    const el = document.getElementById('transcript-text');
+    if (interim) el.innerHTML = `<span class="interim">${interim}</span>`;
+    if (final) {
+      el.textContent = final;
+      processCommand(final);
+    }
+  };
+
+  STUDIO.recognition.onerror = (e) => {
+    console.error('Speech error:', e.error);
+    document.getElementById('mic-status').textContent = `Error: ${e.error}`;
+    STUDIO.isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+  };
+}
+
+function toggleVoice() {
+  if (!STUDIO.recognition) { initSpeech(); if (!STUDIO.recognition) return; }
+  if (STUDIO.isRecording) { STUDIO.recognition.stop(); } else { STUDIO.recognition.start(); }
+}
+
+// ─── Command Processing ──────────────────────────────────────
+function processCommand(text) {
+  if (STUDIO.ws?.readyState === WebSocket.OPEN) {
+    const start = Date.now();
+    STUDIO.ws.send(JSON.stringify({ type: 'command', text }));
+    document.getElementById('status-latency').textContent = `${Date.now() - start}ms`;
+  }
+}
+
+function sendCommand(text) {
+  document.getElementById('transcript-text').textContent = text;
+  processCommand(text);
+}
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('transcript-text').textContent = text;
+  processCommand(text);
+}
+
+// ─── Preview ─────────────────────────────────────────────────
+function updatePreview(html) {
+  const iframe = document.getElementById('preview-iframe');
+  iframe.srcdoc = html;
+  document.getElementById('preview-status-text').textContent = 'Updated';
+  setTimeout(() => {
+    document.getElementById('preview-status-text').textContent = 'Live';
+  }, 500);
+}
+
+function setDevice(device, btn) {
+  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('preview-frame').className = device;
+}
+
+// ─── Component List ──────────────────────────────────────────
+function updateComponentList() {
+  const list = document.getElementById('component-list');
+  const count = STUDIO.components.length;
+
+  document.getElementById('comp-count-badge').textContent = count > 0 ? `(${count})` : '';
+  document.getElementById('preview-label').textContent = `${count} component${count !== 1 ? 's' : ''}`;
+  document.getElementById('status-components').textContent = `${count} component${count !== 1 ? 's' : ''}`;
+
+  if (count === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--studio-text-muted);font-size:12px;padding:20px;">No components yet</div>';
+    return;
+  }
+
+  list.innerHTML = STUDIO.components.map((c, i) =>
+    `<div class="comp-item">
+      <span class="comp-dot"></span>
+      <span class="comp-name">${c.name}</span>
+      <span class="comp-method">${c.method}</span>
+      <button class="comp-remove" onclick="removeComp(${i})">×</button>
+    </div>`
+  ).join('');
+}
+
+function removeComp(index) { if (STUDIO.ws?.readyState === WebSocket.OPEN) STUDIO.ws.send(JSON.stringify({ type: 'undo' })); }
+
+// ─── Code Panel ──────────────────────────────────────────────
+function switchCodeTab(tab, btn) {
+  STUDIO.currentCodeTab = tab;
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderCodePanel();
+}
+
+function renderCodePanel() {
+  const body = document.getElementById('code-body');
+  if (STUDIO.currentCodeTab === 'activity') {
+    body.innerHTML = STUDIO.activity.map(a =>
+      `<div class="activity-item"><span class="activity-icon">${a.icon}</span><span class="activity-text">${a.text}</span><span class="activity-time">${a.time}</span></div>`
+    ).join('') || '<div style="text-align:center;color:var(--studio-text-muted);padding:20px;font-size:12px;">No activity yet</div>';
+  } else {
+    body.innerHTML = STUDIO.components.map(c =>
+      `<div class="code-block"><div class="code-block-header"><span class="code-block-name">${c.name}.hjx</span><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>${escHtml(c.code)}</div>`
+    ).join('') || '<div style="text-align:center;color:var(--studio-text-muted);padding:40px;font-size:12px;">Generated code will appear here</div>';
+  }
+}
+
+function showCodeBlock(name, code) {
+  if (STUDIO.currentCodeTab !== 'components') return;
+  const body = document.getElementById('code-body');
+  const div = document.createElement('div');
+  div.className = 'code-block';
+  div.innerHTML = `<div class="code-block-header"><span class="code-block-name">${name}.hjx</span><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>${escHtml(code)}`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function clearCodePanel() { document.getElementById('code-body').innerHTML = ''; }
+
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const code = block.textContent.replace('Copy', '').trim();
+  navigator.clipboard.writeText(code);
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}
+
+// ─── Theme ──────────────────────────────────────────────────
+function setTheme(theme) {
+  STUDIO.theme = theme;
+  document.querySelectorAll('.theme-opt').forEach(t => t.classList.remove('active'));
+  document.getElementById('theme-' + theme).classList.add('active');
+  if (STUDIO.ws?.readyState === WebSocket.OPEN) STUDIO.ws.send(JSON.stringify({ type: 'theme', theme }));
+}
+
+// ─── Actions ────────────────────────────────────────────────
+function undoLast() { if (STUDIO.ws?.readyState === WebSocket.OPEN) STUDIO.ws.send(JSON.stringify({ type: 'undo' })); }
+
+function clearAll() {
+  if (STUDIO.ws?.readyState === WebSocket.OPEN) STUDIO.ws.send(JSON.stringify({ type: 'clear' }));
+  clearCodePanel();
+}
+
+function switchView(view) {
+  STUDIO.currentView = view;
+  document.querySelectorAll('.studio-nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.studio-nav-btn[onclick*="${view}"]`).classList.add('active');
+  document.getElementById('status-mode').textContent = view.charAt(0).toUpperCase() + view.slice(1) + ' Mode';
+  renderCodePanel();
+}
+
+// ─── Export ─────────────────────────────────────────────────
+function openExport() {
+  if (STUDIO.ws?.readyState === WebSocket.OPEN) STUDIO.ws.send(JSON.stringify({ type: 'export' }));
+}
+
+function showExportModal(files) {
+  const list = document.getElementById('export-file-list');
+  list.innerHTML = Object.entries(files).map(([path, content]) =>
+    `<div class="export-file-row">📄 ${path} <span class="size">${(content.length / 1024).toFixed(1)}KB</span></div>`
+  ).join('');
+  STUDIO._exportFiles = files;
+  document.getElementById('export-overlay').classList.add('visible');
+}
+
+function closeExport() {
+  document.getElementById('export-overlay').classList.remove('visible');
+}
+
+function downloadExport() {
+  if (!STUDIO._exportFiles) return;
+  // Download each file individually (zip would need a library)
+  for (const [path, content] of Object.entries(STUDIO._exportFiles)) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = path;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  closeExport();
+  log('📦', `Exported ${Object.keys(STUDIO._exportFiles).length} files`);
+}
+
+// ─── Activity Log ───────────────────────────────────────────
+function log(icon, text) {
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  STUDIO.activity.unshift({ icon, text, time });
+  if (STUDIO.activity.length > 100) STUDIO.activity.pop();
+  if (STUDIO.currentCodeTab === 'activity') renderCodePanel();
+}
+
+// ─── Helpers ────────────────────────────────────────────────
+function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── Init ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  connectWS();
+  initSpeech();
+
+  // Set initial preview
+  document.getElementById('preview-iframe').srcdoc = `<!DOCTYPE html><html><head><style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;background:#f9fafb;color:#9ca3af;}
+  </style></head><body>
+    <div style="text-align:center;">
+      <div style="font-size:64px;margin-bottom:16px;">🎤</div>
+      <div style="font-size:20px;font-weight:600;margin-bottom:8px;">Start Building</div>
+      <div style="font-size:14px;">Click the mic or type a command below</div>
+    </div>
+  </body></html>`;
+});
+</script>
+
+</body>
+</html>
