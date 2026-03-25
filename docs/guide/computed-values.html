@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Computed Values | HJX</title>
+    <meta name="description" content="The Unified UI Language — One file. HTML + CSS + JS. Zero config.">
+    <meta name="generator" content="VitePress v1.6.4">
+    <link rel="preload stylesheet" href="/assets/style.qp7qGaqN.css" as="style">
+    <link rel="preload stylesheet" href="/vp-icons.css" as="style">
+    
+    <script type="module" src="/assets/app.1xVna05C.js"></script>
+    <link rel="preload" href="/assets/inter-roman-latin.Di8DUHzh.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="modulepreload" href="/assets/chunks/theme.CeLa6R-t.js">
+    <link rel="modulepreload" href="/assets/chunks/framework.CvgP6Fyv.js">
+    <link rel="modulepreload" href="/assets/docs_guide_computed-values.md.BfUo5mW9.lean.js">
+    <meta name="theme-color" content="#3b82f6">
+    <meta property="og:title" content="HJX — Unified UI Language">
+    <meta property="og:description" content="Build web UIs from a single .hjx file. Compiles to vanilla HTML/CSS/JS.">
+    <link rel="icon" type="image/svg+xml" href="/logo.svg">
+    <script id="check-dark-mode">(()=>{const e=localStorage.getItem("vitepress-theme-appearance")||"auto",a=window.matchMedia("(prefers-color-scheme: dark)").matches;(!e||e==="auto"?a:e==="dark")&&document.documentElement.classList.add("dark")})();</script>
+    <script id="check-mac-os">document.documentElement.classList.toggle("mac",/Mac|iPhone|iPod|iPad/i.test(navigator.platform));</script>
+  </head>
+  <body>
+    <div id="app"><div class="Layout" data-v-d8b57b2d><!--[--><!--]--><!--[--><span tabindex="-1" data-v-fcbfc0e0></span><a href="#VPContent" class="VPSkipLink visually-hidden" data-v-fcbfc0e0>Skip to content</a><!--]--><!----><header class="VPNav" data-v-d8b57b2d data-v-7ad780c2><div class="VPNavBar" data-v-7ad780c2 data-v-9fd4d1dd><div class="wrapper" data-v-9fd4d1dd><div class="container" data-v-9fd4d1dd><div class="title" data-v-9fd4d1dd><div class="VPNavBarTitle" data-v-9fd4d1dd data-v-9f43907a><a class="title" href="/" data-v-9f43907a><!--[--><!--]--><!--[--><img class="VPImage logo" src="/logo.svg" alt data-v-ab19afbb><!--]--><span data-v-9f43907a>HJX</span><!--[--><!--]--></a></div></div><div class="content" data-v-9fd4d1dd><div class="content-body" data-v-9fd4d1dd><!--[--><!--]--><div class="VPNavBarSearch search" data-v-9fd4d1dd><!--[--><!----><div id="local-search"><button type="button" class="DocSearch DocSearch-Button" aria-label="Search"><span class="DocSearch-Button-Container"><span class="vp-icon DocSearch-Search-Icon"></span><span class="DocSearch-Button-Placeholder">Search</span></span><span class="DocSearch-Button-Keys"><kbd class="DocSearch-Button-Key"></kbd><kbd class="DocSearch-Button-Key">K</kbd></span></button></div><!--]--></div><nav aria-labelledby="main-nav-aria-label" class="VPNavBarMenu menu" data-v-9fd4d1dd data-v-afb2845e><span id="main-nav-aria-label" class="visually-hidden" data-v-afb2845e> Main Navigation </span><!--[--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/guide/getting-started" tabindex="0" data-v-afb2845e data-v-815115f5><!--[--><span data-v-815115f5>Guide</span><!--]--></a><!--]--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/reference/spec" tabindex="0" data-v-afb2845e data-v-815115f5><!--[--><span data-v-815115f5>Reference</span><!--]--></a><!--]--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/examples/" tabindex="0" data-v-afb2845e data-v-815115f5><!--[--><span data-v-815115f5>Examples</span><!--]--></a><!--]--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/guide/nlp-engine" tabindex="0" data-v-afb2845e data-v-815115f5><!--[--><span data-v-815115f5>NLP Engine</span><!--]--></a><!--]--><!--[--><a class="VPLink link vp-external-link-icon VPNavBarMenuLink" href="https://github.com/loayabdalslam/hjx" target="_blank" rel="noreferrer" tabindex="0" data-v-afb2845e data-v-815115f5><!--[--><span data-v-815115f5>GitHub</span><!--]--></a><!--]--><!--]--></nav><!----><div class="VPNavBarAppearance appearance" data-v-9fd4d1dd data-v-3f90c1a5><button class="VPSwitch VPSwitchAppearance" type="button" role="switch" title aria-checked="false" data-v-3f90c1a5 data-v-be9742d9 data-v-b4ccac88><span class="check" data-v-b4ccac88><span class="icon" data-v-b4ccac88><!--[--><span class="vpi-sun sun" data-v-be9742d9></span><span class="vpi-moon moon" data-v-be9742d9></span><!--]--></span></span></button></div><div class="VPSocialLinks VPNavBarSocialLinks social-links" data-v-9fd4d1dd data-v-ef6192dc data-v-e71e869c><!--[--><a class="VPSocialLink no-icon" href="https://github.com/loayabdalslam/hjx" aria-label="github" target="_blank" rel="noopener" data-v-e71e869c data-v-60a9a2d3><span class="vpi-social-github"></span></a><!--]--></div><div class="VPFlyout VPNavBarExtra extra" data-v-9fd4d1dd data-v-f953d92f data-v-bfe7971f><button type="button" class="button" aria-haspopup="true" aria-expanded="false" aria-label="extra navigation" data-v-bfe7971f><span class="vpi-more-horizontal icon" data-v-bfe7971f></span></button><div class="menu" data-v-bfe7971f><div class="VPMenu" data-v-bfe7971f data-v-20ed86d6><!----><!--[--><!--[--><!----><div class="group" data-v-f953d92f><div class="item appearance" data-v-f953d92f><p class="label" data-v-f953d92f>Appearance</p><div class="appearance-action" data-v-f953d92f><button class="VPSwitch VPSwitchAppearance" type="button" role="switch" title aria-checked="false" data-v-f953d92f data-v-be9742d9 data-v-b4ccac88><span class="check" data-v-b4ccac88><span class="icon" data-v-b4ccac88><!--[--><span class="vpi-sun sun" data-v-be9742d9></span><span class="vpi-moon moon" data-v-be9742d9></span><!--]--></span></span></button></div></div></div><div class="group" data-v-f953d92f><div class="item social-links" data-v-f953d92f><div class="VPSocialLinks social-links-list" data-v-f953d92f data-v-e71e869c><!--[--><a class="VPSocialLink no-icon" href="https://github.com/loayabdalslam/hjx" aria-label="github" target="_blank" rel="noopener" data-v-e71e869c data-v-60a9a2d3><span class="vpi-social-github"></span></a><!--]--></div></div></div><!--]--><!--]--></div></div></div><!--[--><!--]--><button type="button" class="VPNavBarHamburger hamburger" aria-label="mobile navigation" aria-expanded="false" aria-controls="VPNavScreen" data-v-9fd4d1dd data-v-6bee1efd><span class="container" data-v-6bee1efd><span class="top" data-v-6bee1efd></span><span class="middle" data-v-6bee1efd></span><span class="bottom" data-v-6bee1efd></span></span></button></div></div></div></div><div class="divider" data-v-9fd4d1dd><div class="divider-line" data-v-9fd4d1dd></div></div></div><!----></header><div class="VPLocalNav empty fixed" data-v-d8b57b2d data-v-2488c25a><div class="container" data-v-2488c25a><!----><div class="VPLocalNavOutlineDropdown" style="--vp-vh:0px;" data-v-2488c25a data-v-6b867909><button data-v-6b867909>Return to top</button><!----></div></div></div><!----><div class="VPContent" id="VPContent" data-v-d8b57b2d data-v-9a6c75ad><div class="VPDoc has-aside" data-v-9a6c75ad data-v-e6f2a212><!--[--><!--]--><div class="container" data-v-e6f2a212><div class="aside" data-v-e6f2a212><div class="aside-curtain" data-v-e6f2a212></div><div class="aside-container" data-v-e6f2a212><div class="aside-content" data-v-e6f2a212><div class="VPDocAside" data-v-e6f2a212 data-v-cb998dce><!--[--><!--]--><!--[--><!--]--><nav aria-labelledby="doc-outline-aria-label" class="VPDocAsideOutline" data-v-cb998dce data-v-f610f197><div class="content" data-v-f610f197><div class="outline-marker" data-v-f610f197></div><div aria-level="2" class="outline-title" id="doc-outline-aria-label" role="heading" data-v-f610f197>On this page</div><ul class="VPDocOutlineItem root" data-v-f610f197 data-v-53c99d69><!--[--><!--]--></ul></div></nav><!--[--><!--]--><div class="spacer" data-v-cb998dce></div><!--[--><!--]--><!----><!--[--><!--]--><!--[--><!--]--></div></div></div></div><div class="content" data-v-e6f2a212><div class="content-container" data-v-e6f2a212><!--[--><!--]--><main class="main" data-v-e6f2a212><div style="position:relative;" class="vp-doc _docs_guide_computed-values" data-v-e6f2a212><div><h1 id="computed-values" tabindex="-1">Computed Values <a class="header-anchor" href="#computed-values" aria-label="Permalink to &quot;Computed Values&quot;">​</a></h1><p>Computed values are derived state that automatically update when their dependencies change. They&#39;re perfect for calculations, transformations, and derived data.</p><h2 id="what-are-computed-values" tabindex="-1">What are Computed Values? <a class="header-anchor" href="#what-are-computed-values" aria-label="Permalink to &quot;What are Computed Values?&quot;">​</a></h2><p>Computed values are reactive expressions that:</p><ul><li><strong>Auto-update</strong> when their dependencies change</li><li><strong>Cache results</strong> until dependencies change (memoization)</li><li><strong>Derive new values</strong> from existing state</li><li><strong>Keep logic declarative</strong> instead of imperative</li></ul><h2 id="syntax" tabindex="-1">Syntax <a class="header-anchor" href="#syntax" aria-label="Permalink to &quot;Syntax&quot;">​</a></h2><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>component MyComponent</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>state:</span></span>
+<span class="line"><span>  price = 25</span></span>
+<span class="line"><span>  quantity = 3</span></span>
+<span class="line"><span>  taxRate = 0.1</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  subtotal = &quot;price * quantity&quot;</span></span>
+<span class="line"><span>  tax = &quot;subtotal * taxRate&quot;</span></span>
+<span class="line"><span>  total = &quot;subtotal + tax&quot;</span></span>
+<span class="line"><span>  formattedTotal = &quot;&#39;$&#39; + total.toFixed(2)&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>layout:</span></span>
+<span class="line"><span>  view.card:</span></span>
+<span class="line"><span>    text: &quot;Price: ${{price}}&quot;</span></span>
+<span class="line"><span>    text: &quot;Quantity: {{quantity}}&quot;</span></span>
+<span class="line"><span>    text: &quot;Subtotal: ${{subtotal}}&quot;</span></span>
+<span class="line"><span>    text: &quot;Tax: ${{tax}}&quot;</span></span>
+<span class="line"><span>    text.bold: &quot;Total: {{formattedTotal}}&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>handlers:</span></span>
+<span class="line"><span>  updatePrice:</span></span>
+<span class="line"><span>    set price = price + 5</span></span></code></pre></div><p>When <code>price</code> changes, <code>subtotal</code>, <code>tax</code>, <code>total</code>, and <code>formattedTotal</code> all update automatically.</p><h2 id="how-it-works" tabindex="-1">How It Works <a class="header-anchor" href="#how-it-works" aria-label="Permalink to &quot;How It Works&quot;">​</a></h2><h3 id="dependency-tracking" tabindex="-1">Dependency Tracking <a class="header-anchor" href="#dependency-tracking" aria-label="Permalink to &quot;Dependency Tracking&quot;">​</a></h3><p>HJX automatically tracks which state variables each computed value depends on:</p><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>state:</span></span>
+<span class="line"><span>  a = 10</span></span>
+<span class="line"><span>  b = 5</span></span>
+<span class="line"><span>  c = 3</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  sum = &quot;a + b&quot;           // Depends on: a, b</span></span>
+<span class="line"><span>  product = &quot;a * c&quot;       // Depends on: a, c</span></span>
+<span class="line"><span>  combined = &quot;sum + product&quot; // Depends on: sum (which depends on a, b)</span></span></code></pre></div><p>The dependency graph looks like:</p><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>a ─┬─&gt; sum ─────&gt; combined</span></span>
+<span class="line"><span>   │              ↑</span></span>
+<span class="line"><span>b ─┘              │</span></span>
+<span class="line"><span>                  │</span></span>
+<span class="line"><span>c ────────────────┘</span></span>
+<span class="line"><span>     (via product)</span></span></code></pre></div><h3 id="automatic-updates" tabindex="-1">Automatic Updates <a class="header-anchor" href="#automatic-updates" aria-label="Permalink to &quot;Automatic Updates&quot;">​</a></h3><p>When you change <code>a</code>:</p><ol><li><code>sum</code> recalculates</li><li><code>product</code> recalculates</li><li><code>combined</code> recalculates (using new <code>sum</code> and <code>product</code>)</li><li>All DOM elements showing these values update</li></ol><h2 id="examples" tabindex="-1">Examples <a class="header-anchor" href="#examples" aria-label="Permalink to &quot;Examples&quot;">​</a></h2><h3 id="shopping-cart" tabindex="-1">Shopping Cart <a class="header-anchor" href="#shopping-cart" aria-label="Permalink to &quot;Shopping Cart&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>component ShoppingCart</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>state:</span></span>
+<span class="line"><span>  items = [</span></span>
+<span class="line"><span>    { name: &quot;Laptop&quot;, price: 999, quantity: 1 },</span></span>
+<span class="line"><span>    { name: &quot;Mouse&quot;, price: 29, quantity: 2 }</span></span>
+<span class="line"><span>  ]</span></span>
+<span class="line"><span>  discountCode = &quot;&quot;</span></span>
+<span class="line"><span>  discountPercent = 0</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  itemCount = &quot;items.reduce((sum, item) =&gt; sum + item.quantity, 0)&quot;</span></span>
+<span class="line"><span>  subtotal = &quot;items.reduce((sum, item) =&gt; sum + item.price * item.quantity, 0)&quot;</span></span>
+<span class="line"><span>  discountAmount = &quot;subtotal * (discountPercent / 100)&quot;</span></span>
+<span class="line"><span>  total = &quot;subtotal - discountAmount&quot;</span></span>
+<span class="line"><span>  hasDiscount = &quot;discountPercent &gt; 0&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>layout:</span></span>
+<span class="line"><span>  view.cart:</span></span>
+<span class="line"><span>    text.title: &quot;Shopping Cart ({{itemCount}} items)&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    for (item in items):</span></span>
+<span class="line"><span>      view.cart-item:</span></span>
+<span class="line"><span>        text: &quot;{{item.name}} - ${{item.price}} x {{item.quantity}}&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.summary:</span></span>
+<span class="line"><span>      text: &quot;Subtotal: ${{subtotal}}&quot;</span></span>
+<span class="line"><span>      if (hasDiscount):</span></span>
+<span class="line"><span>        text.discount: &quot;Discount: -${{discountAmount}}&quot;</span></span>
+<span class="line"><span>      text.bold: &quot;Total: ${{total}}&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>handlers:</span></span>
+<span class="line"><span>  applyDiscount:</span></span>
+<span class="line"><span>    if (discountCode === &quot;SAVE10&quot;):</span></span>
+<span class="line"><span>      set discountPercent = 10</span></span>
+<span class="line"><span>      log &quot;10% discount applied&quot;</span></span></code></pre></div><h3 id="form-validation" tabindex="-1">Form Validation <a class="header-anchor" href="#form-validation" aria-label="Permalink to &quot;Form Validation&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>component LoginForm</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>state:</span></span>
+<span class="line"><span>  email = &quot;&quot;</span></span>
+<span class="line"><span>  password = &quot;&quot;</span></span>
+<span class="line"><span>  confirmPassword = &quot;&quot;</span></span>
+<span class="line"><span>  agreedToTerms = false</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  emailValid = &quot;email.includes(&#39;@&#39;) &amp;&amp; email.includes(&#39;.&#39;)&quot;</span></span>
+<span class="line"><span>  passwordValid = &quot;password.length &gt;= 8&quot;</span></span>
+<span class="line"><span>  passwordsMatch = &quot;password === confirmPassword &amp;&amp; password !== &#39;&#39;&quot;</span></span>
+<span class="line"><span>  formValid = &quot;emailValid &amp;&amp; passwordValid &amp;&amp; passwordsMatch &amp;&amp; agreedToTerms&quot;</span></span>
+<span class="line"><span>  errorMessage = &quot;!formValid ? &#39;Please fill all fields correctly&#39; : &#39;&#39;&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>layout:</span></span>
+<span class="line"><span>  view.form:</span></span>
+<span class="line"><span>    text.title: &quot;Create Account&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    input (bind value &lt;-&gt; email):</span></span>
+<span class="line"><span>    if (!emailValid &amp;&amp; email !== &quot;&quot;):</span></span>
+<span class="line"><span>      text.error: &quot;Invalid email format&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    input (bind value &lt;-&gt; password):</span></span>
+<span class="line"><span>    if (!passwordValid &amp;&amp; password !== &quot;&quot;):</span></span>
+<span class="line"><span>      text.error: &quot;Password must be at least 8 characters&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    input (bind value &lt;-&gt; confirmPassword):</span></span>
+<span class="line"><span>    if (!passwordsMatch &amp;&amp; confirmPassword !== &quot;&quot;):</span></span>
+<span class="line"><span>      text.error: &quot;Passwords do not match&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.checkbox:</span></span>
+<span class="line"><span>      input (bind checked &lt;-&gt; agreedToTerms):</span></span>
+<span class="line"><span>      text: &quot;I agree to the terms&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    button (disabled=!formValid on click -&gt; submit): &quot;Create Account&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    if (!formValid):</span></span>
+<span class="line"><span>      text.note: &quot;{{errorMessage}}&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>handlers:</span></span>
+<span class="line"><span>  submit:</span></span>
+<span class="line"><span>    log &quot;Form submitted!&quot;</span></span></code></pre></div><h3 id="real-time-dashboard" tabindex="-1">Real-Time Dashboard <a class="header-anchor" href="#real-time-dashboard" aria-label="Permalink to &quot;Real-Time Dashboard&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>component Dashboard</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>state:</span></span>
+<span class="line"><span>  revenue = 15000</span></span>
+<span class="line"><span>  expenses = 8000</span></span>
+<span class="line"><span>  users = 1250</span></span>
+<span class="line"><span>  activeUsers = 890</span></span>
+<span class="line"><span>  targetRevenue = 20000</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  profit = &quot;revenue - expenses&quot;</span></span>
+<span class="line"><span>  profitMargin = &quot;(profit / revenue) * 100&quot;</span></span>
+<span class="line"><span>  userEngagement = &quot;(activeUsers / users) * 100&quot;</span></span>
+<span class="line"><span>  revenueProgress = &quot;(revenue / targetRevenue) * 100&quot;</span></span>
+<span class="line"><span>  isProfitable = &quot;profit &gt; 0&quot;</span></span>
+<span class="line"><span>  reachedTarget = &quot;revenue &gt;= targetRevenue&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>layout:</span></span>
+<span class="line"><span>  view.dashboard:</span></span>
+<span class="line"><span>    view.metric-card:</span></span>
+<span class="line"><span>      text.label: &quot;Revenue&quot;</span></span>
+<span class="line"><span>      text.value: &quot;${{revenue}}&quot;</span></span>
+<span class="line"><span>      text.progress: &quot;{{revenueProgress.toFixed(1)}}% of target&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.metric-card:</span></span>
+<span class="line"><span>      text.label: &quot;Expenses&quot;</span></span>
+<span class="line"><span>      text.value: &quot;${{expenses}}&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.metric-card:</span></span>
+<span class="line"><span>      text.label: &quot;Profit&quot;</span></span>
+<span class="line"><span>      text.value: &quot;${{profit}}&quot;</span></span>
+<span class="line"><span>      if (isProfitable):</span></span>
+<span class="line"><span>        text.positive: &quot;▲ Profitable&quot;</span></span>
+<span class="line"><span>      if (!isProfitable):</span></span>
+<span class="line"><span>        text.negative: &quot;▼ Loss&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.metric-card:</span></span>
+<span class="line"><span>      text.label: &quot;Profit Margin&quot;</span></span>
+<span class="line"><span>      text.value: &quot;{{profitMargin.toFixed(1)}}%&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.metric-card:</span></span>
+<span class="line"><span>      text.label: &quot;User Engagement&quot;</span></span>
+<span class="line"><span>      text.value: &quot;{{userEngagement.toFixed(1)}}%&quot;</span></span>
+<span class="line"><span>      text.detail: &quot;{{activeUsers}} / {{users}} users&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    if (reachedTarget):</span></span>
+<span class="line"><span>      view.celebration:</span></span>
+<span class="line"><span>        text: &quot;🎉 Revenue target reached!&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>handlers:</span></span>
+<span class="line"><span>  refreshData:</span></span>
+<span class="line"><span>    log &quot;Refreshing dashboard data...&quot;</span></span></code></pre></div><h3 id="todo-list-with-filters" tabindex="-1">Todo List with Filters <a class="header-anchor" href="#todo-list-with-filters" aria-label="Permalink to &quot;Todo List with Filters&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>component TodoApp</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>state:</span></span>
+<span class="line"><span>  todos = [</span></span>
+<span class="line"><span>    { text: &quot;Learn HJX&quot;, completed: true },</span></span>
+<span class="line"><span>    { text: &quot;Build UI&quot;, completed: false },</span></span>
+<span class="line"><span>    { text: &quot;Deploy App&quot;, completed: false }</span></span>
+<span class="line"><span>  ]</span></span>
+<span class="line"><span>  filter = &quot;all&quot;</span></span>
+<span class="line"><span>  searchText = &quot;&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  totalCount = &quot;todos.length&quot;</span></span>
+<span class="line"><span>  completedCount = &quot;todos.filter(t =&gt; t.completed).length&quot;</span></span>
+<span class="line"><span>  activeCount = &quot;todos.filter(t =&gt; !t.completed).length&quot;</span></span>
+<span class="line"><span>  filteredTodos = &quot;todos.filter(t =&gt; { if (filter === &#39;active&#39;) return !t.completed; if (filter === &#39;completed&#39;) return t.completed; return true; }).filter(t =&gt; t.text.toLowerCase().includes(searchText.toLowerCase()))&quot;</span></span>
+<span class="line"><span>  hasActiveTodos = &quot;activeCount &gt; 0&quot;</span></span>
+<span class="line"><span>  allCompleted = &quot;completedCount === totalCount&quot;</span></span>
+<span class="line"><span>  completionPercentage = &quot;(completedCount / totalCount) * 100&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>layout:</span></span>
+<span class="line"><span>  view.todo-app:</span></span>
+<span class="line"><span>    text.title: &quot;Todo List&quot;</span></span>
+<span class="line"><span>    text.progress: &quot;{{completionPercentage.toFixed(0)}}% complete ({{completedCount}}/{{totalCount}})&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.filters:</span></span>
+<span class="line"><span>      input (bind value &lt;-&gt; searchText placeholder=&quot;Search todos...&quot;):</span></span>
+<span class="line"><span>      button (on click -&gt; setFilterAll): &quot;All&quot;</span></span>
+<span class="line"><span>      button (on click -&gt; setFilterActive): &quot;Active&quot;</span></span>
+<span class="line"><span>      button (on click -&gt; setFilterCompleted): &quot;Completed&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    view.todo-list:</span></span>
+<span class="line"><span>      for (todo in filteredTodos):</span></span>
+<span class="line"><span>        view.todo-item:</span></span>
+<span class="line"><span>          text: &quot;{{todo.text}}&quot;</span></span>
+<span class="line"><span>          if (todo.completed):</span></span>
+<span class="line"><span>            text.status: &quot;✓&quot;</span></span>
+<span class="line"><span>    </span></span>
+<span class="line"><span>    if (hasActiveTodos):</span></span>
+<span class="line"><span>      text.hint: &quot;{{activeCount}} tasks remaining&quot;</span></span>
+<span class="line"><span>    if (allCompleted):</span></span>
+<span class="line"><span>      text.celebration: &quot;🎉 All tasks completed!&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>handlers:</span></span>
+<span class="line"><span>  setFilterAll:</span></span>
+<span class="line"><span>    set filter = &quot;all&quot;</span></span>
+<span class="line"><span>  setFilterActive:</span></span>
+<span class="line"><span>    set filter = &quot;active&quot;</span></span>
+<span class="line"><span>  setFilterCompleted:</span></span>
+<span class="line"><span>    set filter = &quot;completed&quot;</span></span></code></pre></div><h2 id="best-practices" tabindex="-1">Best Practices <a class="header-anchor" href="#best-practices" aria-label="Permalink to &quot;Best Practices&quot;">​</a></h2><h3 id="_1-keep-computations-simple" tabindex="-1">1. Keep Computations Simple <a class="header-anchor" href="#_1-keep-computations-simple" aria-label="Permalink to &quot;1. Keep Computations Simple&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span># ✅ Good: Simple expressions</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  total = &quot;price * quantity&quot;</span></span>
+<span class="line"><span>  fullName = &quot;firstName + &#39; &#39; + lastName&quot;</span></span>
+<span class="line"><span>  isValid = &quot;email.includes(&#39;@&#39;) &amp;&amp; password.length &gt;= 8&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># ❌ Avoid: Complex logic in computed</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  badExample: |</span></span>
+<span class="line"><span>    &quot;items.map(item =&gt; {</span></span>
+<span class="line"><span>      const result = complexCalculation(item);</span></span>
+<span class="line"><span>      if (result &gt; threshold) {</span></span>
+<span class="line"><span>        return transform(result);</span></span>
+<span class="line"><span>      }</span></span>
+<span class="line"><span>      return default;</span></span>
+<span class="line"><span>    }).filter(x =&gt; x !== null).reduce((a, b) =&gt; a + b, 0)&quot;</span></span></code></pre></div><p>For complex logic, use handlers or server-side scripts.</p><h3 id="_2-use-descriptive-names" tabindex="-1">2. Use Descriptive Names <a class="header-anchor" href="#_2-use-descriptive-names" aria-label="Permalink to &quot;2. Use Descriptive Names&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span># ✅ Clear names</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  totalRevenue = &quot;revenue - refunds&quot;</span></span>
+<span class="line"><span>  activeUserCount = &quot;users.filter(u =&gt; u.lastLogin &gt; thirtyDaysAgo).length&quot;</span></span>
+<span class="line"><span>  hasUnsavedChanges = &quot;formData !== originalData&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># ❌ Unclear names</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  x = &quot;a - b&quot;</span></span>
+<span class="line"><span>  temp = &quot;users.length&quot;</span></span>
+<span class="line"><span>  flag = &quot;data !== old&quot;</span></span></code></pre></div><h3 id="_3-chain-computed-values" tabindex="-1">3. Chain Computed Values <a class="header-anchor" href="#_3-chain-computed-values" aria-label="Permalink to &quot;3. Chain Computed Values&quot;">​</a></h3><p>Computed values can depend on other computed values:</p><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>state:</span></span>
+<span class="line"><span>  baseSalary = 50000</span></span>
+<span class="line"><span>  bonus = 5000</span></span>
+<span class="line"><span>  taxRate = 0.25</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  grossIncome = &quot;baseSalary + bonus&quot;</span></span>
+<span class="line"><span>  tax = &quot;grossIncome * taxRate&quot;</span></span>
+<span class="line"><span>  netIncome = &quot;grossIncome - tax&quot;</span></span>
+<span class="line"><span>  monthlyIncome = &quot;netIncome / 12&quot;</span></span>
+<span class="line"><span>  weeklyIncome = &quot;monthlyIncome / 4&quot;</span></span></code></pre></div><p>This creates a dependency chain that updates efficiently.</p><h3 id="_4-avoid-circular-dependencies" tabindex="-1">4. Avoid Circular Dependencies <a class="header-anchor" href="#_4-avoid-circular-dependencies" aria-label="Permalink to &quot;4. Avoid Circular Dependencies&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span># ❌ This will cause an error:</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  a = &quot;b + 1&quot;</span></span>
+<span class="line"><span>  b = &quot;a + 1&quot;  # Circular!</span></span></code></pre></div><p>HJX detects circular dependencies at compile time.</p><h2 id="performance" tabindex="-1">Performance <a class="header-anchor" href="#performance" aria-label="Permalink to &quot;Performance&quot;">​</a></h2><p>Computed values are <strong>memoized</strong> - they only recalculate when dependencies change:</p><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>state:</span></span>
+<span class="line"><span>  count = 0</span></span>
+<span class="line"><span>  name = &quot;Alice&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  doubled = &quot;count * 2&quot;  // Only recalculates when count changes</span></span></code></pre></div><h3 id="dependency-graph-visualization" tabindex="-1">Dependency Graph Visualization <a class="header-anchor" href="#dependency-graph-visualization" aria-label="Permalink to &quot;Dependency Graph Visualization&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>State: count, name</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>Computed: doubled (depends on: count)</span></span>
+<span class="line"><span>       </span></span>
+<span class="line"><span>When count changes:</span></span>
+<span class="line"><span>  1. doubled recalculates</span></span>
+<span class="line"><span>  2. DOM elements using {{doubled}} update</span></span>
+<span class="line"><span>  </span></span>
+<span class="line"><span>When name changes:</span></span>
+<span class="line"><span>  1. doubled does NOT recalculate (no dependency)</span></span>
+<span class="line"><span>  2. Only DOM elements using {{name}} update</span></span></code></pre></div><h2 id="common-patterns" tabindex="-1">Common Patterns <a class="header-anchor" href="#common-patterns" aria-label="Permalink to &quot;Common Patterns&quot;">​</a></h2><h3 id="percentage-calculations" tabindex="-1">Percentage Calculations <a class="header-anchor" href="#percentage-calculations" aria-label="Permalink to &quot;Percentage Calculations&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>computed:</span></span>
+<span class="line"><span>  progress = &quot;(current / total) * 100&quot;</span></span>
+<span class="line"><span>  discountPercent = &quot;((original - sale) / original) * 100&quot;</span></span>
+<span class="line"><span>  completionRate = &quot;(completed / total) * 100&quot;</span></span></code></pre></div><h3 id="string-formatting" tabindex="-1">String Formatting <a class="header-anchor" href="#string-formatting" aria-label="Permalink to &quot;String Formatting&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>computed:</span></span>
+<span class="line"><span>  fullName = &quot;firstName + &#39; &#39; + lastName&quot;</span></span>
+<span class="line"><span>  greeting = &quot;&#39;Hello, &#39; + name + &#39;!&#39;&quot;</span></span>
+<span class="line"><span>  statusText = &quot;isActive ? &#39;Active&#39; : &#39;Inactive&#39;&quot;</span></span>
+<span class="line"><span>  priceFormatted = &quot;&#39;$&#39; + price.toFixed(2)&quot;</span></span></code></pre></div><h3 id="array-operations" tabindex="-1">Array Operations <a class="header-anchor" href="#array-operations" aria-label="Permalink to &quot;Array Operations&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>computed:</span></span>
+<span class="line"><span>  itemCount = &quot;items.length&quot;</span></span>
+<span class="line"><span>  hasItems = &quot;items.length &gt; 0&quot;</span></span>
+<span class="line"><span>  total = &quot;items.reduce((sum, item) =&gt; sum + item.price, 0)&quot;</span></span>
+<span class="line"><span>  names = &quot;items.map(item =&gt; item.name).join(&#39;, &#39;)&quot;</span></span>
+<span class="line"><span>  filtered = &quot;items.filter(item =&gt; item.active)&quot;</span></span></code></pre></div><h3 id="conditional-values" tabindex="-1">Conditional Values <a class="header-anchor" href="#conditional-values" aria-label="Permalink to &quot;Conditional Values&quot;">​</a></h3><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>computed:</span></span>
+<span class="line"><span>  statusColor = &quot;status === &#39;active&#39; ? &#39;green&#39; : &#39;red&#39;&quot;</span></span>
+<span class="line"><span>  buttonText = &quot;isLoading ? &#39;Loading...&#39; : &#39;Submit&#39;&quot;</span></span>
+<span class="line"><span>  isVisible = &quot;userRole === &#39;admin&#39; || hasPermission&quot;</span></span>
+<span class="line"><span>  errorMessage = &quot;errors.length &gt; 0 ? errors[0] : &#39;&#39;&quot;</span></span></code></pre></div><h2 id="troubleshooting" tabindex="-1">Troubleshooting <a class="header-anchor" href="#troubleshooting" aria-label="Permalink to &quot;Troubleshooting&quot;">​</a></h2><h3 id="computed-value-not-updating" tabindex="-1">Computed Value Not Updating <a class="header-anchor" href="#computed-value-not-updating" aria-label="Permalink to &quot;Computed Value Not Updating&quot;">​</a></h3><p><strong>Problem:</strong> Your computed value isn&#39;t updating when state changes.</p><p><strong>Solution:</strong> Check that you&#39;re referencing state variables correctly:</p><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span># ❌ Wrong: String literal, not a reference</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  bad = &quot;count&quot;  # This is just the string &quot;count&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># ✅ Correct: Expression with variable reference</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  good = &quot;count&quot;  # This references the count variable</span></span></code></pre></div><h3 id="circular-dependency-error" tabindex="-1">Circular Dependency Error <a class="header-anchor" href="#circular-dependency-error" aria-label="Permalink to &quot;Circular Dependency Error&quot;">​</a></h3><p><strong>Problem:</strong> Compiler reports circular dependency.</p><p><strong>Solution:</strong> Review your computed chain:</p><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span># ❌ Circular</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  a = &quot;b + 1&quot;</span></span>
+<span class="line"><span>  b = &quot;c + 1&quot;</span></span>
+<span class="line"><span>  c = &quot;a + 1&quot;  # c -&gt; a -&gt; b -&gt; c</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># ✅ Fixed</span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  a = &quot;base + 1&quot;</span></span>
+<span class="line"><span>  b = &quot;a + 1&quot;</span></span>
+<span class="line"><span>  c = &quot;b + 1&quot;  # Linear chain</span></span></code></pre></div><h3 id="performance-issues" tabindex="-1">Performance Issues <a class="header-anchor" href="#performance-issues" aria-label="Permalink to &quot;Performance Issues&quot;">​</a></h3><p><strong>Problem:</strong> Computed values recalculating too often.</p><p><strong>Solution:</strong> Check for unnecessary dependencies:</p><div class="language-hjx vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">hjx</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>state:</span></span>
+<span class="line"><span>  count = 0</span></span>
+<span class="line"><span>  unused = &quot;never changes&quot;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>computed:</span></span>
+<span class="line"><span>  # ❌ Depends on unused state</span></span>
+<span class="line"><span>  bad = &quot;count + unused.length&quot;</span></span>
+<span class="line"><span>  </span></span>
+<span class="line"><span>  # ✅ Only depends on what&#39;s needed</span></span>
+<span class="line"><span>  good = &quot;count * 2&quot;</span></span></code></pre></div></div></div></main><footer class="VPDocFooter" data-v-e6f2a212 data-v-1bcd8184><!--[--><!--]--><div class="edit-info" data-v-1bcd8184><div class="edit-link" data-v-1bcd8184><a class="VPLink link vp-external-link-icon no-icon edit-link-button" href="https://github.com/loayabdalslam/hjx/edit/main/docs/docs/guide/computed-values.md" target="_blank" rel="noreferrer" data-v-1bcd8184><!--[--><span class="vpi-square-pen edit-link-icon" data-v-1bcd8184></span> Edit this page on GitHub<!--]--></a></div><div class="last-updated" data-v-1bcd8184><p class="VPLastUpdated" data-v-1bcd8184 data-v-1bb0c8a8>Last updated: <time datetime="2026-03-25T22:20:16.000Z" data-v-1bb0c8a8></time></p></div></div><!----></footer><!--[--><!--]--></div></div></div><!--[--><!--]--></div></div><footer class="VPFooter" data-v-d8b57b2d data-v-566314d4><div class="container" data-v-566314d4><p class="message" data-v-566314d4>Released under the MIT License.</p><p class="copyright" data-v-566314d4>© 2026 Loay Abdalslam</p></div></footer><!--[--><!--]--></div></div>
+    <script>window.__VP_HASH_MAP__=JSON.parse("{\"blog_2019-05-28-first-blog-post.md\":\"Da0oChYk\",\"blog_2019-05-29-long-blog-post.md\":\"CsT8XaNJ\",\"blog_2021-08-26-welcome_index.md\":\"CImDvqET\",\"docs_examples_composition.md\":\"C72z7IbK\",\"docs_examples_conditional.md\":\"BP7B6fXT\",\"docs_examples_counter.md\":\"B6Ij6v-v\",\"docs_examples_form.md\":\"k_xmcYUt\",\"docs_examples_index.md\":\"DnzWpB82\",\"docs_examples_list.md\":\"Df7PjKAg\",\"docs_guide_cli.md\":\"DuGjUmq5\",\"docs_guide_components.md\":\"q136r_qd\",\"docs_guide_computed-values.md\":\"BfUo5mW9\",\"docs_guide_getting-started.md\":\"1goUrgsm\",\"docs_guide_handlers.md\":\"ahcsQQ9C\",\"docs_guide_server-driven.md\":\"CqHDoC3J\",\"docs_guide_state.md\":\"DFhS0vA2\",\"docs_guide_styling.md\":\"B48_Eegl\",\"docs_guide_syntax.md\":\"C1cLwq3C\",\"docs_index.md\":\"DyTZKzWH\",\"docs_reference_api.md\":\"oiZf-uuA\",\"examples_composition.md\":\"DTb_HnlB\",\"examples_conditional.md\":\"DrLFvz5y\",\"examples_counter.md\":\"CCcQ3CQC\",\"examples_form.md\":\"BmsuIDx0\",\"examples_index.md\":\"BmmAzMsL\",\"examples_list.md\":\"lda6pZlt\",\"guide_cli.md\":\"DeR6SIuQ\",\"guide_components.md\":\"DPkTVtvV\",\"guide_control-flow.md\":\"nr7bsa8y\",\"guide_ecosystem.md\":\"CfkKvYrD\",\"guide_getting-started.md\":\"6neifsZo\",\"guide_handlers.md\":\"Cep6LHr7\",\"guide_installation.md\":\"BoA_pA-a\",\"guide_nlp-engine.md\":\"B0mtTIEf\",\"guide_server-driven.md\":\"CP_NAUUE\",\"guide_state.md\":\"CjHmGIwM\",\"guide_styling.md\":\"DsocVSgl\",\"guide_syntax.md\":\"DgNRjcSq\",\"index.md\":\"Td4YB5Mh\",\"readme.md\":\"D-hcet1y\",\"reference_api.md\":\"B1uZba7S\",\"reference_cli.md\":\"_SnL0Oua\",\"reference_spec.md\":\"B55_oExQ\",\"src_pages_markdown-page.md\":\"DT1IYzVG\"}");window.__VP_SITE_DATA__=JSON.parse("{\"lang\":\"en-US\",\"dir\":\"ltr\",\"title\":\"HJX\",\"description\":\"The Unified UI Language — One file. HTML + CSS + JS. Zero config.\",\"base\":\"/\",\"head\":[],\"router\":{\"prefetchLinks\":true},\"appearance\":true,\"themeConfig\":{\"logo\":\"/logo.svg\",\"nav\":[{\"text\":\"Guide\",\"link\":\"/guide/getting-started\"},{\"text\":\"Reference\",\"link\":\"/reference/spec\"},{\"text\":\"Examples\",\"link\":\"/examples/\"},{\"text\":\"NLP Engine\",\"link\":\"/guide/nlp-engine\"},{\"text\":\"GitHub\",\"link\":\"https://github.com/loayabdalslam/hjx\"}],\"sidebar\":{\"/guide/\":[{\"text\":\"Introduction\",\"items\":[{\"text\":\"What is HJX?\",\"link\":\"/guide/\"},{\"text\":\"Installation\",\"link\":\"/guide/installation\"},{\"text\":\"Getting Started\",\"link\":\"/guide/getting-started\"}]},{\"text\":\"Core Concepts\",\"items\":[{\"text\":\"Syntax\",\"link\":\"/guide/syntax\"},{\"text\":\"State\",\"link\":\"/guide/state\"},{\"text\":\"Components\",\"link\":\"/guide/components\"},{\"text\":\"Styling\",\"link\":\"/guide/styling\"},{\"text\":\"Handlers\",\"link\":\"/guide/handlers\"},{\"text\":\"Control Flow\",\"link\":\"/guide/control-flow\"}]},{\"text\":\"Advanced\",\"items\":[{\"text\":\"Server-Driven Mode\",\"link\":\"/guide/server-driven\"},{\"text\":\"CLI\",\"link\":\"/guide/cli\"},{\"text\":\"NLP Engine\",\"link\":\"/guide/nlp-engine\"}]},{\"text\":\"Ecosystem\",\"items\":[{\"text\":\"Ecosystem & Tools\",\"link\":\"/guide/ecosystem\"}]}],\"/reference/\":[{\"text\":\"Reference\",\"items\":[{\"text\":\"Language Spec\",\"link\":\"/reference/spec\"},{\"text\":\"CLI Commands\",\"link\":\"/reference/cli\"},{\"text\":\"API\",\"link\":\"/reference/api\"}]}],\"/examples/\":[{\"text\":\"Examples\",\"items\":[{\"text\":\"Overview\",\"link\":\"/examples/\"},{\"text\":\"Counter\",\"link\":\"/examples/counter\"},{\"text\":\"Form\",\"link\":\"/examples/form\"},{\"text\":\"Todo List\",\"link\":\"/examples/list\"},{\"text\":\"Conditional\",\"link\":\"/examples/conditional\"},{\"text\":\"Composition\",\"link\":\"/examples/composition\"}]}]},\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/loayabdalslam/hjx\"}],\"footer\":{\"message\":\"Released under the MIT License.\",\"copyright\":\"© 2026 Loay Abdalslam\"},\"search\":{\"provider\":\"local\"},\"editLink\":{\"pattern\":\"https://github.com/loayabdalslam/hjx/edit/main/docs/:path\",\"text\":\"Edit this page on GitHub\"},\"lastUpdated\":{\"text\":\"Last updated\"}},\"locales\":{},\"scrollOffset\":134,\"cleanUrls\":true}");</script>
+    
+  </body>
+</html>
