@@ -6,6 +6,7 @@ import { buildVanilla } from "./compiler/vanilla.js";
 import { buildReact } from "./compiler/react.js";
 import { emitRuntime } from "./compiler/emit.js";
 import { serveDev } from "./devserver.js";
+import { runFlow } from "./nlp/flow/cli.js";
 
 type Args = Record<string, string | boolean>;
 
@@ -29,11 +30,18 @@ function parseArgs(argv: string[]): { cmd: string; file?: string; args: Args } {
 }
 
 function help() {
-  console.log(`HJX v0.2
+  console.log(`HJX v0.2 — Flow-State Enabled
 Usage:
   hjx parse <file.hjx>
   hjx build <file.hjx> --out <dir> [--target react] [--backend]
   hjx dev <file.hjx> --out <dir> --port <n>
+  hjx flow "natural language description"
+
+Flow Commands:
+  hjx flow "create a counter component"
+  hjx flow --file input.txt
+  hjx flow --grammar custom.yml "make a todo app"
+  hjx flow --compile "create a form"
 
 Options:
   --target <name>   Compilation target: vanilla (default) or react
@@ -44,11 +52,19 @@ Examples:
   hjx build examples/counter.hjx --out dist-app
   hjx build examples/todo-app.hjx --out dist-app --target react --backend
   hjx dev examples/counter.hjx --out dist-app --port 5173
+  hjx flow "create a dashboard with stats and charts"
 `);
 }
 
 async function main() {
   const { cmd, file, args } = parseArgs(process.argv.slice(2));
+
+  // Handle flow command separately
+  if (cmd === "flow") {
+    await runFlow(process.argv.slice(3));
+    return;
+  }
+
   if (cmd === "help" || !cmd) return help();
   if (!file && cmd !== "help") {
     console.error("Missing <file.hjx>");

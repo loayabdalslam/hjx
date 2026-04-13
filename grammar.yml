@@ -1,0 +1,432 @@
+# HJX Dynamic Grammar System
+# 
+# Users can edit this file to customize the language grammar.
+# The grammar defines how natural language is parsed into HJX code.
+#
+# HOW TO USE:
+# 1. Edit this file to add/modify/remove grammar rules
+# 2. The HJX compiler automatically loads and applies the rules
+# 3. Test with: hjx flow "your natural language here"
+#
+# SYNTAX:
+# - Each rule has a name, patterns, and template
+# - Patterns are regex that match natural language
+# - Template is the HJX code generated when a pattern matches
+# - Use {{capture_group_N}} to reference regex captures
+
+# ============================================================
+# Component Creation Rules
+# ============================================================
+
+component_creation:
+  description: "Rules for creating new components"
+  rules:
+    - name: "create-component-basic"
+      patterns:
+        - "create (a|an|the) {{1}} component"
+        - "make (a|an|the) {{1}} component"
+        - "build (a|an|the) {{1}} component"
+        - "i want (a|an|the) {{1}} component"
+      template: |
+        component {{1|capitalize}}
+
+        state:
+
+        layout:
+
+        style:
+
+        handlers:
+
+    - name: "create-with-state"
+      patterns:
+        - "create (a|an|the) {{1}} component with state {{2}}"
+        - "make (a|an|the) {{1}} that has {{2}}"
+      template: |
+        component {{1|capitalize}}
+
+        state:
+          {{2}} = 0
+
+        layout:
+
+        style:
+
+        handlers:
+
+# ============================================================
+# State Variable Rules
+# ============================================================
+
+state_rules:
+  description: "Rules for defining state variables"
+  rules:
+    - name: "add-state-number"
+      patterns:
+        - "add state {{1}}"
+        - "create state {{1}}"
+        - "make variable {{1}}"
+        - "let {{1}} be a number"
+      template: |
+        state:
+          {{1}} = 0
+
+    - name: "add-state-string"
+      patterns:
+        - "add state {{1}} as text"
+        - "add state {{1}} with value {{2}}"
+        - "let {{1}} be '{{2}}'"
+      template: |
+        state:
+          {{1}} = "{{2}}"
+
+    - name: "add-state-boolean"
+      patterns:
+        - "add state {{1}} as boolean"
+        - "let {{1}} be true or false"
+        - "add toggle {{1}}"
+      template: |
+        state:
+          {{1}} = false
+
+    - name: "add-state-array"
+      patterns:
+        - "add state {{1}} as list"
+        - "add state {{1}} as array"
+        - "let {{1}} be a list of {{2}}"
+      template: |
+        state:
+          {{1}} = [{{2}}]
+
+    - name: "add-state-object"
+      patterns:
+        - "add state {{1}} as object"
+        - "add state {{1}} with properties {{2}}"
+      template: |
+        state:
+          {{1}} = { {{2}} }
+
+# ============================================================
+# Layout Rules
+# ============================================================
+
+layout_rules:
+  description: "Rules for adding layout elements"
+  rules:
+    - name: "add-button"
+      patterns:
+        - "add button {{1}}"
+        - "put button with text {{1}}"
+        - "create button called {{1}}"
+        - "make button that says {{1}}"
+      template: |
+        layout:
+          button.primary (on click -> handle{{1|capitalize|nospace}}): "{{1}}"
+
+    - name: "add-button-with-handler"
+      patterns:
+        - "add button {{1}} that does {{2}}"
+        - "make button {{1}} to {{2}}"
+        - "button {{1}} calls {{2}}"
+      template: |
+        layout:
+          button.primary (on click -> {{2}}): "{{1}}"
+
+    - name: "add-text"
+      patterns:
+        - "add text {{1}}"
+        - "show text {{1}}"
+        - "display {{1}}"
+        - "put text {{1}}"
+      template: |
+        layout:
+          text: "{{1}}"
+
+    - name: "add-input"
+      patterns:
+        - "add input bound to {{1}}"
+        - "add input field {{1}}"
+        - "add input for {{1}}"
+        - "text input {{1}}"
+      template: |
+        layout:
+          input.field (bind value <-> {{1}}):
+
+    - name: "add-container"
+      patterns:
+        - "add container {{1}}"
+        - "add view {{1}}"
+        - "wrap in {{1}}"
+      template: |
+        layout:
+          view.{{1|lowercase|nospace}}:
+
+    - name: "add-image"
+      patterns:
+        - "add image {{1}}"
+        - "show picture {{1}}"
+        - "put image with src {{1}}"
+      template: |
+        layout:
+          view.image:
+            img (src="{{1}}"):
+
+# ============================================================
+# Style Rules
+# ============================================================
+
+style_rules:
+  description: "Rules for applying styles"
+  rules:
+    - name: "center-element"
+      patterns:
+        - "center {{1}}"
+        - "make {{1}} centered"
+        - "align {{1}} to center"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            display flex
+            justify content center
+            align items center
+
+    - name: "set-background"
+      patterns:
+        - "set background of {{1}} to {{2}}"
+        - "make {{1}} background {{2}}"
+        - "{{1}} has {{2}} background"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            background {{2}}
+
+    - name: "set-color"
+      patterns:
+        - "set color of {{1}} to {{2}}"
+        - "make {{1}} text {{2}}"
+        - "{{1}} has {{2}} text"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            color {{2}}
+
+    - name: "set-padding"
+      patterns:
+        - "add padding {{1}} to {{2}}"
+        - "set padding of {{2}} to {{1}}"
+        - "make {{2}} have {{1}} padding"
+      template: |
+        style:
+          .{{2|lowercase|nospace}}:
+            padding {{1}}
+
+    - name: "set-margin"
+      patterns:
+        - "add margin {{1}} to {{2}}"
+        - "set margin of {{2}} to {{1}}"
+        - "make {{2}} have {{1}} margin"
+      template: |
+        style:
+          .{{2|lowercase|nospace}}:
+            margin {{1}}
+
+    - name: "set-font-size"
+      patterns:
+        - "set font size of {{1}} to {{2}}"
+        - "make {{1}} font {{2}}"
+        - "{{1}} has font size {{2}}"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            font size {{2}}
+
+    - name: "apply-preset"
+      patterns:
+        - "make {{1}} a card"
+        - "apply card style to {{1}}"
+        - "{{1}} should be card"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            card
+
+    - name: "apply-button-style"
+      patterns:
+        - "make {{1}} a primary button"
+        - "apply primary button to {{1}}"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            button primary
+
+    - name: "apply-input-style"
+      patterns:
+        - "make {{1}} an input field"
+        - "apply input field to {{1}}"
+      template: |
+        style:
+          .{{1|lowercase|nospace}}:
+            input field
+
+# ============================================================
+# Handler Rules
+# ============================================================
+
+handler_rules:
+  description: "Rules for creating event handlers"
+  rules:
+    - name: "create-handler"
+      patterns:
+        - "create handler {{1}}"
+        - "add handler {{1}}"
+        - "make function {{1}}"
+      template: |
+        handlers:
+          {{1}}:
+            log "{{1}} called"
+
+    - name: "create-handler-with-action"
+      patterns:
+        - "create handler {{1}} that sets {{2}}"
+        - "handler {{1}} updates {{2}}"
+        - "when {{1}}, set {{2}}"
+      template: |
+        handlers:
+          {{1}}:
+            set {{2}} = {{2}}
+
+    - name: "create-handler-with-fetch"
+      patterns:
+        - "create handler {{1}} that fetches from {{2}}"
+        - "handler {{1}} calls {{2}}"
+        - "when {{1}}, fetch {{2}}"
+      template: |
+        handlers:
+          {{1}}:
+            fetch {{2}} -> data
+
+# ============================================================
+# API Rules
+# ============================================================
+
+api_rules:
+  description: "Rules for defining API endpoints"
+  rules:
+    - name: "add-get-endpoint"
+      patterns:
+        - "add get endpoint {{1}}"
+        - "fetch from {{1}}"
+        - "api get {{1}}"
+      template: |
+        api:
+          GET {{1}} -> fetch{{1|capitalize|nospace}}
+
+    - name: "add-post-endpoint"
+      patterns:
+        - "add post endpoint {{1}}"
+        - "save to {{1}}"
+        - "api post {{1}}"
+      template: |
+        api:
+          POST {{1}} -> save{{1|capitalize|nospace}}
+
+    - name: "add-put-endpoint"
+      patterns:
+        - "add put endpoint {{1}}"
+        - "update at {{1}}"
+        - "api put {{1}}"
+      template: |
+        api:
+          PUT {{1}} -> update{{1|capitalize|nospace}}
+
+    - name: "add-delete-endpoint"
+      patterns:
+        - "add delete endpoint {{1}}"
+        - "delete from {{1}}"
+        - "api delete {{1}}"
+      template: |
+        api:
+          DELETE {{1}} -> delete{{1|capitalize|nospace}}
+
+# ============================================================
+# Conditional Rules
+# ============================================================
+
+conditional_rules:
+  description: "Rules for conditional rendering"
+  rules:
+    - name: "add-if-condition"
+      patterns:
+        - "show {{1}} if {{2}}"
+        - "display {{1}} when {{2}}"
+        - "if {{2}}, show {{1}}"
+      template: |
+        layout:
+          if ({{2}}):
+            view.{{1|lowercase|nospace}}:
+              text: "{{1}}"
+
+# ============================================================
+# Loop Rules
+# ============================================================
+
+loop_rules:
+  description: "Rules for list rendering"
+  rules:
+    - name: "add-for-loop"
+      patterns:
+        - "list {{1}} in {{2}}"
+        - "for each {{1}} in {{2}}"
+        - "loop through {{2}} as {{1}}"
+        - "show all {{1}} from {{2}}"
+      template: |
+        layout:
+          for ({{1}} in {{2}}):
+            view.item:
+              text: "{{{{1}}}}"
+
+# ============================================================
+# Transformation Filters
+# ============================================================
+# These filters can be applied to capture groups:
+#
+# {{1|capitalize}}    - Capitalize first letter
+# {{1|lowercase}}     - Convert to lowercase
+# {{1|uppercase}}     - Convert to uppercase
+# {{1|nospace}}       - Remove spaces
+# {{1|camelcase}}     - Convert to camelCase
+# {{1|kebabcase}}     - Convert to kebab-case
+# {{1|snakecase}}     - Convert to snake_case
+# {{1|trim}}          - Trim whitespace
+# {{1|default:N}}     - Use default value if empty
+#
+# ============================================================
+
+# ============================================================
+# Custom Rules (User-Defined)
+# ============================================================
+# Add your own rules below this line.
+# Follow the same structure as the built-in rules above.
+
+custom_rules:
+  description: "Your custom grammar rules"
+  rules:
+    # Example custom rule:
+    # - name: "my-custom-rule"
+    #   patterns:
+    #     - "make a {{1}} widget"
+    #   template: |
+    #     component {{1|capitalize}}Widget
+    #     
+    #     state:
+    #       value = 0
+    #     
+    #     layout:
+    #       view.card:
+    #         text: "{{1}}"
+    #     
+    #     style:
+    #       .card:
+    #         card
+    #     
+    #     handlers:
