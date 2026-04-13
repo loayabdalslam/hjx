@@ -1,70 +1,116 @@
-# HJX Documentation - VitePress
+# HJX Documentation
+
+This directory contains the official HJX documentation built with **Docusaurus**.
 
 ## Quick Start
 
 ```bash
 cd docs
 npm install
-npm run docs:dev
+npm start
 ```
 
-Open http://localhost:5173
+Open `http://localhost:3000` to view the docs locally.
 
-## Build
+## Available Scripts
 
-```bash
-npm run docs:build
-```
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start local dev server with hot reload |
+| `npm run build` | Build static site for production |
+| `npm run serve` | Serve the built production build locally |
+| `npm run deploy` | Deploy to GitHub Pages |
+| `npm run clear` | Clear build cache |
 
-Output: `.vitepress/dist/`
-
-## Deploy to GitHub Pages
-
-### Option 1: GitHub Actions (Automatic)
-Push to `main` branch → Auto-deploys
-
-### Option 2: Manual Deploy
-
-```bash
-# Install gh-pages
-npm install -g gh-pages
-
-# Build and deploy
-cd docs
-npm run docs:build
-npx gh-pages -d .vitepress/dist
-```
-
-## Configuration
-
-**Base URL**: `/hjx/` (set in `.vitepress/config.ts`)
-
-**GitHub Pages URL**: `https://loayabdalslam.github.io/hjx/`
-
-## File Structure
+## Directory Structure
 
 ```
 docs/
-├── .vitepress/          # VitePress config
-│   └── config.ts        # Main config file
-├── guide/               # User guide
-├── reference/           # API reference
-├── examples/            # Code examples
-└── index.md             # Homepage
+├── docs/                    # Documentation markdown files
+│   ├── intro.md            # Introduction page
+│   ├── installation.md     # Installation guide
+│   ├── quick-start.md      # Quick start guide
+│   ├── flow-state.md       # Flow-State Engine docs
+│   ├── nl-css.md           # Natural Language CSS docs
+│   ├── grammar-system.md   # Dynamic Grammar docs
+│   ├── react-compilation.md # React Compilation docs
+│   ├── api-integration.md  # REST API docs
+│   ├── benchmarks/         # Benchmarks documentation
+│   │   └── index.md
+│   └── ...                 # Additional docs
+├── src/
+│   ├── css/
+│   │   └── custom.css      # Custom styles
+│   ├── components/         # React components
+│   └── pages/              # Custom pages
+├── static/
+│   └── img/                # Static images
+│       └── logo.svg
+├── docusaurus.config.js    # Docusaurus configuration
+├── sidebars.js             # Sidebar navigation
+└── package.json
 ```
 
-## Troubleshooting
+## Deploy to GitHub Pages
 
-### 404 on GitHub Pages
-- Check `base: '/hjx/'` in config.ts matches repo name
-- Ensure GitHub Pages is enabled in repo settings
-- Check GitHub Actions workflow ran successfully
+### Automatic (GitHub Actions)
 
-### Broken Links
-- Use absolute paths: `/guide/getting-started`
-- Or relative: `./getting-started.md`
+Push to `main` branch and the workflow at `.github/workflows/deploy-docs.yml` will automatically build and deploy.
 
-### Build Fails
-- Node version >= 18 required
-- Run `npm install` in docs folder
-- Check for MDX syntax errors
+### Manual
+
+```bash
+cd docs
+GIT_USER=loayabdalslam npm run deploy
+```
+
+## Writing Documentation
+
+### Adding New Pages
+
+1. Create a `.md` file in `docs/`
+2. Add frontmatter:
+   ```markdown
+   ---
+   sidebar_label: Page Name
+   ---
+   ```
+3. Add the page to `sidebars.js`
+
+### Code Blocks
+
+Use `hjx` for HJX code blocks:
+
+````markdown
+```hjx
+component Counter
+state:
+  count = 0
+```
+````
+
+### Images
+
+Place images in `static/img/` and reference them with:
+
+```markdown
+![Alt text](/img/image.png)
+```
+
+## Customizing
+
+### Theme
+
+Edit `src/css/custom.css` for custom styles.
+
+### Configuration
+
+Edit `docusaurus.config.js` for:
+- Site title and tagline
+- Navigation bar items
+- Footer links
+- GitHub Pages URL
+
+### Sidebar
+
+Edit `sidebars.js` to reorganize navigation.
