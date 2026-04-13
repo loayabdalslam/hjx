@@ -1,10 +1,11 @@
-import { scopeCss } from "./vanilla_scope_css.js";
+import { nlCssToCss } from "./nl_css.js";
 export function buildServerDriven(tree) {
     const cssParts = new Map();
     function collectCss(comp) {
         const scope = `hjx-${comp.ast.component.name.toLowerCase()}`;
         if (!cssParts.has(scope)) {
-            cssParts.set(scope, scopeCss(comp.ast.style ?? "", scope));
+            const css = nlCssToCss(comp.ast.style, comp.ast.styleRaw, scope, comp.ast.breakpoints);
+            cssParts.set(scope, css);
         }
         for (const child of Object.values(comp.imports)) {
             collectCss(child);

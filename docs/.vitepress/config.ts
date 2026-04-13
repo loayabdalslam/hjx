@@ -2,11 +2,11 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'HJX',
-  description: 'The Unified UI Language — One file. HTML + CSS + JS. Zero config.',
-  
+  description: 'The Unified UI Language — One file. HTML + CSS + JS. Zero config. Write in English or code.',
+
   // GitHub Pages deployment
   base: process.env.GITHUB_PAGES ? '/hjx/' : '/',
-  
+
   ignoreDeadLinks: true,
   cleanUrls: true,
 
@@ -24,6 +24,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Reference', link: '/reference/spec' },
       { text: 'Examples', link: '/examples/' },
+      { text: 'Flow-State', link: '/guide/flow-state' },
       { text: 'NLP Engine', link: '/guide/nlp-engine' },
       { text: 'GitHub', link: 'https://github.com/loayabdalslam/hjx' },
     ],
@@ -50,11 +51,22 @@ export default defineConfig({
           ]
         },
         {
+          text: 'v0.2 New Features',
+          items: [
+            { text: 'Flow-State Engine', link: '/guide/flow-state' },
+            { text: 'Natural Language CSS', link: '/guide/nl-css' },
+            { text: 'React Compilation', link: '/guide/react-compilation' },
+            { text: 'REST API Integration', link: '/guide/api-integration' },
+            { text: 'Dynamic Grammar (grammar.yml)', link: '/guide/grammar-system' },
+          ]
+        },
+        {
           text: 'Advanced',
           items: [
             { text: 'Server-Driven Mode', link: '/guide/server-driven' },
             { text: 'CLI', link: '/guide/cli' },
             { text: 'NLP Engine', link: '/guide/nlp-engine' },
+            { text: 'Benchmarks', link: '/guide/benchmarks' },
           ]
         },
         {
@@ -109,6 +121,17 @@ export default defineConfig({
 
     lastUpdated: {
       text: 'Last updated'
+    }
+  },
+
+  // Apply v-pre to all code blocks to prevent Vue interpolation
+  vite: {
+    vue: {
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => false
+        }
+      }
     }
   }
 })

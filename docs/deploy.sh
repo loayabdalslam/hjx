@@ -1,5 +1,6 @@
-#!/bin/bash
-# Deploy HJX Docs to GitHub Pages
+#!/usr/bin/env bash
+# Deploy HJX Documentation to GitHub Pages
+# Usage: ./deploy.sh
 
 set -e
 
@@ -15,11 +16,16 @@ fi
 
 # Build
 echo "🔨 Building VitePress..."
-npm run docs:build
+GITHUB_PAGES=true npm run docs:build
 
-# Deploy
+# Deploy to GitHub Pages
 echo "📤 Deploying to GitHub Pages..."
-npx gh-pages -d .vitepress/dist -t true
 
-echo "✅ Deployed to GitHub Pages!"
+# Use npx gh-pages to deploy the built docs
+npx gh-pages -d .vitepress/dist --dotfiles
+
+echo ""
+echo "✅ Deployed successfully!"
 echo "🌐 View at: https://loayabdalslam.github.io/hjx/"
+echo ""
+echo "Note: It may take a few minutes for changes to appear."

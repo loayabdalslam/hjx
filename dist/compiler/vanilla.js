@@ -1,9 +1,10 @@
-import { scopeCss } from "./vanilla_scope_css.js";
+import { nlCssToCss } from "./nl_css.js";
 import { DependencyTracker } from "./dependency_tracker.js";
 import { SignalCodeGenerator } from "./signal_codegen.js";
 export function buildVanilla(ast) {
     const scope = `hjx-${ast.component.name.toLowerCase()}`;
-    const css = scopeCss(ast.style ?? "", scope);
+    // Generate CSS from natural language style rules
+    const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints);
     const { htmlBody, bindings, eventBindings, inputBindings, ifForBindings } = renderNode(ast.layout ?? emptyRoot(), scope);
     // Analyze dependencies using DependencyTracker
     const tracker = new DependencyTracker();
