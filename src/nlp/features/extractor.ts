@@ -114,7 +114,7 @@ function extractStructural(ast: HJXAst, source: string, tokens: any[]): Structur
     blockCount: {
       state: Object.keys(ast.state).length > 0 ? 1 : 0,
       layout: ast.layout ? 1 : 0,
-      style: ast.style.trim() ? 1 : 0,
+      style: (ast.style.length > 0 || ast.styleRaw.trim()) ? 1 : 0,
       handlers: Object.keys(ast.handlers).length > 0 ? 1 : 0,
       imports: Object.keys(ast.imports).length > 0 ? 1 : 0,
       script: ast.script.trim() ? 1 : 0,

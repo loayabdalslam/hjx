@@ -156,7 +156,7 @@ function computeStructuralEmbedding(source: string): number[] {
     vector[47] = Object.keys(ast.imports).length / 10;
     vector[48] = ast.layout ? countNodes(ast.layout) / 50 : 0;
     vector[49] = ast.layout ? treeDepth(ast.layout) / 10 : 0;
-    vector[50] = ast.style.trim() ? 1 : 0;
+    vector[50] = (ast.style.length > 0 || ast.styleRaw.trim()) ? 1 : 0;
     vector[51] = ast.script.trim() ? 1 : 0;
     vector[52] = Object.keys(ast.computed).length / 10;
 

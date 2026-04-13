@@ -95,9 +95,9 @@ export class CanonicalFormatter {
     }
 
     // Style
-    if (ast.style.trim()) {
+    if (ast.style.length > 0 || ast.styleRaw.trim()) {
       lines.push("style:");
-      const cssLines = ast.style.split("\n").filter(l => l.trim());
+      const cssLines = ast.styleRaw.split("\n").filter((l: string) => l.trim());
       for (const line of cssLines) {
         lines.push(`${this.options.indent}${line}`);
       }

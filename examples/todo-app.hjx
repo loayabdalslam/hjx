@@ -1,0 +1,186 @@
+component TodoApp
+
+state:
+  todos = []
+  newTodo = ""
+  filter = "all"
+  loading = false
+  error = ""
+
+api:
+  GET /api/todos -> fetchTodos:
+    query:
+      filter = "all"
+    response:
+      type = array
+
+  POST /api/todos -> createTodo:
+    body:
+      text = ""
+      done = false
+    response:
+      type = object
+
+  PUT /api/todos/:id -> updateTodo:
+    params:
+      id = number
+    body:
+      done = boolean
+
+  DELETE /api/todos/:id -> deleteTodo:
+    params:
+      id = number
+
+layout:
+  view.container:
+    text.title: "Todo App"
+    text.subtitle: "Manage your tasks efficiently"
+
+    view.input-section:
+      input.field (bind value <-> newTodo):
+      button.primary (on click -> addTodo): "Add Todo"
+
+    view.filters:
+      button.filter (on click -> showAll): "All"
+      button.filter (on click -> showActive): "Active"
+      button.filter (on click -> showDone): "Done"
+
+    if (loading):
+      view.loading:
+        text: "Loading..."
+
+    if (error):
+      view.error:
+        text: "Error: {{error}}"
+
+    if (!loading):
+      view.todo-list:
+        for (todo in todos):
+          view.todo-item:
+            text.todo-text: "{{todo.text}}"
+            button.done-btn (on click -> toggleDone): "✓"
+            button.delete-btn (on click -> deleteItem): "✕"
+
+    text.count: "Total: {{todos.length}} todos"
+
+style:
+  .container:
+    container
+    padding 20px
+    display flex
+    flex direction column
+    gap 20px
+
+  .title:
+    font size 28px
+    font weight bold
+    color #1a1a1a
+    text align center
+
+  .subtitle:
+    font size 14px
+    color #666
+    text align center
+
+  .input-section:
+    display flex
+    gap 12px
+    justify content center
+
+  .field:
+    input field
+    max width 400px
+
+  .primary:
+    button primary
+
+  .filters:
+    display flex
+    gap 8px
+    justify content center
+
+  .filter:
+    button secondary
+
+  .loading:
+    text align center
+    color #666
+    padding 20px
+
+  .error:
+    background #fee
+    color #c00
+    padding 12px
+    border radius 8px
+    text align center
+
+  .todo-list:
+    display flex
+    flex direction column
+    gap 12px
+
+  .todo-item:
+    card
+    display flex
+    justify content space between
+    align items center
+    padding 16px
+
+  .todo-text:
+    font size 16px
+    color #333
+
+  .done-btn:
+    button ghost
+    color #28a745
+
+  .delete-btn:
+    button ghost
+    color #dc3545
+
+  .count:
+    text align center
+    color #666
+    font size 14px
+    margin top 20px
+
+breakpoints:
+  mobile = 480px
+  tablet = 768px
+  desktop = 1024px
+
+handlers:
+  addTodo:
+    set loading = true
+    fetch createTodo with { text: newTodo, done: false } -> result
+    set todos = [...todos, result]
+    set newTodo = ""
+    set loading = false
+
+  toggleDone:
+    fetch updateTodo with { id: todo.id, done: !todo.done } -> updated
+    set todos = todos.map(t -> t.id === updated.id ? updated : t)
+
+  deleteItem:
+    fetch deleteTodo with { id: todo.id }
+    set todos = todos.filter(t -> t.id != todo.id)
+
+  setFilter:
+    set filter = filterName
+    fetch fetchTodos with { filter: filterName } -> data
+    set todos = data
+
+  showAll:
+    set filter = "all"
+    fetch fetchTodos with { filter: "all" } -> data
+    set todos = data
+
+  showActive:
+    set filter = "active"
+    fetch fetchTodos with { filter: "active" } -> data
+    set todos = data
+
+  showDone:
+    set filter = "done"
+    fetch fetchTodos with { filter: "done" } -> data
+    set todos = data

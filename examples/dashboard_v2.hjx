@@ -1,0 +1,181 @@
+component Dashboard
+
+state:
+  users = 1234
+  revenue = 45678
+  orders = 89
+  growth = 12.5
+  recentOrders = [
+    { id: 1, customer: "John Doe", amount: 150, status: "completed" },
+    { id: 2, customer: "Jane Smith", amount: 230, status: "pending" },
+    { id: 3, customer: "Bob Wilson", amount: 89, status: "completed" }
+  ]
+
+layout:
+  view.min-h-screen.bg-light:
+    view.header:
+      text.title: "Dashboard"
+      text.subtitle: "Welcome back! Here's your overview."
+
+    view.stats-grid:
+      view.stat-card:
+        text.stat-label: "Total Users"
+        text.stat-value: "{{users}}"
+        text.stat-change.up: "+{{growth}}% from last month"
+
+      view.stat-card:
+        text.stat-label: "Revenue"
+        text.stat-value: "${{revenue}}"
+        text.stat-change.up: "+8.2% from last month"
+
+      view.stat-card:
+        text.stat-label: "Orders"
+        text.stat-value: "{{orders}}"
+        text.stat-change.down: "-3.1% from last month"
+
+    view.content-grid:
+      view.recent-orders:
+        text.section-title: "Recent Orders"
+        for (order in recentOrders):
+          view.order-row:
+            text.customer: "{{order.customer}}"
+            text.amount: "${{order.amount}}"
+            text.status: "{{order.status}}"
+
+      view.quick-actions:
+        text.section-title: "Quick Actions"
+        button.action-btn (on click -> viewReports): "View Reports"
+        button.action-btn (on click -> addOrder): "Add Order"
+        button.action-btn (on click -> manageUsers): "Manage Users"
+
+style:
+  .min-h-screen:
+    min height 100vh
+
+  .bg-light:
+    background #f5f7fa
+
+  .header:
+    padding 32px
+    text align center
+
+  .title:
+    font size 36px
+    font weight bold
+    color #1a1a1a
+    margin bottom 8px
+
+  .subtitle:
+    font size 16px
+    color #666
+
+  .stats-grid:
+    grid 3
+    padding 0 32px
+    gap 24px
+
+  .stat-card:
+    card
+    padding 24px
+    display flex
+    flex direction column
+    gap 8px
+
+  .stat-label:
+    font size 14px
+    color #666
+    text transform uppercase
+    letter spacing 1px
+
+  .stat-value:
+    font size 32px
+    font weight bold
+    color #1a1a1a
+
+  .stat-change.up:
+    color #28a745
+    font size 14px
+
+  .stat-change.down:
+    color #dc3545
+    font size 14px
+
+  .content-grid:
+    grid 2
+    padding 32px
+    gap 24px
+
+  .recent-orders:
+    card
+
+  .section-title:
+    font size 20px
+    font weight bold
+    color #1a1a1a
+    margin bottom 16px
+
+  .order-row:
+    display flex
+    justify content space between
+    padding 12px 0
+    border bottom 1px solid #eee
+
+  .customer:
+    font weight 600
+    color #333
+
+  .amount:
+    color #666
+
+  .status:
+    color #28a745
+    font weight 600
+
+  .quick-actions:
+    card
+    display flex
+    flex direction column
+    gap 12px
+
+  .action-btn:
+    button primary
+    full width
+
+  .action-btn:nth-child(2):
+    button secondary
+
+  .action-btn:nth-child(3):
+    button ghost
+
+breakpoints:
+  mobile = 480px
+  tablet = 768px
+  desktop = 1024px
+
+style:
+  .stats-grid @tablet:
+    grid 2
+
+  .stats-grid @mobile:
+    grid 1
+    padding 0 16px
+    gap 16px
+
+  .content-grid @tablet:
+    grid 1
+
+  .content-grid @mobile:
+    padding 16px
+
+  .title @mobile:
+    font size 28px
+
+handlers:
+  viewReports:
+    log "Viewing reports"
+
+  addOrder:
+    log "Adding new order"
+
+  manageUsers:
+    log "Managing users"

@@ -331,7 +331,7 @@ export class ErrorDetector {
     const diagnostics: Diagnostic[] = [];
 
     // Check for !important usage
-    if (ast.style.includes("!important")) {
+    if (ast.styleRaw.includes("!important")) {
       diagnostics.push({
         code: DiagnosticCode.STYLE_WARNING,
         severity: DiagnosticSeverity.WARNING,
@@ -343,7 +343,7 @@ export class ErrorDetector {
     }
 
     // Check for empty style block
-    if (ast.style.trim() === "" && ast.layout) {
+    if (ast.styleRaw.trim() === "" && ast.layout) {
       diagnostics.push({
         code: DiagnosticCode.STYLE_WARNING,
         severity: DiagnosticSeverity.INFO,

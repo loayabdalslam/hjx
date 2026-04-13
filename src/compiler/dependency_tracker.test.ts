@@ -12,7 +12,7 @@ describe('DependencyTracker', () => {
   // Mocking a simple HJX Component AST
   const mockAst: HJXAst = {
     kind: "HJXAst",
-    version: "0.1",
+    version: "0.2",
     component: { name: "CounterApp" },
     imports: {},
     script: "",
@@ -22,8 +22,9 @@ describe('DependencyTracker', () => {
     },
     computed: {
       // total depends on 'count' and 'price'
-      total: "count * price" 
+      total: "count * price"
     },
+    api: [],
     layout: {
       kind: "node",
       tag: "div",
@@ -58,8 +59,10 @@ describe('DependencyTracker', () => {
         }
       ]
     },
-    style: "",
-    handlers: {}
+    style: [],
+    styleRaw: "",
+    handlers: {},
+    breakpoints: []
   };
 
   it('should identify state variables correctly', () => {

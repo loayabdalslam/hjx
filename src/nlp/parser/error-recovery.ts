@@ -61,15 +61,18 @@ export function parseWithRecovery(source: string, filename = "<input>"): Recover
   const lines = source.replace(/\r\n/g, "\n").split("\n");
   const ast: HJXAst = {
     kind: "HJXAst",
-    version: "0.1",
+    version: "0.2",
     component: { name: "App" },
     imports: {},
     script: "",
     state: {},
+    api: [],
     layout: null,
-    style: "",
+    style: [],
+    styleRaw: "",
     handlers: {},
     computed: {},
+    breakpoints: [],
   };
 
   const indentOf = (s: string) => (s.match(/^\s*/)?.[0].length ?? 0);
@@ -220,7 +223,7 @@ export function parseWithRecovery(source: string, filename = "<input>"): Recover
           cssLines.push(l.slice(2));
           i++;
         }
-        ast.style = cssLines.join("\n").trimEnd() + "\n";
+        ast.styleRaw = cssLines.join("\n").trimEnd() + "\n";
         continue;
       }
 

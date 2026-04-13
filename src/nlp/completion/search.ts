@@ -170,7 +170,7 @@ export class SemanticCodeSearch {
     try {
       ast = parseHJX(source);
     } catch {
-      ast = { kind: "HJXAst", version: "0.1", component: { name: "Unknown" }, imports: {}, script: "", state: {}, layout: null, style: "", handlers: {}, computed: {} };
+      ast = { kind: "HJXAst", version: "0.2", component: { name: "Unknown" }, imports: {}, script: "", state: {}, api: [], layout: null, style: [], styleRaw: "", handlers: {}, computed: {}, breakpoints: [] };
     }
 
     // Extract keywords
@@ -190,8 +190,8 @@ export class SemanticCodeSearch {
     }
 
     // CSS classes from style
-    const cssClasses = ast.style.match(/\.[a-zA-Z_][a-zA-Z0-9_-]*/g) || [];
-    classes.push(...cssClasses.map(c => c.slice(1)));
+    const cssClasses = ast.styleRaw.match(/\.[a-zA-Z_][a-zA-Z0-9_-]*/g) || [];
+    classes.push(...cssClasses.map((c: string) => c.slice(1)));
 
     const embedding = getEmbedding(source);
 

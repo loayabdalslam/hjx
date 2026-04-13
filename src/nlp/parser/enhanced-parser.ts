@@ -90,15 +90,18 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
 
   const ast: EnhancedAST = {
     kind: "HJXAst",
-    version: "0.1",
+    version: "0.2",
     component: { name: componentName },
     imports: {},
     script: "",
     state: {},
+    api: [],
     layout: null,
-    style: "",
+    style: [],
+    styleRaw: "",
     handlers: {},
     computed: {},
+    breakpoints: [],
     enhanced: true,
     ranges,
     nodes: [],
@@ -417,7 +420,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
         cssLines.push(l.slice(startIndent));
         i++;
       }
-      ast.style = cssLines.join("\n").trimEnd() + "\n";
+      ast.styleRaw = cssLines.join("\n").trimEnd() + "\n";
       ranges["style"] = makeRange(styleStart, i - 1);
       ast.styleRange = ranges["style"];
       continue;

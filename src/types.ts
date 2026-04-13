@@ -21,15 +21,40 @@ export type HJXHandler = {
   body: string[]; // lines of tiny statement language
 };
 
+export type HJXApiEndpoint = {
+  method: string;       // GET, POST, PUT, DELETE
+  path: string;         // /api/todos, /api/todos/:id
+  handlerName: string;  // fetchTodos, createTodo
+  query?: Record<string, any>;
+  params?: Record<string, any>;
+  body?: Record<string, any>;
+  response?: { type: string; item?: any; schema?: any };
+};
+
+export type HJXStyleRule = {
+  selector: string;
+  properties: string[];  // natural language lines like "padding 16px"
+  pseudo?: string;       // :hover, :active, etc.
+  media?: string;        // @mobile, @tablet, etc.
+};
+
+export type HJXBreakpoint = {
+  name: string;
+  value: string;
+};
+
 export type HJXAst = {
   kind: "HJXAst";
-  version: "0.1";
+  version: "0.2";
   component: { name: string };
   imports: Record<string, string>;
   script: string;
   state: Record<string, HJXStateValue>;
+  api: HJXApiEndpoint[];           // NEW: REST API endpoints
   layout: HJXNode | null;
-  style: string;
+  style: HJXStyleRule[];           // CHANGED: structured style rules
+  styleRaw: string;                // BACKWARD COMPAT: raw CSS string
   handlers: Record<string, HJXHandler>;
   computed: Record<string, string>; // computed state variables
+  breakpoints: HJXBreakpoint[];    // NEW: custom breakpoints
 };

@@ -1,8 +1,8 @@
-import { HJXAst, HJXNode, HJXHandler, HJXStateValue } from "./types.js";
+import { HJXAst, HJXNode, HJXHandler, HJXStateValue, HJXApiEndpoint, HJXStyleRule, HJXBreakpoint } from "./types.js";
 
 /**
- * Minimal indentation-based parser for HJX v0.1.
- * Blocks: component, state, layout, style, handlers
+ * Indentation-based parser for HJX v0.2.
+ * Blocks: component, imports, state, api, layout, style, breakpoints, handlers, script
  */
 export function parseHJX(source: string, filename = "<input>"): HJXAst {
   const lines = source.replace(/\r\n/g, "\n").split("\n");
@@ -16,15 +16,18 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
 
   const ast: HJXAst = {
     kind: "HJXAst",
-    version: "0.1",
+    version: "0.2",
     component: { name: componentName },
     imports: {},
     script: "",
     state: {},
+    api: [],
     layout: null,
-    style: "",
+    style: [],
+    styleRaw: "",
     handlers: {},
-    computed: {}
+    computed: {},
+    breakpoints: []
   };
 
   // helper: count leading spaces
@@ -106,6 +109,104 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
+    if (trimmed === "api:") {
+      i++;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (isSkippable(l)) { i++; continue; }
+        if (indentOf(l) === 0) break;
+
+        const t = l.trim();
+        // Parse: GET /api/todos -> fetchTodos or GET /api/todos -> fetchTodos:
+        const apiMatch = t.match(/^(GET|POST|PUT|DELETE|PATCH)\s+([^\s]+)\s*->\s*([A-Za-z_][A-Za-z0-9_]*)\s*:?\s*$/);
+        if (!apiMatch) err("Invalid API line. Expected: METHOD /path -> handlerName", i);
+
+        const endpoint: HJXApiEndpoint = {
+          method: apiMatch[1],
+          path: apiMatch[2],
+          handlerName: apiMatch[3]
+        };
+
+        i++;
+        // Check for sub-blocks: query:, params:, body:, response:
+        while (i < lines.length) {
+          const sl = lines[i];
+          if (isSkippable(sl)) { i++; continue; }
+          if (indentOf(sl) <= 2) break;
+
+          const st = sl.trim();
+
+          if ((st === "query:") || (st === "params:") || (st === "body:")) {
+            const sectionType = st.slice(0, -1); // query, params, or body
+            const target: Record<string, any> = {};
+            i++;
+            while (i < lines.length) {
+              const vl = lines[i];
+              if (isSkippable(vl)) { i++; continue; }
+              if (indentOf(vl) <= 4) break;
+
+              const vt = vl.trim();
+              const vm = vt.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+              if (!vm) err(`Invalid ${sectionType} field`, i);
+              const rawValue = vm[2].trim();
+              // For schema definitions, allow bare type keywords like 'number', 'string', 'boolean'
+              const typeKeywords = ['number', 'string', 'boolean', 'array', 'object', 'any'];
+              if (typeKeywords.includes(rawValue.toLowerCase())) {
+                target[vm[1]] = rawValue.toLowerCase();
+              } else {
+                target[vm[1]] = parseStateValue(rawValue, () => err(`Invalid ${sectionType} value: ${vm[2]}`, i));
+              }
+              i++;
+            }
+            if (sectionType === "query") endpoint.query = target;
+            else if (sectionType === "params") endpoint.params = target;
+            else endpoint.body = target;
+          } else if (st === "response:") {
+            const response: { type: string; item?: any; schema?: any } = { type: "" };
+            i++;
+            while (i < lines.length) {
+              const rl = lines[i];
+              if (isSkippable(rl)) { i++; continue; }
+              if (indentOf(rl) <= 4) break;
+
+              const rt = rl.trim();
+              const rm = rt.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+              if (!rm) err("Invalid response field", i);
+              const rawVal = rm[2].trim();
+              if (rm[1] === "type") {
+                // Handle bare keywords like 'array', 'object', 'string'
+                response.type = rawVal.replace(/^["']|["']$/g, "");
+              }
+              else if (rm[1] === "item") response.item = rawVal;
+              else if (rm[1] === "schema") response.schema = rawVal;
+              i++;
+            }
+            endpoint.response = response;
+          } else {
+            i++;
+          }
+        }
+        ast.api.push(endpoint);
+      }
+      continue;
+    }
+
+    if (trimmed === "breakpoints:") {
+      i++;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (isSkippable(l)) { i++; continue; }
+        if (indentOf(l) === 0) break;
+
+        const t = l.trim();
+        const m = t.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+        if (!m) err("Invalid breakpoint line. Expected: name = value", i);
+        ast.breakpoints.push({ name: m[1], value: m[2].trim() });
+        i++;
+      }
+      continue;
+    }
+
     if (trimmed === "layout:") {
       i++;
       ast.layout = parseLayout(lines, () => i, (v) => { i = v; }, filename);
@@ -114,16 +215,74 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
 
     if (trimmed === "style:") {
       i++;
-      const startIndent = 2;
-      const cssLines: string[] = [];
+      const rules: HJXStyleRule[] = [];
+      let currentRule: HJXStyleRule | null = null;
+      let inRawCss = false;
+      const rawCssLines: string[] = [];
+
       while (i < lines.length) {
         const l = lines[i];
-        if (isSkippable(l)) { cssLines.push(""); i++; continue; }
+        if (isSkippable(l)) {
+          if (currentRule) {
+            currentRule.properties.push("");
+          } else if (inRawCss) {
+            rawCssLines.push("");
+          }
+          i++;
+          continue;
+        }
         if (indentOf(l) === 0) break;
-        cssLines.push(l.slice(startIndent));
+
+        const t = l.trim();
+
+        // Detect raw CSS block: .selector { ... }
+        if (t.includes("{") && !t.endsWith(":")) {
+          inRawCss = true;
+          rawCssLines.push(l.slice(2));
+          // Collect until closing }
+          i++;
+          while (i < lines.length) {
+            const rl = lines[i];
+            rawCssLines.push(rl.length > 2 ? rl.slice(2) : rl);
+            if (rl.includes("}")) {
+              i++;
+              break;
+            }
+            i++;
+          }
+          continue;
+        }
+
+        // Natural language rule: .selector:
+        const ruleMatch = t.match(/^(\.[A-Za-z0-9_/:-]+)(:hover|:active|:focus|:visited|:disabled)?(\s*@[A-Za-z_]+)?\s*:\s*$/);
+        if (ruleMatch) {
+          currentRule = {
+            selector: ruleMatch[1],
+            properties: [],
+            pseudo: ruleMatch[2] || undefined,
+            media: ruleMatch[3]?.trim() || undefined
+          };
+          rules.push(currentRule);
+          inRawCss = false;
+          i++;
+          continue;
+        }
+
+        // Property line under a rule
+        if (currentRule && !inRawCss) {
+          currentRule.properties.push(t);
+          i++;
+          continue;
+        }
+
+        // If we get here and no current rule, treat as raw CSS line
+        rawCssLines.push(l.slice(2));
+        inRawCss = true;
         i++;
       }
-      ast.style = cssLines.join("\n").trimEnd() + "\n";
+
+      ast.style = rules;
+      ast.styleRaw = rawCssLines.join("\n").trim();
       continue;
     }
 

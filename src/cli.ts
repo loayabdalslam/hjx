@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { resolve, dirname, join } from "node:path";
 import { parseHJX } from "./parser.js";
 import { buildVanilla } from "./compiler/vanilla.js";
+import { buildReact } from "./compiler/react.js";
 import { emitRuntime } from "./compiler/emit.js";
 import { serveDev } from "./devserver.js";
 
@@ -29,15 +29,20 @@ function parseArgs(argv: string[]): { cmd: string; file?: string; args: Args } {
 }
 
 function help() {
-  console.log(`HJX v0.1
+  console.log(`HJX v0.2
 Usage:
   hjx parse <file.hjx>
-  hjx build <file.hjx> --out <dir>
+  hjx build <file.hjx> --out <dir> [--target react] [--backend]
   hjx dev <file.hjx> --out <dir> --port <n>
+
+Options:
+  --target <name>   Compilation target: vanilla (default) or react
+  --backend         Generate Express.js backend routes (requires --target react)
 
 Examples:
   hjx parse examples/counter.hjx
   hjx build examples/counter.hjx --out dist-app
+  hjx build examples/todo-app.hjx --out dist-app --target react --backend
   hjx dev examples/counter.hjx --out dist-app --port 5173
 `);
 }
@@ -62,13 +67,39 @@ async function main() {
   }
 
   if (cmd === "build") {
+    const target = String(args["target"] ?? "vanilla");
+    const withBackend = args["backend"] === true;
+
     if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
-    const bundle = buildVanilla(ast);
-    writeFileSync(resolve(outDir, "index.html"), bundle.html, "utf-8");
-    writeFileSync(resolve(outDir, "app.css"), bundle.css, "utf-8");
-    writeFileSync(resolve(outDir, "app.js"), bundle.js, "utf-8");
-    emitRuntime(outDir);
-    console.log(`Built to: ${outDir}`);
+
+    if (target === "react") {
+      // React compilation target
+      const bundle = buildReact(ast, { backend: withBackend });
+
+      // Determine component name for file naming
+      const compName = ast.component.name;
+
+      writeFileSync(resolve(outDir, `${compName}.tsx`), bundle.component, "utf-8");
+      writeFileSync(resolve(outDir, `${compName}.module.css`), bundle.styles, "utf-8");
+
+      if (bundle.apiRoutes && bundle.apiHandlers) {
+        const apiDir = resolve(outDir, "api");
+        if (!existsSync(apiDir)) mkdirSync(apiDir, { recursive: true });
+        writeFileSync(resolve(apiDir, "routes.ts"), bundle.apiRoutes, "utf-8");
+        writeFileSync(resolve(apiDir, "handlers.ts"), bundle.apiHandlers, "utf-8");
+        console.log(`Built React component + API to: ${outDir}`);
+      } else {
+        console.log(`Built React component to: ${outDir}`);
+      }
+    } else {
+      // Vanilla compilation (default)
+      const bundle = buildVanilla(ast);
+      writeFileSync(resolve(outDir, "index.html"), bundle.html, "utf-8");
+      writeFileSync(resolve(outDir, "app.css"), bundle.css, "utf-8");
+      writeFileSync(resolve(outDir, "app.js"), bundle.js, "utf-8");
+      emitRuntime(outDir);
+      console.log(`Built to: ${outDir}`);
+    }
     return;
   }
 
