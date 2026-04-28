@@ -1,0 +1,151 @@
+component Dashboard
+  state
+    stats
+      users: 1234
+      revenue: 45678
+      orders: 567
+      growth: 12.5
+    selectedPeriod: "month"
+
+  layout
+    view.container:
+      view.header:
+        text: "Dashboard"
+        view.period-selector:
+          button.period-btn (on click -> setPeriod("week")): "Week"
+          button.period-btn (on click -> setPeriod("month")): "Month"
+          button.period-btn (on click -> setPeriod("year")): "Year"
+
+      view.stats-grid:
+        view.stat-card:
+          text.stat-label: "Total Users"
+          text.stat-value: "{{stats.users.toLocaleString()}}"
+          text.stat-change: "+8.2% from last period"
+
+        view.stat-card:
+          text.stat-label: "Revenue"
+          text.stat-value: "${{(stats.revenue / 1000).toFixed(1)}}K"
+          text.stat-change: "+{{stats.growth}}% from last period"
+
+        view.stat-card:
+          text.stat-label: "Orders"
+          text.stat-value: "{{stats.orders}}"
+          text.stat-change: "+15 from last period"
+
+        view.stat-card:
+          text.stat-label: "Growth Rate"
+          text.stat-value: "{{stats.growth}}%"
+          text.stat-change: "↑ Trending up"
+
+      view.charts-section:
+        view.chart-card:
+          text.chart-title: "Revenue Trend"
+          view.chart-placeholder:
+            text: "📊 Chart visualization"
+
+        view.chart-card:
+          text.chart-title: "User Activity"
+          view.chart-placeholder:
+            text: "📈 Activity chart"
+
+  handlers
+    setPeriod(period)
+      selectedPeriod = period
+
+  style
+    .container
+      padding 24px
+      background #f9fafb
+      min-height 100vh
+      font family "Inter, system-ui, sans-serif"
+
+    .header
+      margin-bottom 32px
+
+    .header text
+      font size 32px
+      font weight 700
+      color #1f2937
+
+    .period-selector
+      display flex
+      gap 8px
+      margin-top 16px
+
+    .period-btn
+      padding 8px 16px
+      background white
+      border 2px solid #e5e7eb
+      border-radius 6px
+      font size 14px
+      font weight 600
+      color #6b7280
+      cursor pointer
+      transition all 0.3s ease
+
+    .period-btn:hover
+      border-color #667eea
+      color #667eea
+
+    .stats-grid
+      display grid
+      grid-template-columns repeat(auto-fit, minmax(250px, 1fr))
+      gap 20px
+      margin-bottom 32px
+
+    .stat-card
+      background white
+      border-radius 12px
+      padding 24px
+      box-shadow 0 1px 3px rgba(0, 0, 0, 0.1)
+      transition all 0.3s ease
+
+    .stat-card:hover
+      box-shadow 0 10px 25px rgba(0, 0, 0, 0.1)
+      transform translateY(-4px)
+
+    .stat-label
+      font size 14px
+      color #6b7280
+      font weight 500
+      margin-bottom 8px
+
+    .stat-value
+      font size 32px
+      font weight 700
+      color #1f2937
+      margin-bottom 8px
+
+    .stat-change
+      font size 13px
+      color #10b981
+      font weight 500
+
+    .charts-section
+      display grid
+      grid-template-columns repeat(auto-fit, minmax(400px, 1fr))
+      gap 20px
+
+    .chart-card
+      background white
+      border-radius 12px
+      padding 24px
+      box-shadow 0 1px 3px rgba(0, 0, 0, 0.1)
+
+    .chart-title
+      font size 18px
+      font weight 700
+      color #1f2937
+      margin-bottom 20px
+
+    .chart-placeholder
+      height 300px
+      background linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)
+      border-radius 8px
+      display flex
+      align-items center
+      justify-content center
+
+    .chart-placeholder text
+      font size 24px
+      color #9ca3af

@@ -8,7 +8,7 @@ export function buildVanilla(ast: HJXAst): { html: string; css: string; js: stri
   const scope = `hjx-${ast.component.name.toLowerCase()}`;
 
   // Generate CSS from natural language style rules
-  const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints);
+  const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints, ast.designSystem);
 
   const { htmlBody, bindings, eventBindings, inputBindings, ifForBindings } = renderNode(ast.layout ?? emptyRoot(), scope);
 

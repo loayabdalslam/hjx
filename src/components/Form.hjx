@@ -1,0 +1,14 @@
+component Form
+
+state:
+  title = ""
+
+layout:
+  view.form:
+    if (title):
+      text.h2: "{{title}}"
+    slot: "content"
+
+style:
+  .form:
+    form

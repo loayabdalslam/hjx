@@ -1,0 +1,40 @@
+component Dropdown
+
+state:
+  isOpen = false
+  selected = "Select option"
+  options = ["Option 1", "Option 2"]
+
+layout:
+  view.dropdown-container:
+    button.button-outline (on click -> toggle): "{{selected}}"
+    if (isOpen):
+      view.dropdown-menu:
+        for (opt in options):
+          view.dropdown-item (on click -> select): "{{opt}}"
+
+style:
+  .dropdown-container:
+    position relative
+  
+  .dropdown-menu:
+    position absolute
+    top 100%
+    left 0
+    background white
+    box-shadow 0 4px 12px rgba(0,0,0,0.15)
+    border-radius 8px
+    z-index 10
+
+  .dropdown-item:
+    padding 10px
+    cursor pointer
+  
+  .dropdown-item:hover:
+    background #F5F5F5
+
+handlers:
+  toggle:
+    set isOpen = !isOpen
+  select:
+    // Logic to select option

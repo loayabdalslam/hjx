@@ -57,4 +57,8 @@ export type HJXAst = {
   handlers: Record<string, HJXHandler>;
   computed: Record<string, string>; // computed state variables
   breakpoints: HJXBreakpoint[];    // NEW: custom breakpoints
+  designSystem?: {
+    theme?: 'light' | 'dark';
+    tokens?: Record<string, any>;
+  };
 };

@@ -17,7 +17,7 @@ export function buildReact(ast: HJXAst, options: { backend?: boolean } = {}): Re
   const scope = `hjx-${ast.component.name.toLowerCase()}`;
 
   // Generate CSS from natural language style rules
-  const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints);
+  const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints, ast.designSystem);
 
   // Generate React component
   const component = generateComponent(ast, scope);

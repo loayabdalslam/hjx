@@ -4,7 +4,7 @@ import { SignalCodeGenerator } from "./signal_codegen.js";
 export function buildVanilla(ast) {
     const scope = `hjx-${ast.component.name.toLowerCase()}`;
     // Generate CSS from natural language style rules
-    const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints);
+    const css = nlCssToCss(ast.style, ast.styleRaw, scope, ast.breakpoints, ast.designSystem);
     const { htmlBody, bindings, eventBindings, inputBindings, ifForBindings } = renderNode(ast.layout ?? emptyRoot(), scope);
     // Analyze dependencies using DependencyTracker
     const tracker = new DependencyTracker();

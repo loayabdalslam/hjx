@@ -1,0 +1,28 @@
+component Tabs
+
+state:
+  activeTab = 0
+  tabs = ["Tab 1", "Tab 2"]
+
+layout:
+  view.flex-row:
+    for (tab in tabs):
+      button.tab-item (on click -> setActiveTab): "{{tab}}"
+  view.tab-content:
+    slot: "content"
+
+style:
+  .tab-item:
+    padding 10px 20px
+    border none
+    background transparent
+    cursor pointer
+    border-bottom 2px solid transparent
+  
+  .tab-item:active:
+    border-bottom 2px solid #6200EE
+    color #6200EE
+
+handlers:
+  setActiveTab:
+    // Logic to set active tab

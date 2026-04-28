@@ -1,0 +1,27 @@
+component Modal
+
+state:
+  isOpen = false
+  title = "Modal Title"
+
+layout:
+  if (isOpen):
+    view.modal-backdrop (on click -> close):
+      view.modal (on click -> stopPropagation):
+        view.flex-between:
+          text.h3: "{{title}}"
+          button.button-ghost (on click -> close): "×"
+        view.p-md:
+          slot: "content"
+
+style:
+  .modal:
+    modal
+  .modal-backdrop:
+    modal-backdrop
+
+handlers:
+  close:
+    set isOpen = false
+  stopPropagation:
+    // Helper to prevent closing when clicking inside modal

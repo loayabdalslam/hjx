@@ -1,0 +1,19 @@
+component Alert
+
+state:
+  type = "info"
+  message = "Alert message"
+
+layout:
+  view.alert-{{type}}:
+    text: "{{message}}"
+
+style:
+  .alert-info:
+    alert-info
+  .alert-success:
+    alert-success
+  .alert-warning:
+    alert-warning
+  .alert-error:
+    alert-error

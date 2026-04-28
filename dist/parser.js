@@ -1,3 +1,4 @@
+import { isBuiltInComponent } from "./components/registry.js";
 /**
  * Indentation-based parser for HJX v0.2.
  * Blocks: component, imports, state, api, layout, style, breakpoints, handlers, script
@@ -231,9 +232,38 @@ export function parseHJX(source, filename = "<input>") {
             }
             continue;
         }
+        if (trimmed === "design-system:") {
+            i++;
+            ast.designSystem = {};
+            while (i < lines.length) {
+                const l = lines[i];
+                if (isSkippable(l)) {
+                    i++;
+                    continue;
+                }
+                if (indentOf(l) === 0)
+                    break;
+                const t = l.trim();
+                const m = t.match(/^([A-Za-z_][A-Za-z0-9_.]*)\s*=\s*(.+)$/);
+                if (!m)
+                    err("Invalid design-system line. Expected: key = value", i);
+                const key = m[1];
+                const val = m[2].trim().replace(/^["']|["']$/g, "");
+                if (key === "theme") {
+                    ast.designSystem.theme = val;
+                }
+                else {
+                    if (!ast.designSystem.tokens)
+                        ast.designSystem.tokens = {};
+                    ast.designSystem.tokens[key] = val;
+                }
+                i++;
+            }
+            continue;
+        }
         if (trimmed === "layout:") {
             i++;
-            ast.layout = parseLayout(lines, () => i, (v) => { i = v; }, filename);
+            ast.layout = parseLayout(lines, () => i, (v) => { i = v; }, filename, ast);
             continue;
         }
         if (trimmed === "style:") {
@@ -383,7 +413,7 @@ function parseStateValue(raw, onError) {
     }
     return onError();
 }
-function parseLayout(lines, getIndex, setIndex, filename) {
+function parseLayout(lines, getIndex, setIndex, filename, ast) {
     let i = getIndex();
     // const nodes: HJXNode[] = []; // Removed: now declared by call to parseBlock below
     const indentOf = (s) => (s.match(/^\s*/)?.[0].length ?? 0);
@@ -437,6 +467,10 @@ function parseLayout(lines, getIndex, setIndex, filename) {
             const node = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
             if (paren)
                 parseParenContent(node, paren.slice(1, -1));
+            // Handle built-in components
+            if (isBuiltInComponent(tag) && !ast.imports[tag]) {
+                ast.imports[tag] = `@hjx/components/${tag}`;
+            }
             return { node, indent, hasChildren: true };
         }
         // leaf with : "text"
@@ -450,6 +484,10 @@ function parseLayout(lines, getIndex, setIndex, filename) {
             const node = { kind: "node", tag, id, classes, attrs: {}, text: parseMaybeString(rhs, () => err("Expected string after ':'", lineNo)), events: {}, bind: null, children: [] };
             if (paren)
                 parseParenContent(node, paren.slice(1, -1));
+            // Handle built-in components
+            if (isBuiltInComponent(tag) && !ast.imports[tag]) {
+                ast.imports[tag] = `@hjx/components/${tag}`;
+            }
             return { node, indent, hasChildren: false };
         }
         // simple node (void/empty): view#id.class (attrs)
@@ -462,6 +500,10 @@ function parseLayout(lines, getIndex, setIndex, filename) {
             const node = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
             if (paren)
                 parseParenContent(node, paren.slice(1, -1));
+            // Handle built-in components
+            if (isBuiltInComponent(tag) && !ast.imports[tag]) {
+                ast.imports[tag] = `@hjx/components/${tag}`;
+            }
             return { node, indent, hasChildren: false };
         }
         err(`Invalid layout line: ${t}`, lineNo);

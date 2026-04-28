@@ -6,6 +6,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "node dist/cli.js dev examples/dashboard.hjx --out dist-app --port 5172",
+    "examples:showcase": "vite --config vite.config.examples.ts",
+    "examples:counter": "npm run build && node dist/cli.js dev examples/01-beginner-counter.hjx --out dist-counter --port 5174",
+    "examples:todo": "npm run build && node dist/cli.js dev examples/02-beginner-todo.hjx --out dist-todo --port 5174",
+    "examples:form": "npm run build && node dist/cli.js dev examples/03-intermediate-form.hjx --out dist-form --port 5174",
+    "examples:dashboard": "npm run build && node dist/cli.js dev examples/04-intermediate-dashboard.hjx --out dist-dashboard --port 5174",
+    "examples:ecommerce": "npm run build && node dist/cli.js dev examples/05-advanced-ecommerce.hjx --out dist-ecommerce --port 5174",
+    "examples:all": "npm run build && npm run examples:showcase",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",

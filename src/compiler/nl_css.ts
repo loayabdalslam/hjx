@@ -5,6 +5,7 @@
 
 import { HJXStyleRule, HJXBreakpoint } from "../types.js";
 import { scopeCss } from "./vanilla_scope_css.js";
+import { defaultTokens, getTheme, mergeTokens, generatePresets, getToken } from "../design-system/index.js";
 
 // Property name mapping: natural language -> CSS property
 const PROPERTY_MAP: Record<string, string> = {
@@ -199,11 +200,16 @@ const DEFAULT_BREAKPOINTS: Record<string, string> = {
  * Parse a natural language property line and return CSS declaration.
  * Returns null if it's a shortcut (handled separately).
  */
-function parsePropertyLine(line: string): string | null {
+function parsePropertyLine(line: string, presets: Record<string, string>): string | null {
   const trimmed = line.trim();
   if (!trimmed) return "";
 
-  // Check shortcuts first
+  // Check presets from design system
+  if (presets[trimmed.toLowerCase()]) {
+    return presets[trimmed.toLowerCase()].trim();
+  }
+
+  // Check shortcuts (legacy)
   for (const [shortcut, expansions] of Object.entries(SHORTCUTS)) {
     if (trimmed.toLowerCase() === shortcut) {
       return expansions.join(";\n  ");
@@ -221,7 +227,7 @@ function parsePropertyLine(line: string): string | null {
     if (trimmed.toLowerCase().startsWith(nlProp)) {
       matchedProperty = cssProp;
       const valuePart = trimmed.slice(nlProp.length).trim();
-      matchedValue = translateValue(valuePart);
+      matchedValue = translateValue(valuePart, presets);
       break;
     }
   }
@@ -237,8 +243,14 @@ function parsePropertyLine(line: string): string | null {
 /**
  * Translate a natural language value to CSS value.
  */
-function translateValue(value: string): string {
+function translateValue(value: string, presets: Record<string, string>): string {
   const trimmed = value.trim().toLowerCase();
+
+  // Resolve design tokens (e.g. colors.primary)
+  if (trimmed.includes('.')) {
+    const tokenValue = getToken(trimmed);
+    if (tokenValue) return tokenValue;
+  }
 
   // Check value map
   if (VALUE_MAP[trimmed]) {
@@ -268,9 +280,15 @@ export function nlCssToCss(
   rules: HJXStyleRule[],
   rawCss: string,
   scope: string,
-  breakpoints: HJXBreakpoint[] = []
+  breakpoints: HJXBreakpoint[] = [],
+  designSystem?: { theme?: 'light' | 'dark', tokens?: Record<string, any> }
 ): string {
   const cssParts: string[] = [];
+
+  // Setup design system
+  const theme = getTheme(designSystem?.theme || 'light');
+  const tokens = designSystem?.tokens ? mergeTokens(theme, designSystem.tokens) : theme;
+  const presets = generatePresets(tokens);
 
   // Add raw CSS as-is
   if (rawCss) {
@@ -288,7 +306,7 @@ export function nlCssToCss(
     const properties: string[] = [];
     for (const propLine of rule.properties) {
       if (!propLine) continue;
-      const cssDecl = parsePropertyLine(propLine);
+      const cssDecl = parsePropertyLine(propLine, presets);
       if (cssDecl !== null) {
         properties.push(cssDecl);
       }

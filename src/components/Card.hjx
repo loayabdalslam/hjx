@@ -1,0 +1,18 @@
+component Card
+
+state:
+  title = "Card Title"
+  subtitle = ""
+
+layout:
+  view.card:
+    if (title):
+      text.text-bold: "{{title}}"
+    if (subtitle):
+      text.text-muted: "{{subtitle}}"
+    view.p-md:
+      slot: "content"
+
+style:
+  .card:
+    card

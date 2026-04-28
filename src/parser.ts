@@ -1,4 +1,5 @@
 import { HJXAst, HJXNode, HJXHandler, HJXStateValue, HJXApiEndpoint, HJXStyleRule, HJXBreakpoint } from "./types.js";
+import { isBuiltInComponent } from "./components/registry.js";
 
 /**
  * Indentation-based parser for HJX v0.2.
@@ -207,9 +208,35 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
+    if (trimmed === "design-system:") {
+      i++;
+      ast.designSystem = {};
+      while (i < lines.length) {
+        const l = lines[i];
+        if (isSkippable(l)) { i++; continue; }
+        if (indentOf(l) === 0) break;
+
+        const t = l.trim();
+        const m = t.match(/^([A-Za-z_][A-Za-z0-9_.]*)\s*=\s*(.+)$/);
+        if (!m) err("Invalid design-system line. Expected: key = value", i);
+        
+        const key = m[1];
+        const val = m[2].trim().replace(/^["']|["']$/g, "");
+        
+        if (key === "theme") {
+          ast.designSystem.theme = val as 'light' | 'dark';
+        } else {
+          if (!ast.designSystem.tokens) ast.designSystem.tokens = {};
+          ast.designSystem.tokens[key] = val;
+        }
+        i++;
+      }
+      continue;
+    }
+
     if (trimmed === "layout:") {
       i++;
-      ast.layout = parseLayout(lines, () => i, (v) => { i = v; }, filename);
+      ast.layout = parseLayout(lines, () => i, (v) => { i = v; }, filename, ast);
       continue;
     }
 
@@ -362,7 +389,8 @@ function parseLayout(
   lines: string[],
   getIndex: () => number,
   setIndex: (v: number) => void,
-  filename: string
+  filename: string,
+  ast: HJXAst
 ): HJXNode {
   let i = getIndex();
   // const nodes: HJXNode[] = []; // Removed: now declared by call to parseBlock below
@@ -424,6 +452,11 @@ function parseLayout(
       const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
       if (paren) parseParenContent(node, paren.slice(1, -1));
 
+      // Handle built-in components
+      if (isBuiltInComponent(tag) && !ast.imports[tag]) {
+        ast.imports[tag] = `@hjx/components/${tag}`;
+      }
+
       return { node, indent, hasChildren: true };
     }
 
@@ -440,6 +473,11 @@ function parseLayout(
 
       if (paren) parseParenContent(node, paren.slice(1, -1));
 
+      // Handle built-in components
+      if (isBuiltInComponent(tag) && !ast.imports[tag]) {
+        ast.imports[tag] = `@hjx/components/${tag}`;
+      }
+
       return { node, indent, hasChildren: false };
     }
 
@@ -453,6 +491,11 @@ function parseLayout(
 
       const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
       if (paren) parseParenContent(node, paren.slice(1, -1));
+
+      // Handle built-in components
+      if (isBuiltInComponent(tag) && !ast.imports[tag]) {
+        ast.imports[tag] = `@hjx/components/${tag}`;
+      }
 
       return { node, indent, hasChildren: false };
     }

@@ -1,0 +1,328 @@
+{
+  "project": "HJX Design System & Component Library Integration",
+  "version": "1.0",
+  "lastUpdated": "2026-04-29",
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Design System Foundation",
+      "status": "pending",
+      "estimatedHours": 5,
+      "actualHours": 0,
+      "tasks": [
+        {
+          "id": "task-1-1",
+          "title": "Create design tokens file",
+          "description": "Create src/design-system/tokens.ts with colors, spacing, typography, shadows, breakpoints",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/design-system/tokens.ts"],
+          "estimatedHours": 2,
+          "actualHours": 2
+        },
+        {
+          "id": "task-1-2",
+          "title": "Create design presets file",
+          "description": "Create src/design-system/presets.ts with CSS presets (card, button, input, modal, etc.)",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/design-system/presets.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 1.5
+        },
+        {
+          "id": "task-1-3",
+          "title": "Update nl_css.ts for token integration",
+          "description": "Modify src/compiler/nl_css.ts to resolve design tokens",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/compiler/nl_css.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 1.5,
+          "dependencies": ["task-1-1"]
+        },
+        {
+          "id": "task-1-4",
+          "title": "Update parser for design-system block",
+          "description": "Add support for @design-system block in parser.ts",
+          "status": "completed",
+          "priority": "medium",
+          "files": ["src/parser.ts"],
+          "estimatedHours": 1,
+          "actualHours": 1
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Built-in Component Library",
+      "status": "pending",
+      "estimatedHours": 9,
+      "actualHours": 0,
+      "tasks": [
+        {
+          "id": "task-2-1",
+          "title": "Create component registry",
+          "description": "Create src/components/registry.ts to map component names to definitions",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/components/registry.ts"],
+          "estimatedHours": 1,
+          "actualHours": 1
+        },
+        {
+          "id": "task-2-2",
+          "title": "Create Button component",
+          "description": "Create src/components/Button.hjx with variants",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/components/Button.hjx"],
+          "estimatedHours": 1,
+          "actualHours": 1
+        },
+        {
+          "id": "task-2-3",
+          "title": "Create Card component",
+          "description": "Create src/components/Card.hjx with header/body/footer",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/components/Card.hjx"],
+          "estimatedHours": 0.75,
+          "actualHours": 0.75
+        },
+        {
+          "id": "task-2-4",
+          "title": "Create Input component",
+          "description": "Create src/components/Input.hjx with label and validation",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/components/Input.hjx"],
+          "estimatedHours": 0.75,
+          "actualHours": 0.75
+        },
+        {
+          "id": "task-2-5",
+          "title": "Create remaining components",
+          "description": "Create Modal, Form, Tabs, Alert, Badge, Spinner, Dropdown components",
+          "status": "completed",
+          "priority": "high",
+          "files": ["src/components/Modal.hjx", "src/components/Form.hjx", "src/components/Tabs.hjx", "src/components/Alert.hjx", "src/components/Badge.hjx", "src/components/Spinner.hjx", "src/components/Dropdown.hjx"],
+          "estimatedHours": 3,
+          "actualHours": 3
+        },
+        {
+          "id": "task-2-6",
+          "title": "Update parser for component imports",
+          "description": "Modify src/parser.ts to recognize built-in components",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/parser.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 0,
+          "dependencies": ["task-2-1"]
+        },
+        {
+          "id": "task-2-7",
+          "title": "Update vanilla compiler for components",
+          "description": "Modify src/compiler/vanilla.ts to handle built-in components",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/compiler/vanilla.ts"],
+          "estimatedHours": 1,
+          "actualHours": 0,
+          "dependencies": ["task-2-1"]
+        },
+        {
+          "id": "task-2-8",
+          "title": "Update React compiler for components",
+          "description": "Modify src/compiler/react.ts to handle built-in components",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/compiler/react.ts"],
+          "estimatedHours": 1,
+          "actualHours": 0,
+          "dependencies": ["task-2-1"]
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Grammar Extension for Components",
+      "status": "pending",
+      "estimatedHours": 5,
+      "actualHours": 0,
+      "tasks": [
+        {
+          "id": "task-3-1",
+          "title": "Update grammar.yml with component patterns",
+          "description": "Add component patterns to grammar.yml",
+          "status": "pending",
+          "priority": "high",
+          "files": ["grammar.yml"],
+          "estimatedHours": 2,
+          "actualHours": 0
+        },
+        {
+          "id": "task-3-2",
+          "title": "Create component patterns file",
+          "description": "Create src/nlp/flow/component_patterns.ts with predefined patterns",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/nlp/flow/component_patterns.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 0
+        },
+        {
+          "id": "task-3-3",
+          "title": "Update Flow engine for component generation",
+          "description": "Modify src/nlp/flow/flow_engine.ts to generate component code",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/nlp/flow/flow_engine.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 0,
+          "dependencies": ["task-3-2"]
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Component Variants & Composition",
+      "status": "pending",
+      "estimatedHours": 5,
+      "actualHours": 0,
+      "tasks": [
+        {
+          "id": "task-4-1",
+          "title": "Create variants file",
+          "description": "Create src/components/variants.ts with variant definitions",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/components/variants.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 0
+        },
+        {
+          "id": "task-4-2",
+          "title": "Update parser for component props",
+          "description": "Add component prop parsing to src/parser.ts",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/parser.ts"],
+          "estimatedHours": 1.5,
+          "actualHours": 0,
+          "dependencies": ["task-4-1"]
+        },
+        {
+          "id": "task-4-3",
+          "title": "Update vanilla compiler for variants",
+          "description": "Handle component variants in src/compiler/vanilla.ts",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/compiler/vanilla.ts"],
+          "estimatedHours": 1,
+          "actualHours": 0,
+          "dependencies": ["task-4-1"]
+        },
+        {
+          "id": "task-4-4",
+          "title": "Update React compiler for variants",
+          "description": "Handle component variants in src/compiler/react.ts",
+          "status": "pending",
+          "priority": "high",
+          "files": ["src/compiler/react.ts"],
+          "estimatedHours": 1,
+          "actualHours": 0,
+          "dependencies": ["task-4-1"]
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Task Tracking System",
+      "status": "in_progress",
+      "estimatedHours": 2.5,
+      "actualHours": 0.5,
+      "tasks": [
+        {
+          "id": "task-5-1",
+          "title": "Create plan folder structure",
+          "description": "Create plan/ directory with README, PROGRESS, tasks.json",
+          "status": "completed",
+          "priority": "high",
+          "files": ["plan/README.md", "plan/PROGRESS.md", "plan/tasks.json"],
+          "estimatedHours": 0.5,
+          "actualHours": 0.5
+        },
+        {
+          "id": "task-5-2",
+          "title": "Create phase detail files",
+          "description": "Create plan/phases/phase-*.md files",
+          "status": "in_progress",
+          "priority": "high",
+          "files": ["plan/phases/phase-1.md", "plan/phases/phase-2.md", "plan/phases/phase-3.md", "plan/phases/phase-4.md", "plan/phases/phase-5.md", "plan/phases/phase-6.md"],
+          "estimatedHours": 1.5,
+          "actualHours": 0
+        },
+        {
+          "id": "task-5-3",
+          "title": "Set up task tracking workflow",
+          "description": "Document how to update and track tasks",
+          "status": "pending",
+          "priority": "medium",
+          "files": ["plan/README.md"],
+          "estimatedHours": 0.5,
+          "actualHours": 0
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Documentation & Examples",
+      "status": "pending",
+      "estimatedHours": 3.5,
+      "actualHours": 0,
+      "tasks": [
+        {
+          "id": "task-6-1",
+          "title": "Create design system documentation",
+          "description": "Create docs/design-system.md with usage guide",
+          "status": "pending",
+          "priority": "high",
+          "files": ["docs/design-system.md"],
+          "estimatedHours": 1.5,
+          "actualHours": 0
+        },
+        {
+          "id": "task-6-2",
+          "title": "Create example files",
+          "description": "Create design-system-showcase.hjx, form-example.hjx, modal-example.hjx",
+          "status": "pending",
+          "priority": "high",
+          "files": ["examples/design-system-showcase.hjx", "examples/form-example.hjx", "examples/modal-example.hjx"],
+          "estimatedHours": 1.5,
+          "actualHours": 0
+        },
+        {
+          "id": "task-6-3",
+          "title": "Update README.md",
+          "description": "Add design system section to README.md",
+          "status": "pending",
+          "priority": "medium",
+          "files": ["README.md"],
+          "estimatedHours": 0.5,
+          "actualHours": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalTasks": 35,
+    "completedTasks": 11,
+    "inProgressTasks": 1,
+    "pendingTasks": 24,
+    "totalEstimatedHours": 30,
+    "totalActualHours": 13,
+    "completionPercentage": 31
+  }
+}
