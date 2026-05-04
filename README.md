@@ -40,10 +40,37 @@ console.log(output); // 30
 
 ---
 
-## Real-World Integrations
+### 3. Production Caching (Run Once, Deploy Everywhere)
+Intent is designed for production. It uses a smart caching layer to ensure you only call the AI provider during development.
 
-Check out the [examples](./examples) folder for production-ready patterns:
-- **[Next.js + HJX](./examples/nextjs-hjx-server)**: A dynamic business logic server where React components fetch logic results defined in `.hjx` files.
+```javascript
+// During Build / Dev
+const { output, cached } = await runHjx(source, { cache: true });
+// Subsequent runs will use .intent-cache/ folder
+```
+
+---
+
+## Production-Ready Examples
+
+We have provided several full-scale project architectures in the `examples/` directory:
+
+1.  **[Next.js Dynamic Logic Server](./examples/nextjs-hjx-server)**: Featuring a `prebuild.js` script to warm up the AI cache before deployment.
+2.  **[Vite + React Integration](./examples/vite-intent-app)**: Demonstrates a Vite Plugin that treats `.hjx` files as standard JS modules.
+3.  **[AI Knowledge Base](./examples/ai-knowledge-base)**: Automated SEO and metadata optimization at build time.
+4.  **[Dynamic Pricing Engine](./examples/dynamic-pricing-engine)**: Complex regional business rules defined in natural language.
+5.  **[Smart Form Validator](./examples/smart-form-validator)**: Sophisticated validation logic used in React forms.
+
+## Production Architecture: The "Intent-to-Static" Workflow
+
+To make Intent production-ready, we follow a simple principle: **AI generates in Dev, Static runs in Prod.**
+
+1.  **Development**: You write `.hjx` files. The Intent Runtime calls your AI provider (e.g., `gemma4:31b-cloud`) and generates high-quality code.
+2.  **Caching**: The generated code and outputs are stored in `.intent-cache/`.
+3.  **Build Time**: During `next build` or `vite build`, the caching layer ensures all logic is frozen. No AI calls happen during the build or in the final production bundle.
+4.  **Runtime**: Your application imports the cached logic. It runs at native speed (JS/Python) with zero latency and zero AI costs.
+
+---
 
 ## Installation
 

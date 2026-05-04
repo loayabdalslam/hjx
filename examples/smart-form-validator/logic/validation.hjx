@@ -1,0 +1,31 @@
+target: javascript
+# Intent: Complex Password & Email Validator
+
+email = "user@example.com"
+password = "Password123!"
+
+# Rules:
+# 1. Email must contain @ and a domain
+# 2. Password must be > 8 chars, have a number, and a special char
+# 3. If email is from "disposable.com", reject
+
+isEmailValid = email.includes("@") && email.split("@")[1].includes(".")
+isDisposable = email.endsWith("disposable.com")
+
+hasNumber = /\d/.test(password)
+hasSpecial = /[!@#$%^&*]/.test(password)
+isLengthValid = password.length >= 8
+
+isValid = isEmailValid && !isDisposable && hasNumber && hasSpecial && isLengthValid
+
+errors = []
+if (!isEmailValid) errors.push("Invalid email format")
+if (isDisposable) errors.push("Disposable emails not allowed")
+if (!isLengthValid) errors.push("Password too short")
+if (!hasNumber) errors.push("Password needs a number")
+if (!hasSpecial) errors.push("Password needs a special character")
+
+return {
+    "isValid": isValid,
+    "errors": errors
+}

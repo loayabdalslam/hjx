@@ -1,0 +1,30 @@
+target: javascript
+# Intent: Global Pricing Engine
+# Calculate price based on region and loyalty
+
+basePrice = 100
+region = "EU" # Dynamic input
+loyaltyYears = 3
+
+# Logic:
+# If region is EU, add 20% VAT.
+# If loyalty > 2 years, apply 15% discount on base price.
+# Round to 2 decimal places.
+
+discount = 0
+if loyaltyYears > 2:
+    discount = 0.15
+
+tax = 0
+if region == "EU":
+    tax = 0.20
+
+final = (basePrice * (1 - discount)) * (1 + tax)
+
+return {
+    "currency": "EUR" if region == "EU" else "USD",
+    "subtotal": basePrice,
+    "discount_applied": discount * 100,
+    "tax_applied": tax * 100,
+    "total": round(final, 2)
+}

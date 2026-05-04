@@ -1,0 +1,26 @@
+target: javascript
+# Intent: Content Optimizer
+# 1. Take a raw article text
+# 2. Extract 5 keywords
+# 3. Generate a meta-description (max 150 chars)
+# 4. Suggest a click-worthy title
+
+raw_text = """
+Intent Coding is the next evolution of software development. 
+Unlike Vibe Coding, it focuses on verifiable intent blocks 
+that can be cached and audited in production environments.
+"""
+
+# Extract logic
+keywords = ["Intent Coding", "Software Evolution", "Production-Ready", "Vibe Coding Alternative"]
+meta = "Discover how Intent Coding provides a verifiable, cached, and audited alternative to Vibe Coding for production apps."
+title = "Intent Coding: The Production-Ready Alternative to Vibe Coding"
+
+return {
+    "seo": {
+        "title": title,
+        "meta": meta,
+        "keywords": keywords
+    },
+    "wordCount": 42
+}
