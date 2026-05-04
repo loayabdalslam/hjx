@@ -7,7 +7,7 @@ import { join } from 'path';
 // Mock the core generator function
 vi.spyOn(generator, 'generate').mockImplementation(async (parsed) => {
   return {
-    code: parsed.target === 'javascript' ? 'return "mocked result";' : 'print("mocked result")',
+    code: parsed.target === 'javascript' ? 'console.log("mocked result");' : 'print("mocked result")',
     success: true
   };
 });
@@ -25,7 +25,7 @@ describe('Intent Coding — Mocked Core Tests', () => {
     
     expect(result.success).toBe(true);
     expect(result.cached).toBe(false);
-    expect(result.output).toBe("mocked result");
+    expect(result.output.trim()).toBe("mocked result");
     expect(existsSync(cacheDir)).toBe(true);
   });
 

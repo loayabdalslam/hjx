@@ -1,13 +1,26 @@
-## Hjx Example 3 — Data Processing
-## Target: Python
+target: javascript
+provider: ollama
+model: gemma4:31b-cloud
+@description Student Score Analysis
 
-@target python
-@description Process a list of student scores
+# Data Processing Intent:
+# 1. Define a list of students with scores [85, 42, 90, 66, 78, 55]
+# 2. Calculate the average score
+# 3. Find the highest and lowest score
+# 4. Classify each as "Pass" (> 60) or "Fail"
+# 5. Print a summary JSON object
 
-do {
-  create a list of 10 random student scores between 50 and 100
-  calculate the average score
-  find the highest and lowest score
-  print a summary report with all these statistics
-  classify each student as pass or fail based on score above 60
+scores = [85, 42, 90, 66, 78, 55]
+avg = sum(scores) / length(scores)
+high = max(scores)
+low = min(scores)
+
+results = []
+for s in scores:
+    results.push({ "score": s, "status": "Pass" if s > 60 else "Fail" })
+
+return {
+    "average": avg,
+    "stats": { "max": high, "min": low },
+    "detailed": results
 }

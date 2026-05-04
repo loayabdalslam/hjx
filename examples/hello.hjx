@@ -1,10 +1,8 @@
-## Hjx Example 1 — Hello World
-## Target: Python
-## Run with: hjx run examples/hello.hjx
+target: javascript
+provider: ollama
+model: gemma4:31b-cloud
+@description Simple Hello World
 
-@target python
-@description A simple greeting program
-
-print hello world to the terminal
-print the current date and time
-print a separator line of dashes
+# Print "Hello World" to the console
+print "Hello World from Intent Coding!"
+print the current date and time formatted nicely

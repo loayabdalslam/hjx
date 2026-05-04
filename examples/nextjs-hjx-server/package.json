@@ -1,0 +1,17 @@
+{
+  "name": "nextjs-hjx-server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run prebuild && next build",
+    "start": "next start",
+    "prebuild": "node scripts/prebuild.js"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "hjx": "file:../../"
+  }
+}

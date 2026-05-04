@@ -1,10 +1,9 @@
-## Hjx Example 2 — Fibonacci
-## Target: JavaScript
-## Run with: hjx run examples/fibonacci.hjx
+target: javascript
+provider: ollama
+model: gemma4:31b-cloud
+@description Fibonacci Sequence Generator
 
-@target javascript
-@description Calculate fibonacci numbers
-
+# Calculate the first 10 numbers of the Fibonacci sequence
 create a function that calculates fibonacci numbers recursively
 call the function with n equals 10 and print the result
 print all fibonacci numbers from 0 to 15 in a loop
