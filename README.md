@@ -1,300 +1,107 @@
-# Intent — (Intent Coding) 🧠
+# Hjx - INTENT CODING: The "Vibe Coding" Killer! 🚀
+> **"Stop Vibe Coding and Start Intenting! Welcome to 2008... but with AI from the future! This is EPIC!"**
 
-> **Unified AI-Powered Programming Language**
-> Write your intent in plain English (or Arabic), and Intent converts it to real, runnable code in any language.
-
----
-
-## What is Intent Coding?
-
-**Intent Coding** is the first implementation of *True Intent Control*. While "Vibe Coding" relies on luck and imprecise prompting, Intent Coding uses a structured runtime to translate your exact mental model into executable, verifiable code. 
-
-**Intent** (formerly Hjx) is the engine for this movement. It is a **runtime for AI-generated code**. Instead of writing code, you describe your **Intent**. The system feeds this to high-performance models (like `gemma2:27b` or `gemma4`) and executes the results within a controlled environment.
-
-```
-# hello.hjx
-@target python
-
-print hello world to the terminal
-print the current date and time
-```
+[![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/loayabdalslam/intent-coding)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Status: Production Ready](https://img.shields.io/badge/Status-Over_9000-red.svg)]()
 
 ---
 
-## Usage
+###  يا هلا والله! Are you tired of "Vibe Coding"?
+Do you just type code and *hope* it works? Do you pray to the AI gods every time you refresh? **THAT’S NOOB STUFF!** 
 
-### 1. CLI Usage
+Welcome to **INTENT CODING** — the first library that lets you control the AI's *soul*. We don't just "vibe." We define **Intent Blocks** that translate directly into static, cached, and audited production code. 
+
+**It's fast. It's safe. It's UBER-COOL! **
+
+---
+
+## Why Intent Coding is an EPIC WIN! 
+
+| Feature | Vibe Coding (The Noob Way) | Intent Coding (The Pro Way) |
+| :--- | :--- | :--- |
+| **Speed** | Waiting for API calls like it's dial-up 🐢 | **Instant!** Cached result is faster than a ninja 🥷 |
+| **Cost** | Burning tokens like crazy 💸 | **Zero Cost!** One run, infinite executions 💎 |
+| **Reliability** | AI might hallucinate and pwn your DB 🤡 | **Verifiable!** Audit the code before it hits prod ✅ |
+| **Production** | "It works on my machine..." 🤷‍♂️ | **Built for the Cloud!** Pre-build & cache everything ☁️ |
+
+---
+
+## 🛠️ Installation (Easy as 1-2-3!)
+
 ```bash
-hjx run hello.hjx
+# Get the magic started!
+npm install -g hjx-intent-coding
 ```
 
-### 2. Programmatic API (Library)
-You can now use `hjx` directly in your Node.js/Next.js/Vite projects:
+---
+
+## 🕹️ Practical Demos (Watch this!)
+
+### 1. The "Smart Pricing" Engine 💰
+Stop hardcoding complex rules. Just tell Intent what you want!
 
 ```javascript
-import { runHjx } from 'hjx';
+// logic/pricing.hjx
+target: javascript
+provider: ollama
+model: gemma4:31b-cloud
 
-const { output } = await runHjx("x = 10; y = 20; return x + y");
-console.log(output); // 30
+# Intent: Global Pricing Engine
+# 1. Base price is 100 USD
+# 2. If user is from EU, add 20% VAT
+# 3. If they are a VIP, give them 15% off
+# 4. Return the final price in JSON
 ```
 
----
+**Run it like a boss:**
+```bash
+intent run logic/pricing.hjx
+```
 
-### 3. Production Caching (Run Once, Deploy Everywhere)
-Intent is designed for production. It uses a smart caching layer to ensure you only call the AI provider during development.
+### 2. Next.js Integration (Zero Latency!) ⚡
+Integrate directly into your Server Components. No more slow loaders!
 
 ```javascript
-// During Build / Dev
-const { output, cached } = await runHjx(source, { cache: true });
-// Subsequent runs will use .intent-cache/ folder
-```
-
----
-
-## Production-Ready Examples
-
-We have provided several full-scale project architectures in the `examples/` directory:
-
-1.  **[Next.js Dynamic Logic Server](./examples/nextjs-hjx-server)**: Featuring a `prebuild.js` script to warm up the AI cache before deployment.
-2.  **[Vite + React Integration](./examples/vite-intent-app)**: Demonstrates a Vite Plugin that treats `.hjx` files as standard JS modules.
-3.  **[AI Knowledge Base](./examples/ai-knowledge-base)**: Automated SEO and metadata optimization at build time.
-4.  **[Dynamic Pricing Engine](./examples/dynamic-pricing-engine)**: Complex regional business rules defined in natural language.
-5.  **[Smart Form Validator](./examples/smart-form-validator)**: Sophisticated validation logic used in React forms.
-
-## Production Architecture: The "Intent-to-Static" Workflow
-
-To make Intent production-ready, we follow a simple principle: **AI generates in Dev, Static runs in Prod.**
-
-1.  **Development**: You write `.hjx` files. The Intent Runtime calls your AI provider (e.g., `gemma4:31b-cloud`) and generates high-quality code.
-2.  **Caching**: The generated code and outputs are stored in `.intent-cache/`.
-3.  **Build Time**: During `next build` or `vite build`, the caching layer ensures all logic is frozen. No AI calls happen during the build or in the final production bundle.
-4.  **Runtime**: Your application imports the cached logic. It runs at native speed (JS/Python) with zero latency and zero AI costs.
-
----
-
-## Installation
-
-### Requirements
-- Node.js >= 18
-- At least one AI provider (see below)
-
-### Install
-
-```bash
-git clone https://github.com/you/hjx
-cd hjx
-npm install
-npm link        # makes `hjx` available globally
-```
-
----
-
-## AI Providers
-
-Hjx supports multiple AI providers. Configure via `.hjxrc` or CLI flags.
-
-| Provider | Flag | Requires |
-|----------|------|---------|
-| **Ollama** (default, local) | `--provider ollama` | Ollama running locally |
-| **Claude** (Anthropic) | `--provider claude` | `ANTHROPIC_API_KEY` |
-| **GPT** (OpenAI) | `--provider gpt` | `OPENAI_API_KEY` |
-| **Gemini** (Google) | `--provider gemini` | `GEMINI_API_KEY` |
-
-### Setup Ollama (recommended, 100% offline)
-
-```bash
-# Install Ollama from https://ollama.ai
-ollama pull codellama   # or mistral, deepseek-coder, etc.
-```
-
-### Setup Claude / GPT / Gemini
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-export OPENAI_API_KEY=sk-...
-export GEMINI_API_KEY=AIza...
-```
-
----
-
-## Hjx File Format (`.hjx`)
-
-```hjx
-## This is a comment
-
-@target python           # required: target language
-@description My program  # optional: short description
-
-# Single-line intent:
-create a function that sorts a list of numbers
-
-# Multi-line intent block:
-do {
-  read a CSV file called data.csv
-  calculate the average of the second column
-  print the result formatted with 2 decimal places
-}
-```
-
-### Supported target languages
-
-`python` · `javascript` · `typescript` · `rust` · `go` · `java` · `kotlin` · `cpp` · `c` · `sql`
-
----
-
-## CLI Commands
-
-### `hjx run <file.hjx>`
-
-Translate and immediately execute the file.
-
-```bash
-hjx run hello.hjx
-hjx run script.hjx --provider claude --target javascript
-hjx run script.hjx --explain    # also show AI explanation
-hjx run script.hjx --no-run     # generate only, don't execute
-```
-
-### `hjx compile <file.hjx>`
-
-Translate only — show generated code without running it.
-
-```bash
-hjx compile script.hjx
-hjx compile script.hjx -t go   # override target language
-```
-
-### `hjx repl`
-
-Interactive mode — type intent, get code, run it, repeat.
-
-```bash
-hjx repl
-hjx repl --provider gpt --target javascript
-```
-
-REPL commands:
-
-| Command | Action |
-|---------|--------|
-| `:help` | Show commands |
-| `:target <lang>` | Change target language |
-| `:history` | Show last 10 entries |
-| `:clear` | Clear screen |
-| `:exit` | Quit |
-
-### `hjx explain <file.hjx>`
-
-Generate code and provide a plain-English explanation.
-
-```bash
-hjx explain script.hjx
-```
-
-### `hjx history`
-
-Show translation history.
-
-```bash
-hjx history          # last 20 entries
-hjx history -n 50    # last 50 entries
-hjx history clear    # clear all history
-```
-
----
-
-## Configuration
-
-Create a `.hjxrc` file in your project or home directory:
-
-```json
-{
-  "provider": "ollama",
-  "ollamaUrl": "http://localhost:11434",
-  "ollamaModel": "codellama",
-  "target": "python",
-  "run": true,
-  "explain": false,
-  "timeout": 30000
-}
-```
-
-Copy the example: `cp .hjxrc.example .hjxrc`
-
-### Environment variables
-
-| Variable | Description |
-|----------|-------------|
-| `HJX_PROVIDER` | Default provider |
-| `HJX_TARGET` | Default target language |
-| `HJX_OLLAMA_URL` | Ollama server URL |
-| `HJX_OLLAMA_MODEL` | Ollama model name |
-| `HJX_MODEL` | Model override (any provider) |
-| `ANTHROPIC_API_KEY` | Claude API key |
-| `OPENAI_API_KEY` | OpenAI API key |
-| `GEMINI_API_KEY` | Gemini API key |
-
----
-
-## Examples
-
-### Example 1 — Hello World
-
-```hjx
-@target python
-print hello world with a timestamp
-```
-
-```bash
-hjx run examples/hello.hjx
-```
-
-### Example 2 — Fibonacci (JavaScript)
-
-```hjx
-@target javascript
-create a recursive fibonacci function
-print fibonacci numbers from 0 to 15
-```
-
-### Example 3 — Data Processing
-
-```hjx
-@target python
-@description Student score analyzer
-
-do {
-  create a list of 10 random student scores between 50 and 100
-  calculate average, highest, and lowest score
-  print a summary report
-  classify each student as pass or fail
+import { runHjx } from 'intent';
+
+export default async function Page() {
+  // This hits the cache in production. ZERO API CALLS!
+  const result = await runHjx(myIntentSource, { cache: true });
+  return <div>Final Price: {result.output.total}</div>;
 }
 ```
 
 ---
 
-## History
+## 🏗️ The "Intent-to-Static" Architecture
 
-Hjx saves every translation to `~/.hjx/history.json`. You can inspect it directly or use `hjx history`.
-
----
-
-## Architecture
-
-```
-.hjx file → Parser → AI Router → Code Generator → Executor → Output
-                        ↓
-               Ollama / Claude / GPT / Gemini
-```
+Intent Coding isn't just a library; it's a **Workflow**. 
+1.  **Dev Phase:** You write intents. The AI generates code. 
+2.  **Audit Phase:** You check the generated code.
+3.  **Build Phase:** `prebuild.js` warms up the cache.
+4.  **Prod Phase:** Your server runs **STRICT STATIC CODE**. No AI required!
 
 ---
 
+## 📂 Awesome Examples Inside!
+
+Check out our `examples/` folder for some serious inspiration:
+- 📊 **Next.js Server:** Dynamic business rules at scale.
+- 🎨 **Vite React App:** Using Intent as a frontend plugin.
+- 🧠 **AI Knowledge Base:** Automated SEO and content optimization.
+- ⚖️ **Dynamic Pricing:** Real-time financial calculations.
+
 ---
 
-## Real-World Projects & Integrations
+## 🤝 Contributing
+Want to help us kill Vibe Coding? Join the revolution! Send us a PR or just tell your friends that Intent Coding is the only way to live.
 
-- **[Next.js Dynamic Logic](./examples/nextjs-hjx-server)**: Using HJX as a backend logic layer for React apps.
+**Don't forget to STAR this repo! If we get 30000 stars, I'll record a video of me doing the Shuffle! 💃**
 
-## License
+---
 
-MIT
+## 📜 License
+Released under the MIT License because we're cool like that.
+
+**© 2071-2026 Intent Coding Team — Stay Epic!**
