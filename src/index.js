@@ -1,6 +1,9 @@
-export { parse } from './parser/index.js';
-export { createProvider } from './providers/index.js';
-export { generate, explain, executeCode } from './generator/index.js';
+import { parse } from './parser/index.js';
+import { createProvider } from './providers/index.js';
+import { generate, executeCode } from './generator/index.js';
+
+export { parse, createProvider, generate, executeCode };
+export { explain } from './generator/index.js';
 export { addEntry, getHistory, clearHistory, getHistoryPath } from './history/index.js';
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';

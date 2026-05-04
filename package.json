@@ -1,0 +1,33 @@
+{
+  "name": "hjx",
+  "version": "1.0.0",
+  "description": "hjx — The first Intent Coding library. A superior alternative to Vibe Coding.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "hjx": "./src/cli/index.js"
+  },
+  "scripts": {
+    "start": "node src/cli/index.js",
+    "dev": "node --watch src/cli/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "inquirer": "^9.2.15",
+    "ora": "^8.0.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
