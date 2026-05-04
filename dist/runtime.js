@@ -1,12 +1,3 @@
-export function createStore(initial) {
-    const state = { ...initial };
-    const listeners = new Set();
-    return {
-        get: () => state,
-        set: (patch) => { Object.assign(state, patch); listeners.forEach(fn => fn()); },
-        subscribe: (fn) => { listeners.add(fn); return () => listeners.delete(fn); }
-    };
-}
 export function textBinder(store, root, selector, template) {
     const el = root.querySelector(selector);
     if (!el)
@@ -157,7 +148,6 @@ function parseValue(v) {
         return parseInt(trimmed);
     return trimmed;
 }
-export function mount() { }
 // Effect stack for dependency tracking
 let currentEffect = null;
 const effectStack = [];

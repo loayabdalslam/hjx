@@ -1,0 +1,1 @@
+Make a todo list component called TodoApp with state items array initialized as empty, newItem string, layout with input for new item, add button, and list of items, handlers addItem and deleteItem

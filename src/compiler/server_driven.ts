@@ -246,8 +246,8 @@ function escapeHtml(s: string): string {
 
 function emptyRoot(): HJXNode {
   return {
-    kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [
-      { kind: "node", tag: "text", classes: [], attrs: {}, text: "Empty layout", events: {}, bind: null, children: [] }
+    kind: "node", tag: "view", id: "root", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [
+      { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: "Empty layout", events: {}, bind: null, children: [] }
     ]
   };
 }
@@ -349,7 +349,7 @@ export function renderNode(
 
     // Handle inline text as first child of slot
     if (node.text != null && node.text.trim() !== "") {
-      const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: node.text, events: {}, bind: null, children: [] };
+      const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: node.text, events: {}, bind: null, children: [] };
       const res = renderNode(txtNode, scope, imports, statePrefix, {}, {}, receivedSlots, ctx);
       preRenderedSlot.htmlBody += res.htmlBody;
       preRenderedSlot.bindings.push(...res.bindings);
@@ -427,7 +427,7 @@ export function renderNode(
 
       const preRenderedSlot: Bindings = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
       if (n.text != null && n.text.trim() !== "") {
-        const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: n.text, events: {}, bind: null, children: [] };
+        const txtNode: HJXNode = { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: n.text, events: {}, bind: null, children: [] };
         const res = renderNode(txtNode, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
         preRenderedSlot.htmlBody += res.htmlBody;
         preRenderedSlot.bindings.push(...res.bindings);

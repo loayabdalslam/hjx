@@ -1,4 +1,6 @@
 import { nlCssToCss } from "./nl_css.js";
+import { isBuiltInComponent } from "../components/registry.js";
+import { allVariants } from "../components/variants.js";
 import { DependencyTracker } from "./dependency_tracker.js";
 import { SignalCodeGenerator } from "./signal_codegen.js";
 export function buildVanilla(ast) {
@@ -161,8 +163,8 @@ function escapeHtml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/</g, "&gt;");
 }
 function emptyRoot() {
-    return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [
-            { kind: "node", tag: "text", classes: [], attrs: {}, text: "Empty layout", events: {}, bind: null, children: [] }
+    return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [
+            { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: "Empty layout", events: {}, bind: null, children: [] }
         ] };
 }
 function renderNode(node, scope) {
@@ -198,6 +200,18 @@ function renderNode(node, scope) {
         if (n.kind === "else") {
             return "";
         }
+        // Apply component variants
+        if (isBuiltInComponent(n.tag)) {
+            const variants = allVariants[n.tag];
+            if (variants) {
+                for (const [propName, propValue] of Object.entries(n.props)) {
+                    if (variants[propValue]) {
+                        const variant = variants[propValue];
+                        n.classes.push(variant.styles);
+                    }
+                }
+            }
+        }
         const tag = mapTag(n.tag);
         const dataId = ensureDataId(n);
         const attrParts = [];
@@ -231,14 +245,16 @@ function renderNode(node, scope) {
 }
 function mapTag(tag) {
     const t = tag.toLowerCase();
-    if (t === "view")
+    if (t === "view" || t === "card" || t === "modal" || t === "alert" || t === "spinner")
         return "div";
-    if (t === "text")
+    if (t === "text" || t === "badge")
         return "span";
     if (t === "button")
         return "button";
     if (t === "input")
         return "input";
+    if (t === "form")
+        return "form";
     return t;
 }
 function escapeAttr(s) {

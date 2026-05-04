@@ -91,8 +91,8 @@ export class HJXNLPEngine {
     this.visualizer = new FeatureVisualizer(this.featureStore);
   }
 
-  classifyIntent(text: string) {
-    return this.intentClassifier.classify(text);
+  async classifyIntent(text: string) {
+    return await this.intentClassifier.classify(text);
   }
 
   extractEntities(text: string) {
@@ -119,10 +119,10 @@ export class HJXNLPEngine {
     return this.errorCorrector.correctCode(source);
   }
 
-  analyzeComponent(source: string, filePath: string) {
+  async analyzeComponent(source: string, filePath: string) {
     const features = extractFeatures(source, filePath);
     const embedding = getEmbedding(source);
-    const intent = this.classifyIntent(source);
+    const intent = await this.classifyIntent(source);
     const entities = this.extractEntities(source);
     const errors = this.detectErrors(source);
     const relations = this.extractRelations(source, entities);

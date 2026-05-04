@@ -53,7 +53,7 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
-    if (trimmed === "state:") {
+    if (trimmed === "state:" || trimmed === "state") {
       i++;
       while (i < lines.length) {
         const l = lines[i];
@@ -71,7 +71,7 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
-    if (trimmed === "computed:") {
+    if (trimmed === "computed:" || trimmed === "computed") {
       i++;
       while (i < lines.length) {
         const l = lines[i];
@@ -328,7 +328,7 @@ export function parseHJX(source: string, filename = "<input>"): HJXAst {
       continue;
     }
 
-    if (trimmed === "handlers:") {
+    if (trimmed === "handlers:" || trimmed === "handlers") {
       i++;
       while (i < lines.length) {
         const l = lines[i];
@@ -411,7 +411,7 @@ function parseLayout(
     const ifMatch = t.match(/^if\s*\((.+)\)\s*:\s*$/);
     if (ifMatch) {
       return {
-        node: { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         indent,
         hasChildren: true
       };
@@ -420,7 +420,7 @@ function parseLayout(
     // else:
     if (t === "else:") {
       return {
-        node: { kind: "else", tag: "else", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "else", tag: "else", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         indent,
         hasChildren: true
       };
@@ -434,7 +434,7 @@ function parseLayout(
           kind: "for",
           tag: "for",
           iterator: { item: forMatch[1], list: forMatch[2] },
-          classes: [], attrs: {}, text: null, events: {}, bind: null, children: []
+          classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: []
         },
         indent,
         hasChildren: true
@@ -449,7 +449,7 @@ function parseLayout(
       const classes = extractClasses(t);
       const paren = containerMatch[4]?.trim() ?? "";
 
-      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
+      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, props: {}, children: [] };
       if (paren) parseParenContent(node, paren.slice(1, -1));
 
       // Handle built-in components
@@ -469,7 +469,7 @@ function parseLayout(
       const paren = leafMatch[4]?.trim() ?? "";
       const rhs = leafMatch[5].trim();
 
-      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: parseMaybeString(rhs, () => err("Expected string after ':'", lineNo)), events: {}, bind: null, children: [] };
+      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, props: {}, text: parseMaybeString(rhs, () => err("Expected string after ':'", lineNo)), events: {}, bind: null, children: [] };
 
       if (paren) parseParenContent(node, paren.slice(1, -1));
 
@@ -489,7 +489,7 @@ function parseLayout(
       const classes = extractClasses(t);
       const paren = simpleMatch[4]?.trim() ?? "";
 
-      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
+      const node: HJXNode = { kind: "node", tag, id, classes, attrs: {}, text: null, events: {}, bind: null, props: {}, children: [] };
       if (paren) parseParenContent(node, paren.slice(1, -1));
 
       // Handle built-in components
@@ -522,12 +522,18 @@ function parseLayout(
         continue;
       }
 
-      // 3. attribute="value" or attribute='value'
-      const attrMatch = remaining.match(/^([a-zA-Z0-9_-]+)\s*=\s*("([^"]*)"|'([^']*)')/);
+      // 3. key = value
+      const attrMatch = remaining.match(/^([a-zA-Z0-9_-]+)\s*=\s*({{[^}]+}}|"[^"]*"|'[^']*'|true|false|[0-9.]+)/);
       if (attrMatch) {
         const key = attrMatch[1];
-        const val = attrMatch[3] ?? attrMatch[4] ?? "";
+        let val: any = attrMatch[2];
+        if (val.startsWith('"') || val.startsWith("'")) val = val.slice(1, -1);
+        else if (val === "true") val = true;
+        else if (val === "false") val = false;
+        else if (!isNaN(Number(val)) && !val.includes("{{")) val = Number(val);
+
         node.attrs[key] = val;
+        node.props[key] = val;
         remaining = remaining.slice(attrMatch[0].length).trim();
         continue;
       }
@@ -535,7 +541,9 @@ function parseLayout(
       // 4. boolean attribute
       const boolMatch = remaining.match(/^([a-zA-Z0-9_-]+)(?=\s|$)/);
       if (boolMatch) {
-        node.attrs[boolMatch[1]] = "true";
+        const key = boolMatch[1];
+        node.attrs[key] = "true";
+        node.props[key] = true;
         remaining = remaining.slice(boolMatch[0].length).trim();
         continue;
       }
@@ -551,13 +559,7 @@ function parseLayout(
     return parts.slice(1).map(s => s.trim()).filter(Boolean);
   }
 
-  function parseMaybeString(rhs: string, onError: () => never): string {
-    const r = rhs.trim();
-    if ((r.startsWith('"') && r.endsWith('"')) || (r.startsWith("'") && r.endsWith("'"))) return r.slice(1, -1);
-    return onError();
-  }
-
-  function parseBlock(minIndent: number): HJXNode[] {
+function parseBlock(minIndent: number): HJXNode[] {
     const nodes: HJXNode[] = [];
 
     while (i < lines.length) {
@@ -611,7 +613,7 @@ function parseLayout(
 
   // wrap multiple roots in a root view
   if (nodes.length === 1) return nodes[0];
-  return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: nodes };
+  return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: nodes };
 }
 
 function parseMaybeString(rhs: string, onError: () => never): string {

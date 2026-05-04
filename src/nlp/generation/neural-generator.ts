@@ -2,6 +2,7 @@ import { Intent, IntentResult, classifyIntent } from "../intent/classifier.js";
 import { extractEntities, ExtractedEntity, EntityType } from "../entities/extractor.js";
 import { TemplateGenerator, GenerationResult } from "./template-generator.js";
 import { parseHJX } from "../../parser.js";
+// Note: AI/orchestrator removed - using template-based generation
 
 export interface NeuralGenerationConfig {
   maxTokens: number;
@@ -9,6 +10,7 @@ export interface NeuralGenerationConfig {
   beamSize: number;
   topP: number;
   repetitionPenalty: number;
+  useAI?: boolean;
 }
 
 const DEFAULT_CONFIG: NeuralGenerationConfig = {
@@ -17,13 +19,14 @@ const DEFAULT_CONFIG: NeuralGenerationConfig = {
   beamSize: 3,
   topP: 0.9,
   repetitionPenalty: 1.1,
+  useAI: false, // Using template-based generation (no AI/orchestrator)
 };
 
 export interface NeuralGenerationResult {
   code: string;
   candidates: string[];
   confidence: number;
-  method: "neural" | "template" | "hybrid";
+  method: "neural" | "template" | "hybrid" | "ai";
   validSyntax: boolean;
   postProcessed: boolean;
 }
@@ -38,7 +41,11 @@ export class NeuralCodeGenerator {
   }
 
   async generate(description: string, context?: string): Promise<NeuralGenerationResult> {
-    const intent = classifyIntent(description);
+    if (this.config.useAI) {
+      return this.generateWithAI(description, context);
+    }
+
+    const intent = await classifyIntent(description);
     const entities = extractEntities(description);
 
     // Try template-based generation first
@@ -82,15 +89,28 @@ export class NeuralCodeGenerator {
     };
   }
 
+  private async generateWithAI(description: string, context?: string): Promise<NeuralGenerationResult> {
+    // Fallback to template generation (no AI/orchestrator needed)
+    // Just use the template-based approach
+    this.config.useAI = false;
+    const result = await this.generate(description, context);
+    this.config.useAI = false; // Keep it off
+    return {
+      ...result,
+      method: "template",
+      confidence: 0.7
+    };
+  }
+
   async generatePartial(existingCode: string, completion: string): Promise<string> {
     let ast;
     try {
       ast = parseHJX(existingCode);
     } catch {
-      return this.generatePartialFallback(existingCode, completion);
+      return await this.generatePartialFallback(existingCode, completion);
     }
 
-    const intent = classifyIntent(completion);
+    const intent = await classifyIntent(completion);
     const entities = extractEntities(completion);
 
     switch (intent.primaryIntent) {
@@ -349,8 +369,8 @@ export class NeuralCodeGenerator {
     return [...new Set(candidates)];
   }
 
-  private generatePartialFallback(existingCode: string, completion: string): string {
-    const intent = classifyIntent(completion);
+  private async generatePartialFallback(existingCode: string, completion: string): Promise<string> {
+    const intent = await classifyIntent(completion);
     const entities = extractEntities(completion);
     const templateResult = this.templateGenerator.generate(intent, entities);
     return existingCode + "\n\n" + templateResult.hjx;

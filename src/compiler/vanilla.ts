@@ -1,6 +1,8 @@
 import { HJXAst, HJXNode } from "../types.js";
 import { scopeCss } from "./vanilla_scope_css.js";
 import { nlCssToCss } from "./nl_css.js";
+import { isBuiltInComponent } from "../components/registry.js";
+import { allVariants } from "../components/variants.js";
 import { DependencyTracker } from "./dependency_tracker.js";
 import { SignalCodeGenerator } from "./signal_codegen.js";
 
@@ -189,8 +191,8 @@ function escapeHtml(s: string): string {
 }
 
 function emptyRoot(): HJXNode {
-  return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [
-    { kind: "node", tag: "text", classes: [], attrs: {}, text: "Empty layout", events: {}, bind: null, children: [] }
+  return { kind: "node", tag: "view", id: "root", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [
+    { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: "Empty layout", events: {}, bind: null, children: [] }
   ]};
 }
 
@@ -238,6 +240,19 @@ function renderNode(node: HJXNode, scope: string): {
       return "";
     }
 
+    // Apply component variants
+    if (isBuiltInComponent(n.tag)) {
+      const variants = (allVariants as any)[n.tag];
+      if (variants) {
+        for (const [propName, propValue] of Object.entries(n.props)) {
+          if (variants[propValue as any]) {
+            const variant = variants[propValue as any];
+            n.classes.push(variant.styles);
+          }
+        }
+      }
+    }
+
     const tag = mapTag(n.tag);
     const dataId = ensureDataId(n);
     const attrParts: string[] = [];
@@ -277,10 +292,11 @@ function renderNode(node: HJXNode, scope: string): {
 
 function mapTag(tag: string): string {
   const t = tag.toLowerCase();
-  if (t === "view") return "div";
-  if (t === "text") return "span";
+  if (t === "view" || t === "card" || t === "modal" || t === "alert" || t === "spinner") return "div";
+  if (t === "text" || t === "badge") return "span";
   if (t === "button") return "button";
   if (t === "input") return "input";
+  if (t === "form") return "form";
   return t;
 }
 

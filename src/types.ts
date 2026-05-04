@@ -1,4 +1,4 @@
-export type HJXStateValue = string | number | boolean;
+export type HJXStateValue = string | number | boolean | any[] | Record<string, any> | null;
 
 export type HJXBind = { prop: "value"; state: string };
 
@@ -13,6 +13,7 @@ export type HJXNode = {
   text: string | null;
   events: Record<string, string>;
   bind: HJXBind | null;
+  props: Record<string, any>;
   children: HJXNode[];
 };
 

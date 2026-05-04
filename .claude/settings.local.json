@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cd E:\\\\\\\\chatit.cloud\\\\\\\\hjx\\\\\\\\hjx)"
+      "Bash(grep -E \"\\\\.\\(hjx|md\\)$\")"
     ]
   }
 }

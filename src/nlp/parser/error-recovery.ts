@@ -408,14 +408,14 @@ function parseLayoutSafe(lines: string[], startIndex: number, filename: string, 
     const ifMatch = t.match(/^if\s*\((.+)\)\s*:\s*$/);
     if (ifMatch) {
       return {
-        node: { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         hasChildren: true,
       };
     }
 
     if (t === "else:") {
       return {
-        node: { kind: "else", tag: "else", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "else", tag: "else", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         hasChildren: true,
       };
     }
@@ -423,7 +423,7 @@ function parseLayoutSafe(lines: string[], startIndex: number, filename: string, 
     const forMatch = t.match(/^for\s*\(([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_.]+)\)\s*:\s*$/);
     if (forMatch) {
       return {
-        node: { kind: "for", tag: "for", iterator: { item: forMatch[1], list: forMatch[2] }, classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "for", tag: "for", iterator: { item: forMatch[1], list: forMatch[2] }, classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         hasChildren: true,
       };
     }
@@ -435,7 +435,7 @@ function parseLayoutSafe(lines: string[], startIndex: number, filename: string, 
       const before = t.split("(")[0].split(":")[0].trim();
       const classes = before.split(".").slice(1).map(s => s.trim()).filter(Boolean);
       return {
-        node: { kind: "node", tag, id: cssId, classes, attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "node", tag, id: cssId, classes, attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         hasChildren: true,
       };
     }
@@ -449,7 +449,7 @@ function parseLayoutSafe(lines: string[], startIndex: number, filename: string, 
       const rhs = leafMatch[5].trim();
       const text = (rhs.startsWith('"') && rhs.endsWith('"')) || (rhs.startsWith("'") && rhs.endsWith("'")) ? rhs.slice(1, -1) : rhs;
       return {
-        node: { kind: "node", tag, id: cssId, classes, attrs: {}, text, events: {}, bind: null, children: [] },
+        node: { kind: "node", tag, id: cssId, classes, attrs: {}, props: {}, text, events: {}, bind: null, children: [] },
         hasChildren: false,
       };
     }
@@ -461,7 +461,7 @@ function parseLayoutSafe(lines: string[], startIndex: number, filename: string, 
       const before = t.split("(")[0].trim();
       const classes = before.split(".").slice(1).map(s => s.trim()).filter(Boolean);
       return {
-        node: { kind: "node", tag, id: cssId, classes, attrs: {}, text: null, events: {}, bind: null, children: [] },
+        node: { kind: "node", tag, id: cssId, classes, attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] },
         hasChildren: false,
       };
     }
@@ -506,7 +506,7 @@ function parseLayoutSafe(lines: string[], startIndex: number, filename: string, 
   }
 
   const root = nodes.length === 1 ? nodes[0] : {
-    kind: "node" as const, tag: "view", id: "root", classes: [], attrs: {},
+    kind: "node" as const, tag: "view", id: "root", classes: [], attrs: {}, props: {},
     text: null, events: {}, bind: null, children: nodes,
   };
   return { node: root, endIndex: i };
@@ -530,15 +530,15 @@ function parseChildren(lines: string[], startIdx: number, minIndent: number, err
 
     const ifMatch = t.match(/^if\s*\((.+)\)\s*:\s*$/);
     if (ifMatch) {
-      node = { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] };
+      node = { kind: "if", tag: "if", condition: ifMatch[1].trim(), classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] };
       hasChildren = true;
     } else if (t === "else:") {
-      node = { kind: "else", tag: "else", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] };
+      node = { kind: "else", tag: "else", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] };
       hasChildren = true;
     } else {
       const forMatch = t.match(/^for\s*\(([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_.]+)\)\s*:\s*$/);
       if (forMatch) {
-        node = { kind: "for", tag: "for", iterator: { item: forMatch[1], list: forMatch[2] }, classes: [], attrs: {}, text: null, events: {}, bind: null, children: [] };
+        node = { kind: "for", tag: "for", iterator: { item: forMatch[1], list: forMatch[2] }, classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] };
         hasChildren = true;
       } else {
         const containerMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?\s*:\s*$/);
@@ -547,7 +547,7 @@ function parseChildren(lines: string[], startIdx: number, minIndent: number, err
           const cssId = containerMatch[2] ? containerMatch[2].slice(1) : undefined;
           const before = t.split("(")[0].split(":")[0].trim();
           const classes = before.split(".").slice(1).map(s => s.trim()).filter(Boolean);
-          node = { kind: "node", tag, id: cssId, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
+          node = { kind: "node", tag, id: cssId, classes, attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] };
           hasChildren = true;
         } else {
           const leafMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?\s*:\s*(.+)$/);
@@ -558,7 +558,7 @@ function parseChildren(lines: string[], startIdx: number, minIndent: number, err
             const classes = before.split(".").slice(1).map(s => s.trim()).filter(Boolean);
             const rhs = leafMatch[5].trim();
             const text = (rhs.startsWith('"') && rhs.endsWith('"')) || (rhs.startsWith("'") && rhs.endsWith("'")) ? rhs.slice(1, -1) : rhs;
-            node = { kind: "node", tag, id: cssId, classes, attrs: {}, text, events: {}, bind: null, children: [] };
+            node = { kind: "node", tag, id: cssId, classes, attrs: {}, props: {}, text, events: {}, bind: null, children: [] };
           } else {
             const simpleMatch = t.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(#[A-Za-z_][A-Za-z0-9_-]*)?(\.[A-Za-z0-9_/:-]+)*(\s*\([^\)]*\))?$/);
             if (simpleMatch) {
@@ -566,7 +566,7 @@ function parseChildren(lines: string[], startIdx: number, minIndent: number, err
               const cssId = simpleMatch[2] ? simpleMatch[2].slice(1) : undefined;
               const before = t.split("(")[0].trim();
               const classes = before.split(".").slice(1).map(s => s.trim()).filter(Boolean);
-              node = { kind: "node", tag, id: cssId, classes, attrs: {}, text: null, events: {}, bind: null, children: [] };
+              node = { kind: "node", tag, id: cssId, classes, attrs: {}, props: {}, text: null, events: {}, bind: null, children: [] };
             }
           }
         }

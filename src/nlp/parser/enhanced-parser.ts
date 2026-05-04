@@ -236,7 +236,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
           const condition = ifMatch[1].trim();
           addSymbol(condition.replace(/[!()]/g, ""), "param", "layout", lineNo + 1, l.indexOf(condition) + 1);
           const node: EnhancedNode = {
-            kind: "if", tag: "if", condition, classes: [], attrs: {}, text: null, events: {}, bind: null, children: [],
+            kind: "if", tag: "if", condition, classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [],
             range: makeRange(lineNo, lineNo), path: `layout.${id}`, depth, parentId: null, uid: id,
             semanticType: "control_flow",
           };
@@ -246,7 +246,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
         if (t === "else:") {
           const id = makeId();
           const node: EnhancedNode = {
-            kind: "else", tag: "else", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [],
+            kind: "else", tag: "else", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [],
             range: makeRange(lineNo, lineNo), path: `layout.${id}`, depth, parentId: null, uid: id,
             semanticType: "control_flow",
           };
@@ -259,7 +259,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
           addSymbol(forMatch[1], "iterator", "layout", lineNo + 1, l.indexOf(forMatch[1]) + 1);
           const node: EnhancedNode = {
             kind: "for", tag: "for", iterator: { item: forMatch[1], list: forMatch[2] },
-            classes: [], attrs: {}, text: null, events: {}, bind: null, children: [],
+            classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [],
             range: makeRange(lineNo, lineNo), path: `layout.${id}`, depth, parentId: null, uid: id,
             semanticType: "control_flow",
           };
@@ -274,7 +274,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
           const paren = containerMatch[4]?.trim() ?? "";
           const id = makeId();
           const node: EnhancedNode = {
-            kind: "node", tag, id: cssId, classes, attrs: {}, text: null, events: {}, bind: null, children: [],
+            kind: "node", tag: tag, id: cssId, classes: classes, attrs: {}, props: {}, text: null, events: {}, bind: null, children: [],
             range: makeRange(lineNo, lineNo), path: `layout.${id}`, depth, parentId: null, uid: id,
             semanticType: classifyElement(tag),
           };
@@ -291,7 +291,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
           const rhs = leafMatch[5].trim();
           const nid = makeId();
           const node: EnhancedNode = {
-            kind: "node", tag, id: cssId, classes, attrs: {},
+            kind: "node", tag: tag, id: cssId, classes: classes, attrs: {}, props: {},
             text: parseMaybeString(rhs, () => err("Expected string after ':'", lineNo)),
             events: {}, bind: null, children: [],
             range: makeRange(lineNo, lineNo), path: `layout.${nid}`, depth, parentId: null, uid: nid,
@@ -309,7 +309,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
           const paren = simpleMatch[4]?.trim() ?? "";
           const nid = makeId();
           const node: EnhancedNode = {
-            kind: "node", tag, id: cssId, classes, attrs: {}, text: null, events: {}, bind: null, children: [],
+            kind: "node", tag: tag, id: cssId, classes: classes, attrs: {}, props: {}, text: null, events: {}, bind: null, children: [],
             range: makeRange(lineNo, lineNo), path: `layout.${nid}`, depth, parentId: null, uid: nid,
             semanticType: classifyElement(tag),
           };
@@ -397,7 +397,7 @@ export function parseEnhanced(source: string, filename = "<input>"): EnhancedAST
 
       const layoutNodes = parseBlock(baseIndent, null);
       const root = layoutNodes.length === 1 ? layoutNodes[0] : {
-        kind: "node" as const, tag: "view", id: "root", classes: [], attrs: {},
+        kind: "node" as const, tag: "view", id: "root", classes: [], attrs: {}, props: {},
         text: null, events: {}, bind: null, children: layoutNodes,
         range: makeRange(layoutStart, i - 1), path: "layout.root", depth: 0,
         parentId: null, uid: makeId(), semanticType: "container",

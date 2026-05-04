@@ -17,9 +17,9 @@ function contentType(path) {
     return "application/octet-stream";
 }
 let currentTree = null;
-function buildOnce(inputPath, outDir) {
+async function buildOnce(inputPath, outDir) {
     try {
-        currentTree = loadComponentTree(inputPath);
+        currentTree = await loadComponentTree(inputPath);
         // TODO: buildServerDriven needs to handle the tree
         // For now we pass the root AST, but we need to update it to support the tree
         const bundle = buildServerDriven(currentTree);
@@ -35,14 +35,14 @@ function buildOnce(inputPath, outDir) {
 }
 export async function serveDev(opts) {
     const { inputPath, outDir, port } = opts;
-    buildOnce(inputPath, outDir);
+    await buildOnce(inputPath, outDir);
     const watcher = chokidar.watch([dirname(inputPath)], { ignoreInitial: true });
-    watcher.on("all", (event, path) => {
+    watcher.on("all", async (event, path) => {
         if (path.endsWith(".hjx")) {
             try {
                 // Simplified rebuild: just rebuild everything if any hjx changes in dir
                 // A better way would be to track dependencies in loader
-                buildOnce(inputPath, outDir);
+                await buildOnce(inputPath, outDir);
                 console.log("Rebuilt.");
             }
             catch (e) {

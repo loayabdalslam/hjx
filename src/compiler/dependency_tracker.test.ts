@@ -34,6 +34,7 @@ describe('DependencyTracker', () => {
       text: null,
       events: {},
       bind: null,
+      props: {},
       children: [
         {
           kind: "node",
@@ -44,6 +45,7 @@ describe('DependencyTracker', () => {
           text: "Current count: {{ count }}", // Direct state dependency
           events: {},
           bind: null,
+          props: {},
           children: []
         },
         {
@@ -55,6 +57,7 @@ describe('DependencyTracker', () => {
           text: "Total is: {{ total }}", // Computed dependency
           events: {},
           bind: null,
+          props: {},
           children: []
         }
       ]

@@ -1,3 +1,5 @@
+// Intent classification - Simple pattern-based (no AI/orchestrator needed)
+
 export enum Intent {
   CREATE_COMPONENT = "CREATE_COMPONENT",
   ADD_STATE = "ADD_STATE",
@@ -175,9 +177,16 @@ export class IntentClassifier {
     this.rulePatterns = customPatterns ?? RULE_PATTERNS;
   }
 
-  classify(text: string): IntentResult {
-    const normalized = text.toLowerCase().trim();
+  async classify(text: string, useAI = true): Promise<IntentResult> {
+    if (useAI) {
+      try {
+        return await this.classifyWithAI(text);
+      } catch (error) {
+        console.warn("[IntentClassifier] AI classification failed, falling back to rules:", error);
+      }
+    }
 
+    const normalized = text.toLowerCase().trim();
     const scores: Map<Intent, { score: number; entities: Record<string, string> }> = new Map();
 
     for (const rule of this.rulePatterns) {
@@ -235,12 +244,20 @@ export class IntentClassifier {
     };
   }
 
-  classifyBatch(texts: string[]): IntentResult[] {
-    return texts.map(t => this.classify(t));
+  private async classifyWithAI(text: string): Promise<IntentResult> {
+    // Simple fallback - no AI/orchestrator needed
+    // Just use rule-based classification
+    return this.classify(text, false).then(r => ({
+      ...r,
+      confidence: 0.3 // Lower confidence since no AI
+    }));
+  }
+
+  classifyBatch(texts: string[]): Promise<IntentResult[]> {
+    return Promise.all(texts.map(t => this.classify(t)));
   }
 
   train(examples: { text: string; intent: Intent }[]): void {
-    // Add new patterns from training examples
     for (const example of examples) {
       const existingRule = this.rulePatterns.find(r => r.intent === example.intent);
       if (existingRule) {
@@ -255,6 +272,6 @@ export class IntentClassifier {
   }
 }
 
-export function classifyIntent(text: string): IntentResult {
+export async function classifyIntent(text: string): Promise<IntentResult> {
   return new IntentClassifier().classify(text);
 }

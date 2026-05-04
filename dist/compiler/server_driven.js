@@ -234,8 +234,8 @@ function escapeHtml(s) {
 }
 function emptyRoot() {
     return {
-        kind: "node", tag: "view", id: "root", classes: [], attrs: {}, text: null, events: {}, bind: null, children: [
-            { kind: "node", tag: "text", classes: [], attrs: {}, text: "Empty layout", events: {}, bind: null, children: [] }
+        kind: "node", tag: "view", id: "root", classes: [], attrs: {}, props: {}, text: null, events: {}, bind: null, children: [
+            { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: "Empty layout", events: {}, bind: null, children: [] }
         ]
     };
 }
@@ -302,7 +302,7 @@ export function renderNode(node, scope, imports, statePrefix, extraAttrs = {}, e
         const preRenderedSlot = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
         // Handle inline text as first child of slot
         if (node.text != null && node.text.trim() !== "") {
-            const txtNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: node.text, events: {}, bind: null, children: [] };
+            const txtNode = { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: node.text, events: {}, bind: null, children: [] };
             const res = renderNode(txtNode, scope, imports, statePrefix, {}, {}, receivedSlots, ctx);
             preRenderedSlot.htmlBody += res.htmlBody;
             preRenderedSlot.bindings.push(...res.bindings);
@@ -371,7 +371,7 @@ export function renderNode(node, scope, imports, statePrefix, extraAttrs = {}, e
             }
             const preRenderedSlot = { htmlBody: "", bindings: [], attrBindings: [], eventBindings: [], inputBindings: [] };
             if (n.text != null && n.text.trim() !== "") {
-                const txtNode = { kind: "node", tag: "text", classes: [], attrs: {}, text: n.text, events: {}, bind: null, children: [] };
+                const txtNode = { kind: "node", tag: "text", classes: [], attrs: {}, props: {}, text: n.text, events: {}, bind: null, children: [] };
                 const res = renderNode(txtNode, scope, imports, statePrefix, extraAttrs, extraEvents, receivedSlots, ctx, serverState);
                 preRenderedSlot.htmlBody += res.htmlBody;
                 preRenderedSlot.bindings.push(...res.bindings);

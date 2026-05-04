@@ -1,13 +1,3 @@
-export function createStore(initial: Record<string, any>) {
-  const state = { ...initial };
-  const listeners = new Set<() => void>();
-  return {
-    get: () => state,
-    set: (patch: Record<string, any>) => { Object.assign(state, patch); listeners.forEach(fn => fn()); },
-    subscribe: (fn: () => void) => { listeners.add(fn); return () => listeners.delete(fn); }
-  };
-}
-
 export function textBinder(store: any, root: Element, selector: string, template: string) {
   const el = root.querySelector(selector) as HTMLElement | null;
   if (!el) return;
@@ -165,7 +155,6 @@ function parseValue(v: string) {
   return trimmed;
 }
 
-export function mount() {}
 // ==============================================
 // Minimal runtime for signal tracking
 // This is the only code that runs in the browser

@@ -18,9 +18,23 @@
 
 HJX is a compiled UI language that unifies **structure**, **style**, and **logic** into a single `.hjx` file. It compiles to clean, dependency-free **HTML + CSS + JavaScript** or **React components** — no virtual DOM, no runtime overhead, no framework lock-in.
 
-### ✨ NEW in v0.2: Flow-State Engine
-
 **Write UI in plain English.** The Flow-State Engine translates natural language descriptions directly into HJX code. You can also mix English with code for a seamless development experience.
+
+### 🎨 NEW in v0.2.1: Design System & Component Library
+
+**Professional UI in seconds.** HJX now includes a built-in Design System and a library of 10+ core components.
+
+- **Design Tokens**: Centralized colors, spacing, and typography.
+- **Built-in Components**: `Button`, `Card`, `Input`, `Modal`, `Form`, `Tabs`, `Alert`, `Badge`, `Spinner`, `Dropdown`.
+- **Variant System**: Easily toggle between `primary`, `secondary`, `danger`, `outline`, and `ghost` variants.
+
+```hjx
+layout:
+  Card (elevation="elevated"):
+    text.h2: "Order Summary"
+    Badge (label="Shipped", variant="primary")
+    Button (variant="outline"): "Track Order"
+```
 
 ```bash
 $ hjx flow "create a counter component"
@@ -172,6 +186,8 @@ hjx flow --grammar my-grammar.yml "make a weather widget"
 | `create a todo list` | Todo app with add/remove |
 | `add state called X` | `state: X = 0` |
 | `add button called X` | `button.primary: "X"` |
+| `add a Card` | `Card:` |
+| `add a primary Button` | `Button (variant="primary"):` |
 | `make X centered` | Flexbox centering styles |
 | `fetch from /api/X` | API endpoint definition |
 

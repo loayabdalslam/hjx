@@ -1,0 +1,13 @@
+component Counter
+state:
+  count = 0
+layout:
+  view.container:
+    text: "Count: {{count}}"
+    button (on click -> inc): "Increment"
+    button (on click -> dec): "Decrement"
+handlers:
+  inc:
+    set count = count + 1
+  dec:
+    set count = count - 1

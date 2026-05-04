@@ -69,7 +69,20 @@ async function main() {
     const outDir = resolve(String(args["out"] ?? "dist-app"));
     const port = Number(args["port"] ?? "5173");
     const src = readFileSync(inputPath, "utf-8");
-    const ast = parseHJX(src, inputPath);
+    let ast;
+    try {
+        ast = parseHJX(src, inputPath);
+    }
+    catch (e) {
+        if (src.toLowerCase().includes("component") || src.toLowerCase().includes("display") || src.toLowerCase().includes("show")) {
+            const { parseWithNLP } = await import("./nlp/advanced-nlp-engine.js");
+            console.log(`[CLI] Strict parse failed, attempting natural language parse...`);
+            ast = await parseWithNLP(src);
+        }
+        else {
+            throw e;
+        }
+    }
     if (cmd === "parse") {
         console.log(JSON.stringify(ast, null, 2));
         return;

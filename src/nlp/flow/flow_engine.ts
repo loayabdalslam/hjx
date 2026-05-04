@@ -12,20 +12,21 @@
 
 import { HJXAst } from "../../types.js";
 import { parseHJX } from "../../parser.js";
+import { COMPONENT_PATTERNS } from "./component_patterns.js";
 
 // ============================================================
 // Section 1: Intent Pattern Registry
 // Maps natural language patterns to HJX AST transformations
 // ============================================================
 
-interface FlowPattern {
+export interface FlowPattern {
   id: string;
   patterns: RegExp[];
   handler: (match: RegExpMatchArray, context: FlowContext) => FlowResult;
   description: string;
 }
 
-interface FlowContext {
+export interface FlowContext {
   existingAst?: HJXAst;
   variables: Record<string, any>;
   components: string[];
@@ -33,7 +34,7 @@ interface FlowContext {
   stateKeys: string[];
 }
 
-interface FlowResult {
+export interface FlowResult {
   type: "component" | "state" | "layout" | "style" | "handler" | "api" | "mixed";
   hjx: string;
   newState?: Record<string, any>;
@@ -46,6 +47,7 @@ interface FlowResult {
 // ============================================================
 
 const FLOW_PATTERNS: FlowPattern[] = [
+  ...COMPONENT_PATTERNS,
   // --- Counter Pattern (MUST be before create-component) ---
   {
     id: "counter",

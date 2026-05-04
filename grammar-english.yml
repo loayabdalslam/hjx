@@ -1,0 +1,316 @@
+# HJX Grammar Configuration - Plain English Syntax
+# This grammar enables writing HJX components in natural English
+
+version: "1.0"
+language: "english"
+
+# Component Definition
+component_patterns:
+  - pattern: "Create a component called {name}"
+    maps_to: "component {name}"
+
+  - pattern: "Define component {name}"
+    maps_to: "component {name}"
+
+# State Management
+state_patterns:
+  - pattern: "State variable {name} with initial value {value}"
+    maps_to: "state\n  {name}: {value}"
+
+  - pattern: "State {name} equals {value}"
+    maps_to: "state\n  {name}: {value}"
+
+  - pattern: "Track {name} as {type}"
+    maps_to: "state\n  {name}: {type}"
+
+# Layout & Structure
+layout_patterns:
+  - pattern: "Create a container with {content}"
+    maps_to: "layout\n  view.container:\n    {content}"
+
+  - pattern: "Display {content}"
+    maps_to: "layout\n  {content}"
+
+  - pattern: "Show text {text}"
+    maps_to: "text: \"{text}\""
+
+  - pattern: "Add a button labeled {label}"
+    maps_to: "button: \"{label}\""
+
+  - pattern: "Create an input field"
+    maps_to: "input: \"\""
+
+  - pattern: "Add a heading {text}"
+    maps_to: "text.heading: \"{text}\""
+
+# Event Handlers
+handler_patterns:
+  - pattern: "When clicked, {action}"
+    maps_to: "(on click -> {action})"
+
+  - pattern: "On click {handler}"
+    maps_to: "(on click -> {handler})"
+
+  - pattern: "When submitted, {action}"
+    maps_to: "(on submit -> {action})"
+
+  - pattern: "When changed, {action}"
+    maps_to: "(on change -> {action})"
+
+  - pattern: "On blur {handler}"
+    maps_to: "(on blur -> {handler})"
+
+# Styling
+style_patterns:
+  - pattern: "Style with {properties}"
+    maps_to: "style\n  {properties}"
+
+  - pattern: "Background color {color}"
+    maps_to: "background {color}"
+
+  - pattern: "Text color {color}"
+    maps_to: "color {color}"
+
+  - pattern: "Padding {value}"
+    maps_to: "padding {value}"
+
+  - pattern: "Margin {value}"
+    maps_to: "margin {value}"
+
+  - pattern: "Font size {size}"
+    maps_to: "font size {size}"
+
+  - pattern: "Display as flex"
+    maps_to: "display flex"
+
+  - pattern: "Display as grid"
+    maps_to: "display grid"
+
+  - pattern: "Center content"
+    maps_to: "display flex\n  align-items center\n  justify-content center"
+
+# Conditional Logic
+conditional_patterns:
+  - pattern: "If {condition}, show {content}"
+    maps_to: "if ({condition}):\n  {content}"
+
+  - pattern: "Show {content} when {condition}"
+    maps_to: "if ({condition}):\n  {content}"
+
+# Loops
+loop_patterns:
+  - pattern: "For each {item} in {list}, show {content}"
+    maps_to: "for ({item} in {list}):\n  {content}"
+
+  - pattern: "Loop through {list} and display {content}"
+    maps_to: "for (item in {list}):\n  {content}"
+
+# Data Binding
+binding_patterns:
+  - pattern: "Bind {element} to {variable}"
+    maps_to: "(bind value <-> {variable})"
+
+  - pattern: "Two-way bind {variable}"
+    maps_to: "(bind value <-> {variable})"
+
+  - pattern: "Show {variable} value"
+    maps_to: "text: \"{{{{variable}}}}\""
+
+# Common Components
+component_shortcuts:
+  counter: |
+    component Counter
+      state
+        count: 0
+      layout
+        view.container:
+          text: "Count: {{count}}"
+          button (on click -> increment): "Increment"
+          button (on click -> decrement): "Decrement"
+      handlers
+        increment
+          count = count + 1
+        decrement
+          count = count - 1
+      style
+        .container
+          display flex
+          flex-direction column
+          align-items center
+          gap 16px
+
+  todo_list: |
+    component TodoList
+      state
+        todos: []
+        input: ""
+      layout
+        view.container:
+          input (bind value <-> input): ""
+          button (on click -> addTodo): "Add"
+          for (todo in todos):
+            view.todo-item:
+              text: "{{todo}}"
+              button (on click -> removeTodo(todo)): "Delete"
+      handlers
+        addTodo
+          if (input.trim() !== "")
+            todos = [...todos, input]
+            input = ""
+        removeTodo(todo)
+          todos = todos.filter(t => t !== todo)
+
+  form: |
+    component Form
+      state
+        formData: {}
+        errors: {}
+      layout
+        view.form:
+          input (bind value <-> formData.name): ""
+          input (bind value <-> formData.email): ""
+          button (on click -> submit): "Submit"
+      handlers
+        submit
+          if (validateForm())
+            console.log(formData)
+
+  dashboard: |
+    component Dashboard
+      state
+        stats: {}
+      layout
+        view.dashboard:
+          view.stats-grid:
+            for (stat in stats):
+              view.stat-card:
+                text: "{{stat.label}}"
+                text.value: "{{stat.value}}"
+      style
+        .dashboard
+          padding 24px
+        .stats-grid
+          display grid
+          grid-template-columns repeat(auto-fit, minmax(250px, 1fr))
+          gap 20px
+
+# Natural Language CSS Shortcuts
+css_shortcuts:
+  card: |
+    background white
+    border-radius 12px
+    padding 24px
+    box-shadow 0 2px 8px rgba(0, 0, 0, 0.1)
+
+  button_primary: |
+    background #667eea
+    color white
+    padding 12px 24px
+    border none
+    border-radius 8px
+    cursor pointer
+    font-weight 600
+
+  button_secondary: |
+    background #e5e7eb
+    color #1f2937
+    padding 12px 24px
+    border none
+    border-radius 8px
+    cursor pointer
+    font-weight 600
+
+  input_field: |
+    padding 12px 16px
+    border 2px solid #e5e7eb
+    border-radius 8px
+    font-size 16px
+
+  container: |
+    max-width 1200px
+    margin 0 auto
+    padding 24px
+
+  flex_center: |
+    display flex
+    align-items center
+    justify-content center
+
+  grid_auto: |
+    display grid
+    grid-template-columns repeat(auto-fit, minmax(250px, 1fr))
+    gap 20px
+
+  gradient_primary: |
+    background linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+
+  shadow_lg: |
+    box-shadow 0 20px 60px rgba(0, 0, 0, 0.3)
+
+  text_center: |
+    text-align center
+
+  responsive_padding: |
+    padding 24px
+    @mobile
+      padding 16px
+
+# Responsive Design Patterns
+responsive_patterns:
+  mobile: "@mobile"
+  tablet: "@tablet"
+  desktop: "@desktop"
+
+breakpoints:
+  mobile: "max-width 640px"
+  tablet: "max-width 1024px"
+  desktop: "min-width 1025px"
+
+# Common Handlers
+handler_templates:
+  increment: |
+    increment
+      {variable} = {variable} + 1
+
+  decrement: |
+    decrement
+      {variable} = {variable} - 1
+
+  toggle: |
+    toggle
+      {variable} = !{variable}
+
+  add_item: |
+    addItem
+      if ({input}.trim() !== "")
+        {list} = [...{list}, {input}]
+        {input} = ""
+
+  remove_item: |
+    removeItem({item})
+      {list} = {list}.filter(i => i !== {item})
+
+  validate_email: |
+    validateEmail
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      return emailRegex.test({email})
+
+# API Integration Patterns
+api_patterns:
+  - pattern: "Fetch data from {endpoint}"
+    maps_to: "api\n  GET {endpoint} -> fetchData"
+
+  - pattern: "Post to {endpoint}"
+    maps_to: "api\n  POST {endpoint} -> submitData"
+
+# Export Configuration
+exports:
+  - vanilla
+  - react
+  - server-driven
+
+# Compilation Targets
+targets:
+  vanilla: "Signal-based vanilla JavaScript"
+  react: "React with hooks"
+  server-driven: "Server-driven rendering"

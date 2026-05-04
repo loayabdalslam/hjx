@@ -5,6 +5,8 @@
 
 import { HJXAst, HJXNode, HJXApiEndpoint, HJXStyleRule, HJXBreakpoint } from "../types.js";
 import { nlCssToCss } from "./nl_css.js";
+import { isBuiltInComponent } from "../components/registry.js";
+import { allVariants } from "../components/variants.js";
 
 export interface ReactBundle {
   component: string;    // Component.tsx
@@ -199,25 +201,37 @@ function generateHandler(name: string, handler: { name: string; body: string[] }
   return code;
 }
 
-function renderNodeToJSX(node: HJXNode, ast: HJXAst, indent: number): string {
+function renderNodeToJSX(n: HJXNode, ast: HJXAst, indent: number): string {
   const pad = "  ".repeat(indent);
 
-  if (node.kind === "if") {
-    return renderIfToJSX(node, ast, indent);
+  if (n.kind === "if") {
+    return renderIfToJSX(n, ast, indent);
   }
 
-  if (node.kind === "for") {
-    return renderForToJSX(node, ast, indent);
+  if (n.kind === "for") {
+    return renderForToJSX(n, ast, indent);
   }
 
-  if (node.kind === "else") {
-    return `${pad}} else {\n${renderChildrenToJSX(node.children, ast, indent + 1)}${pad}}\n`;
+  if (n.kind === "else") {
+    return `${pad}} else {\n${renderChildrenToJSX(n.children, ast, indent + 1)}${pad}}\n`;
   }
 
-  // Regular node
-  const tag = node.tag;
-  const classes = node.classes.length > 0 ? `className={styles.${node.classes.join(".")}}` : "";
-  const id = node.id ? `id="${node.id}"` : "";
+  // Apply component variants
+  if (isBuiltInComponent(n.tag)) {
+    const variants = (allVariants as any)[n.tag];
+    if (variants) {
+      for (const [propName, propValue] of Object.entries(n.props)) {
+        if (variants[propValue as any]) {
+          const variant = variants[propValue as any];
+          n.classes.push(variant.styles);
+        }
+      }
+    }
+  }
+
+  const tag = mapTag(n.tag);
+  const classes = n.classes.length > 0 ? `className={styles.${n.classes.join(".")}}` : "";
+  const id = n.id ? `id="${n.id}"` : "";
 
   // Build props
   const props: string[] = [];
@@ -225,29 +239,29 @@ function renderNodeToJSX(node: HJXNode, ast: HJXAst, indent: number): string {
   if (id) props.push(id);
 
   // Event handlers
-  for (const [event, handlerName] of Object.entries(node.events)) {
+  for (const [event, handlerName] of Object.entries(n.events)) {
     props.push(`on${capitalize(event)}={() => ${handlerName}()}`);
   }
 
   // Input binding
-  if (node.bind) {
-    props.push(`value={${node.bind.state}}`);
-    props.push(`onChange={(e) => set${capitalize(node.bind.state)}(e.target.value)}`);
+  if (n.bind) {
+    props.push(`value={${n.bind.state}}`);
+    props.push(`onChange={(e) => set${capitalize(n.bind.state)}(e.target.value)}`);
   }
 
   // Text interpolation
-  if (node.text) {
-    const textContent = interpolateText(node.text, ast);
+  if (n.text) {
+    const textContent = interpolateText(n.text, ast);
     const propsStr = props.length > 0 ? " " + props.join(" ") : "";
-    if (node.children.length > 0) {
-      return `${pad}<${tag}${propsStr}>\n${renderChildrenToJSX(node.children, ast, indent + 1)}${pad}</${tag}>\n`;
+    if (n.children.length > 0) {
+      return `${pad}<${tag}${propsStr}>\n${renderChildrenToJSX(n.children, ast, indent + 1)}${pad}</${tag}>\n`;
     }
     return `${pad}<${tag}${propsStr}>${textContent}</${tag}>\n`;
   }
 
   const propsStr = props.length > 0 ? " " + props.join(" ") : "";
-  if (node.children.length > 0) {
-    return `${pad}<${tag}${propsStr}>\n${renderChildrenToJSX(node.children, ast, indent + 1)}${pad}</${tag}>\n`;
+  if (n.children.length > 0) {
+    return `${pad}<${tag}${propsStr}>\n${renderChildrenToJSX(n.children, ast, indent + 1)}${pad}</${tag}>\n`;
   }
   return `${pad}<${tag}${propsStr} />\n`;
 }
@@ -308,6 +322,16 @@ function formatStateValue(value: any): string {
   return "undefined";
 }
 
+function mapTag(tag: string): string {
+  const t = tag.toLowerCase();
+  if (t === "view" || t === "card" || t === "modal" || t === "alert" || t === "spinner") return "div";
+  if (t === "text" || t === "badge") return "span";
+  if (t === "button") return "button";
+  if (t === "input") return "input";
+  if (t === "form") return "form";
+  return t;
+}
+
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -322,6 +346,7 @@ function emptyRoot(): HJXNode {
     text: null,
     events: {},
     bind: null,
+    props: {},
     children: [],
   };
 }

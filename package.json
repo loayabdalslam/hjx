@@ -13,13 +13,20 @@
     "examples:dashboard": "npm run build && node dist/cli.js dev examples/04-intermediate-dashboard.hjx --out dist-dashboard --port 5174",
     "examples:ecommerce": "npm run build && node dist/cli.js dev examples/05-advanced-ecommerce.hjx --out dist-ecommerce --port 5174",
     "examples:all": "npm run build && npm run examples:showcase",
+    "examples:react": "npm run build && node dist/cli.js build examples/react/01-counter.hjx --target react --out dist-react",
+    "examples:nlp": "npm run build && node dist/cli.js flow \"create a counter component\"",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:deploy": "cd docs && bash deploy.sh",
     "test": "vitest",
+    "test:unit": "vitest run src/**/*.test.ts",
+    "test:examples": "vitest run src/examples.test.ts",
+    "test:react": "vitest run src/examples.test.ts --reporter=verbose",
     "coverage": "vitest run --coverage",
-    "benchmark": "npx tsx scripts/benchmark.ts"
+    "benchmark": "npx tsx scripts/benchmark.ts",
+    "lint": "eslint src/ --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
     "chokidar": "^3.6.0",
