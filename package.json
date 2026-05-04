@@ -9,8 +9,8 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "hjx": "./src/cli/index.js",
-    "intent": "./src/cli/index.js"
+    "hjx": "src/cli/index.js",
+    "intent": "src/cli/index.js"
   },
   "scripts": {
     "start": "node src/cli/index.js",
