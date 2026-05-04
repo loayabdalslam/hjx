@@ -6,6 +6,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "hjx": "file:../../"
+    "hjx-intent-coding": "latest"
   }
 }
