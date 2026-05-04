@@ -1,4 +1,4 @@
-import { runHjx } from 'hjx';
+import { runHjx } from 'hjx-intent-coding';
 import { readFileSync } from 'fs';
 
 async function run() {

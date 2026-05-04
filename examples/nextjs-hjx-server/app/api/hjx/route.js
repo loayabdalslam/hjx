@@ -1,4 +1,4 @@
-import { runHjx } from 'hjx'; // This would be the local package or npm package
+import { runHjx } from 'hjx-intent-coding'; // This would be the local package or npm package
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
