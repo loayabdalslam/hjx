@@ -1,107 +1,147 @@
-# Hjx - INTENT CODING: The "Vibe Coding" Killer! 🚀
-> **"Stop Vibe Coding and Start Intenting! Welcome to 2008... but with AI from the future! This is EPIC!"**
+# Intent Coding (hjx): A Verifiable Runtime for Intent-to-Static Logic
 
-[![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/loayabdalslam/intent-coding)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: Production Ready](https://img.shields.io/badge/Status-Over_9000-red.svg)]()
+Intent Coding (hjx) is a production-grade library designed to transition software development from non-deterministic AI prompting (Vibe Coding) to a verifiable, cached, and audited "Intent-to-Static" (I2S) architecture. It enables developers to define business logic in natural language while ensuring that the runtime executes static, high-performance code with zero AI latency and zero token costs in production environments.
 
 ---
 
-###  يا هلا والله! Are you tired of "Vibe Coding"?
-Do you just type code and *hope* it works? Do you pray to the AI gods every time you refresh? **THAT’S NOOB STUFF!** 
+## Technical Problem: The Limitations of Vibe Coding
+Modern AI-driven development often suffers from:
+1. **Non-Determinism**: AI models may produce different outputs for the same prompt, leading to unstable production logic.
+2. **Latency**: Real-time AI inference is too slow for high-performance web applications.
+3. **Cost**: Continuous API calls to LLM providers are prohibitively expensive at scale.
+4. **Security**: Executing un-audited AI output directly in production poses significant security risks.
 
-Welcome to **INTENT CODING** — the first library that lets you control the AI's *soul*. We don't just "vibe." We define **Intent Blocks** that translate directly into static, cached, and audited production code. 
+## The Solution: Intent-to-Static (I2S) Architecture
+Intent Coding solves these challenges by introducing a caching and verification layer between the intent and the execution.
 
-**It's fast. It's safe. It's UBER-COOL! **
-
----
-
-## Why Intent Coding is an EPIC WIN! 
-
-| Feature | Vibe Coding (The Noob Way) | Intent Coding (The Pro Way) |
-| :--- | :--- | :--- |
-| **Speed** | Waiting for API calls like it's dial-up 🐢 | **Instant!** Cached result is faster than a ninja 🥷 |
-| **Cost** | Burning tokens like crazy 💸 | **Zero Cost!** One run, infinite executions 💎 |
-| **Reliability** | AI might hallucinate and pwn your DB 🤡 | **Verifiable!** Audit the code before it hits prod ✅ |
-| **Production** | "It works on my machine..." 🤷‍♂️ | **Built for the Cloud!** Pre-build & cache everything ☁️ |
+### Architectural Workflow
+1. **Definition**: Developers write Intent Blocks in `.hjx` files.
+2. **Translation**: The Intent Engine translates natural language into static target code (JavaScript, Python, etc.).
+3. **Verification**: Generated code is stored in `.intent-cache` for developer audit and verification.
+4. **Execution**: The production runtime executes the cached static code directly, bypassing the AI provider entirely.
 
 ---
 
-## 🛠️ Installation (Easy as 1-2-3!)
+## Core Components
 
-```bash
-# Get the magic started!
-npm install -g hjx-intent-coding
-```
+### 1. Intent Parser
+The parser processes `.hjx` files, extracting metadata directives and intent blocks.
+- **Directives**: Configures the target language, AI provider, and model version.
+- **Intent Blocks**: Encapsulates the natural language description of the logic.
+
+### 2. Code Generation Engine
+A specialized prompt-engineering layer that converts intents into clean, idiomatic code. It supports multiple languages including JavaScript, Python, Rust, and Go.
+
+### 3. Persistent Caching Layer
+Uses MD5 hashing to ensure that identical intents always resolve to the same static code. This layer is designed to be warmed up during the CI/CD build phase.
 
 ---
 
-## 🕹️ Practical Demos (Watch this!)
+## Comprehensive Example Walkthroughs
 
-### 1. The "Smart Pricing" Engine 💰
-Stop hardcoding complex rules. Just tell Intent what you want!
-
+### 1. Dynamic Pricing Engine
+**Source: `examples/dynamic-pricing-engine/logic/pricing.hjx`**
 ```javascript
-// logic/pricing.hjx
 target: javascript
 provider: ollama
 model: gemma4:31b-cloud
 
-# Intent: Global Pricing Engine
-# 1. Base price is 100 USD
-# 2. If user is from EU, add 20% VAT
-# 3. If they are a VIP, give them 15% off
-# 4. Return the final price in JSON
+# Calculate price based on region and loyalty
+# If region is EU, add 20% VAT.
+# If loyalty > 2 years, apply 15% discount.
 ```
-
-**Run it like a boss:**
-```bash
-intent run logic/pricing.hjx
-```
-
-### 2. Next.js Integration (Zero Latency!) ⚡
-Integrate directly into your Server Components. No more slow loaders!
-
-```javascript
-import { runHjx } from 'intent';
-
-export default async function Page() {
-  // This hits the cache in production. ZERO API CALLS!
-  const result = await runHjx(myIntentSource, { cache: true });
-  return <div>Final Price: {result.output.total}</div>;
+**Expected Output:**
+```json
+{
+  "currency": "EUR",
+  "subtotal": 100,
+  "discount_applied": 15,
+  "tax_applied": 20,
+  "total": 102.00
 }
 ```
+**Technical Significance**: Demonstrates how complex, conditional business rules can be maintained in natural language while executing as high-speed JavaScript.
+
+### 2. Intelligent Data Processing (Student Analysis)
+**Source: `examples/students.hjx`**
+```javascript
+# Process student scores, calculate averages, and classify results.
+```
+**Expected Output:**
+```json
+{
+  "average": 67.33,
+  "stats": { "max": 90, "min": 42 },
+  "detailed": [
+    { "score": 85, "status": "Pass" },
+    { "score": 42, "status": "Fail" }
+  ]
+}
+```
+**Technical Significance**: Proves the engine's ability to handle array manipulation and object construction without manual boilerplate.
+
+### 3. Automated SEO Optimization
+**Source: `examples/ai-knowledge-base/logic/optimize-article.hjx`**
+```javascript
+# Extract 5 keywords and generate a meta-description from raw text.
+```
+**Expected Output:**
+```json
+{
+  "seo": {
+    "title": "Intent Coding: The Production-Ready Alternative",
+    "meta": "A technical deep-dive into the I2S architecture...",
+    "keywords": ["Architecture", "Production", "Verification"]
+  }
+}
+```
+**Technical Significance**: Showcases the integration of natural language understanding into standard data pipelines.
 
 ---
 
-## 🏗️ The "Intent-to-Static" Architecture
+## Framework Integration Guides
 
-Intent Coding isn't just a library; it's a **Workflow**. 
-1.  **Dev Phase:** You write intents. The AI generates code. 
-2.  **Audit Phase:** You check the generated code.
-3.  **Build Phase:** `prebuild.js` warms up the cache.
-4.  **Prod Phase:** Your server runs **STRICT STATIC CODE**. No AI required!
+### Next.js Integration
+Intent Coding is fully compatible with Next.js Server Components.
+- **Prebuild Warming**: Run `node scripts/prebuild.js` in your CI/CD to generate the logic cache.
+- **Zero-Latency API**: The `runHjx` function retrieves the cached logic instantly during the request lifecycle.
 
----
-
-## 📂 Awesome Examples Inside!
-
-Check out our `examples/` folder for some serious inspiration:
-- 📊 **Next.js Server:** Dynamic business rules at scale.
-- 🎨 **Vite React App:** Using Intent as a frontend plugin.
-- 🧠 **AI Knowledge Base:** Automated SEO and content optimization.
-- ⚖️ **Dynamic Pricing:** Real-time financial calculations.
+### Vite Integration
+A custom Vite plugin allows `.hjx` files to be imported as standard modules.
+```javascript
+import pricingLogic from './logic/pricing.hjx';
+// During build, this is replaced by the generated JavaScript.
+```
 
 ---
 
-## 🤝 Contributing
-Want to help us kill Vibe Coding? Join the revolution! Send us a PR or just tell your friends that Intent Coding is the only way to live.
-
-**Don't forget to STAR this repo! If we get 30000 stars, I'll record a video of me doing the Shuffle! 💃**
+## Production Deployment Best Practices
+1. **Deterministic Models**: Always specify a fixed model version in your directives.
+2. **Audit Logs**: Maintain the `.intent-cache` directory in version control to audit logic changes over time.
+3. **CI/CD Integration**: Ensure the prebuild script runs before the main application build to prevent cache misses in production.
+4. **Security Sandboxing**: The executor runs code in an isolated environment; ensure appropriate resource limits are set.
 
 ---
 
-## 📜 License
-Released under the MIT License because we're cool like that.
+## Installation and Usage
 
-**© 2071-2026 Intent Coding Team — Stay Epic!**
+### CLI Usage
+```bash
+npm install -g hjx-intent-coding
+hjx run examples/hello.hjx
+```
+
+### Programmatic API
+```javascript
+import { runHjx } from 'hjx-intent-coding';
+
+const result = await runHjx(source, { cache: true });
+console.log(result.output);
+```
+
+---
+
+## License
+Licensed under the MIT License. Developed for verifiable AI-assisted engineering.
+
+(C) 2026 Intent Coding Systems.

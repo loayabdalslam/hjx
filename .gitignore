@@ -1,6 +1,9 @@
-# Dependencies
 node_modules/
-
+**/node_modules/
+.intent-cache/
+**/.intent-cache/
+.next/
+**/.next/
 # Environment variables
 .env
 .env.local
