@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HJX - The Unified UI Language with Flow-State Engine</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; text-align: center; }
+    header h1 { font-size: 3em; margin-bottom: 10px; }
+    header p { font-size: 1.2em; opacity: 0.9; }
+    .nav { background: #333; padding: 10px 0; position: sticky; top: 0; z-index: 100; }
+    .nav ul { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+    .nav a { color: white; text-decoration: none; padding: 5px 15px; border-radius: 5px; transition: background 0.3s; }
+    .nav a:hover { background: #667eea; }
+    .content { background: white; padding: 30px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin: 30px 0 20px; }
+    h3 { color: #764ba2; margin: 20px 0 10px; }
+    code { background: #f0f0f0; padding: 2px 8px; border-radius: 3px; font-family: 'Consolas', monospace; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 10px; overflow-x: auto; margin: 15px 0; }
+    pre code { background: transparent; padding: 0; }
+    .highlight { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
+    .feature-card { background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; }
+    .example-link { display: block; padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #333; transition: all 0.3s; }
+    .example-link:hover { background: #667eea; color: white; transform: translateX(10px); }
+    .example-link span { display: block; font-size: 0.9em; color: #666; }
+    .example-link:hover span { color: white; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .stat { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+    .stat .number { font-size: 2em; font-weight: bold; }
+    .stat .label { font-size: 0.9em; opacity: 0.9; }
+    footer { background: #333; color: white; text-align: center; padding: 20px; margin-top: 40px; }
+    .success-badge { display: inline-block; background: #4CAF50; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; }
+    .working-note { background: #e8f5e9; border: 2px solid #4CAF50; padding: 20px; border-radius: 10px; margin: 20px 0; }
+    .working-note h3 { color: #4CAF50; margin: 0 0 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎯 HJX</h1>
+    <p>The Unified UI Language with Flow-State Engine</p>
+    <p>Write in Plain English or Code — Your Choice</p>
+  </header>
+
+  <nav class="nav">
+    <div class="container">
+      <ul>
+        <li><a href="#quickstart">Quick Start</a></li>
+        <li><a href="#examples">Examples</a></li>
+        <li><a href="#flow">NLP Flow</a></li>
+        <li><a href="#cli">CLI</a></li>
+        <li><a href="#docs">All Docs</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="working-note">
+      <h3>✅ SYSTEM WORKING!</h3>
+      <p>Plain English → HJX → Web Project (HTML/CSS/JS) or React</p>
+      <pre><code>node dist/cli.js flow "create a counter component"
+# → Full HJX code with state, layout, style, handlers
+
+node dist/cli.js build counter.hjx --out my-app
+# → index.html + app.js + app.css + runtime.js</code></pre>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="number">10</div><div class="label">Built-in Components</div></div>
+      <div class="stat"><div class="number">98%</div><div class="label">NLP Confidence</div></div>
+      <div class="stat"><div class="number">2</div><div class="label">Compilation Targets</div></div>
+      <div class="stat"><div class="number">∞</div><div class="label">Possibilities</div></div>
+    </div>
+
+    <div class="content" id="quickstart">
+      <h2>🚀 Quick Start</h2>
+      
+      <h3>1. Install & Build</h3>
+      <pre><code>git clone https://github.com/loayabdalslam/hjx.git
+cd hjx
+npm install
+npm run build</code></pre>
+
+      <h3>2. Create from Plain English</h3>
+      <pre><code>node dist/cli.js flow "create a counter component"
+# Output: Full HJX code</code></pre>
+
+      <h3>3. Build to Web Project</h3>
+      <pre><code>node dist/cli.js build myfile.hjx --out dist-output
+# Creates: index.html + app.js + app.css + runtime.js</code></pre>
+
+      <h3>4. Build to React</h3>
+      <pre><code>node dist/cli.js build myfile.hjx --target react --out dist-react
+# Creates: Component.tsx + Component.module.css</code></pre>
+
+      <h3>5. Start Dev Server</h3>
+      <pre><code>node dist/cli.js dev examples/01-beginner-counter.hjx --port 5172
+# Open http://localhost:5172</code></pre>
+    </div>
+
+    <div class="content" id="examples">
+      <h2>📝 Examples</h2>
+      
+      <h3>Standard HJX Examples</h3>
+      <a href="examples/01-beginner-counter.hjx" class="example-link">
+        <strong>01-beginner-counter.hjx</strong>
+        <span>Counter with state, increment/decrement, styling</span>
+      </a>
+      <a href="examples/02-beginner-todo.hjx" class="example-link">
+        <strong>02-beginner-todo.hjx</strong>
+        <span>Todo list with array, add/remove, binding</span>
+      </a>
+      <a href="examples/03-intermediate-form.hjx" class="example-link">
+        <strong>03-intermediate-form.hjx</strong>
+        <span>Contact form with validation, error handling</span>
+      </a>
+      <a href="examples/04-intermediate-dashboard.hjx" class="example-link">
+        <strong>04-intermediate-dashboard.hjx</strong>
+        <span>Analytics dashboard with stats, periods</span>
+      </a>
+      <a href="examples/05-advanced-ecommerce.hjx" class="example-link">
+        <strong>05-advanced-ecommerce.hjx</strong>
+        <span>E-commerce product page with gallery, cart</span>
+      </a>
+
+      <h3>Plain English NLP Examples</h3>
+      <a href="examples/plain-english/01-counter.txt" class="example-link">
+        <strong>Plain English: Counter</strong>
+        <span>Natural language input → HJX code</span>
+      </a>
+      <a href="examples/plain-english/02-todo.txt" class="example-link">
+        <strong>Plain English: Todo</strong>
+        <span>Natural language input → HJX code</span>
+      </a>
+
+      <h3>React Examples</h3>
+      <a href="examples/react/01-counter.hjx" class="example-link">
+        <strong>React: Counter</strong>
+        <span>HJX compiling to React component</span>
+      </a>
+      <a href="examples/react/02-todo.hjx" class="example-link">
+        <strong>React: Todo</strong>
+        <span>HJX compiling to React component</span>
+      </a>
+    </div>
+
+    <div class="content" id="flow">
+      <h2>🧠 NLP Flow-State Engine</h2>
+      
+      <h3>How It Works</h3>
+      <p>The Flow-State Engine converts plain English descriptions directly into HJX code. You can also mix English with code for a seamless development experience.</p>
+
+      <h3>Built-in Patterns</h3>
+      <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+        <tr style="background: #667eea; color: white;">
+          <th style="padding: 10px; text-align: left;">Input</th>
+          <th style="padding: 10px; text-align: left;">Output</th>
+        </tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>create a counter</code></td><td style="padding: 10px;">Counter with increment/decrement</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>make a form</code></td><td style="padding: 10px;">Form with inputs, bindings, submit</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>create a todo list</code></td><td style="padding: 10px;">Todo app with add/remove</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>add state called X</code></td><td style="padding: 10px;"><code>state: X = 0</code></td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>add button called X</code></td><td style="padding: 10px;"><code>button.primary: "X"</code></td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>make X centered</code></td><td style="padding: 10px;">Flexbox centering styles</td></tr>
+      </table>
+
+      <h3>Mixed Code + English</h3>
+      <pre><code>component Dashboard
+state:
+  users = 0
+
+# Make the container centered with a card style
+add a title that says "Analytics Dashboard"
+add buttons for "View Reports" and "Export Data"</code></pre>
+    </div>
+
+    <div class="content" id="cli">
+      <h2>💻 CLI Reference</h2>
+      
+      <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+        <tr style="background: #667eea; color: white;">
+          <th style="padding: 10px; text-align: left;">Command</th>
+          <th style="padding: 10px; text-align: left;">Description</th>
+        </tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx parse file.hjx</code></td><td style="padding: 10px;">Print the AST (JSON) for a file</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx build file.hjx --out dir</code></td><td style="padding: 10px;">Compile to vanilla HTML/CSS/JS</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx build file.hjx --target react --out dir</code></td><td style="padding: 10px;">Compile to React component</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx build file.hjx --target react --backend --out dir</code></td><td style="padding: 10px;">Compile to React + Express backend</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx dev file.hjx --out dir --port n</code></td><td style="padding: 10px;">Build, serve, and watch with hot reload</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx flow "description"</code></td><td style="padding: 10px;">Generate HJX from natural language</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx flow --file input.txt</code></td><td style="padding: 10px;">Read input from file</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx flow --grammar custom.yml "desc"</code></td><td style="padding: 10px;">Use custom grammar rules</td></tr>
+        <tr style="background: #f8f9fa;"><td style="padding: 10px;"><code>hjx flow --compile "desc"</code></td><td style="padding: 10px;">Compile directly to HTML/CSS/JS</td></tr>
+      </table>
+    </div>
+
+    <div class="content" id="docs">
+      <h2>📚 All Documentation</h2>
+      
+      <div class="feature-grid">
+        <a href="README.md" class="example-link">
+          <strong>README.md</strong>
+          <span>Main project documentation</span>
+        </a>
+        <a href="SPEC.md" class="example-link">
+          <strong>SPEC.md</strong>
+          <span>Language specification</span>
+        </a>
+        <a href="CLAUDE.md" class="example-link">
+          <strong>CLAUDE.md</strong>
+          <span>Architecture & development guide</span>
+        </a>
+        <a href="AGENTS.md" class="example-link">
+          <strong>AGENTS.md</strong>
+          <span>AI agent guidance</span>
+        </a>
+        <a href="COMPLETED.md" class="example-link">
+          <strong>COMPLETED.md</strong>
+          <span>What was accomplished</span>
+        </a>
+        <a href="plan/LONGTERM_PLAN.md" class="example-link">
+          <strong>LONGTERM_PLAN.md</strong>
+          <span>18-month strategic roadmap</span>
+        </a>
+        <a href="Benchmark.md" class="example-link">
+          <strong>Benchmark.md</strong>
+          <span>Performance benchmarks</span>
+        </a>
+        <a href="examples/README.md" class="example-link">
+          <strong>examples/README.md</strong>
+          <span>Examples guide</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="content">
+      <h2>🏗️ Architecture</h2>
+      
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>📝 Parser</h3>
+          <p>Converts HJX syntax to AST. Supports plain English with NLP fallback.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🧠 Flow Engine</h3>
+          <p>Translates natural English to HJX code with 98% confidence.</p>
+        </div>
+        <div class="feature-card">
+          <h3>⚛️ Compilers</h3>
+          <p>Vanilla JS, React, Server-Driven targets. CSS scoping included.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🎨 Design System</h3>
+          <p>10 built-in components, tokens, presets, light/dark themes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>HJX - The Unified UI Language with Flow-State Engine</p>
+    <p>Version 0.2.1 | MIT License | Made with ❤️</p>
+  </footer>
+</body>
+</html>

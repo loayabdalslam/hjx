@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HJX Examples - Counter</title>
+  <style>
+    body { font-family: 'Consolas', monospace; background: #1e1e1e; color: #d4d4d4; padding: 20px; margin: 0; }
+    h1 { color: #667eea; }
+    .code { background: #2d2d2d; padding: 15px; border-radius: 8px; white-space: pre-wrap; overflow-x: auto; }
+    a { color: #667eea; }
+  </style>
+</head>
+<body>
+  <h1>Counter Example</h1>
+  <div class="code">component Counter
+  state
+    count = 0
+    step = 1
+
+  layout
+    view.container:
+      view.header:
+        text: "Counter App"
+      view.card:
+        view.display:
+          text: "Count: {{count}}"
+        view.controls:
+          button.btn-primary (on click -> increment): "+"
+          button.btn-secondary (on click -> decrement): "-"
+          button.btn-tertiary (on click -> reset): "Reset"
+          view.step-control:
+            text: "Step: {{step}}"
+            input.input-field (bind value <-> step): ""
+
+  handlers
+    increment
+      count = count + step
+    decrement
+      count = count - step
+    reset
+      count = 0
+      step = 1
+
+  style
+    .container
+      display flex
+      flex-direction column
+      align-items center
+      justify-content center
+      min-height 100vh
+      background linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+      font-family 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+      padding 20px
+
+    .header
+      text-align center
+      margin-bottom 40px
+
+    .card
+      background white
+      border-radius 16px
+      box-shadow 0 20px 60px rgba(0, 0, 0, 0.3)
+      padding 40px
+      max-width 400px
+      width 100%
+
+    .display text
+      font-size 64px
+      font-weight bold
+      color #667eea
+
+    .controls
+      display flex
+      gap 12px
+      justify-content center
+      margin-bottom 30px
+
+    .btn-primary, .btn-secondary, .btn-tertiary
+      padding 12px 24px
+      font-size 18px
+      font-weight 600
+      border none
+      border-radius 8px
+      cursor pointer
+
+    .btn-primary
+      background #667eea
+      color white
+
+    .btn-secondary
+      background #f093fb
+      color white
+
+    .btn-tertiary
+      background #e0e0e0
+      color #333</div>
+  <p><a href="index.html">← Back to Documentation</a></p>
+</body>
+</html>
