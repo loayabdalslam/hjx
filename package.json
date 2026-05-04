@@ -1,6 +1,6 @@
 {
   "name": "hjx-intent-coding",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "hjx — The first Intent Coding library. A superior alternative to Vibe Coding.",
   "type": "module",
   "main": "./src/index.js",
