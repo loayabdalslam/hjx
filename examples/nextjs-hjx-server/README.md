@@ -38,6 +38,7 @@ import { runHjx } from 'hjx';
 
 const result = await runHjx(source, {
   provider: 'ollama',
+  model: 'gemma4:e4b',
   target: 'javascript'
 });
 

@@ -26,7 +26,7 @@ class OllamaProvider extends BaseProvider {
 
   async complete(prompt) {
     const url = this.config.ollamaUrl || 'http://localhost:11434';
-    const model = this.config.ollamaModel || this.config.model || 'llama3';
+    const model = this.config.ollamaModel || this.config.model || 'gemma4:31b-cloud';
 
     const res = await fetch(`${url}/api/generate`, {
       method: 'POST',
