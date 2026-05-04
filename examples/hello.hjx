@@ -1,0 +1,10 @@
+## Hjx Example 1 — Hello World
+## Target: Python
+## Run with: hjx run examples/hello.hjx
+
+@target python
+@description A simple greeting program
+
+print hello world to the terminal
+print the current date and time
+print a separator line of dashes

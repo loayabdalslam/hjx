@@ -1,1 +1,0 @@
-Create a counter component named Counter with state variable count starting at 0, increment and decrement handlers, layout with a text displaying count and two buttons, styled with a centered card

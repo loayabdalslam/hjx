@@ -1,48 +1,33 @@
 {
   "name": "hjx",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Intent — The first Intent Coding library. A superior alternative to Vibe Coding.",
   "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "hjx": "./src/cli/index.js"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "node dist/cli.js dev examples/dashboard.hjx --out dist-app --port 5172",
-    "examples:showcase": "vite --config vite.config.examples.ts",
-    "examples:counter": "npm run build && node dist/cli.js dev examples/01-beginner-counter.hjx --out dist-counter --port 5174",
-    "examples:todo": "npm run build && node dist/cli.js dev examples/02-beginner-todo.hjx --out dist-todo --port 5174",
-    "examples:form": "npm run build && node dist/cli.js dev examples/03-intermediate-form.hjx --out dist-form --port 5174",
-    "examples:dashboard": "npm run build && node dist/cli.js dev examples/04-intermediate-dashboard.hjx --out dist-dashboard --port 5174",
-    "examples:ecommerce": "npm run build && node dist/cli.js dev examples/05-advanced-ecommerce.hjx --out dist-ecommerce --port 5174",
-    "examples:all": "npm run build && npm run examples:showcase",
-    "examples:react": "npm run build && node dist/cli.js build examples/react/01-counter.hjx --target react --out dist-react",
-    "examples:nlp": "npm run build && node dist/cli.js flow \"create a counter component\"",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "docs:deploy": "cd docs && bash deploy.sh",
-    "test": "vitest",
-    "test:unit": "vitest run src/**/*.test.ts",
-    "test:examples": "vitest run src/examples.test.ts",
-    "test:react": "vitest run src/examples.test.ts --reporter=verbose",
-    "coverage": "vitest run --coverage",
-    "benchmark": "npx tsx scripts/benchmark.ts",
-    "lint": "eslint src/ --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "start": "node src/cli/index.js",
+    "dev": "node --watch src/cli/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "chokidar": "^3.6.0",
-    "jimp": "^0.16.13",
-    "uuid": "^13.0.0",
-    "ws": "^8.19.0"
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "inquirer": "^9.2.15",
+    "node-fetch": "^3.3.2",
+    "ora": "^8.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@types/jsdom": "^27.0.0",
-    "@types/uuid": "^10.0.0",
-    "@types/ws": "^8.18.1",
-    "@vitest/coverage-v8": "^4.0.18",
-    "jsdom": "^28.1.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.6.3",
-    "vitepress": "^1.0.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.5"
   }
 }

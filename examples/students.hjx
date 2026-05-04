@@ -1,0 +1,13 @@
+## Hjx Example 3 — Data Processing
+## Target: Python
+
+@target python
+@description Process a list of student scores
+
+do {
+  create a list of 10 random student scores between 50 and 100
+  calculate the average score
+  find the highest and lowest score
+  print a summary report with all these statistics
+  classify each student as pass or fail based on score above 60
+}

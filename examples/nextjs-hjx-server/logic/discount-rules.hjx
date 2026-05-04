@@ -1,0 +1,28 @@
+target: javascript
+
+# This is a business logic block
+# It calculates a dynamic discount based on user tier and order value
+
+tier = "gold"
+orderValue = 1500
+
+# logic: if tier is gold and value > 1000, discount is 20%. if silver, 10%. else 5%.
+# output the final price after discount
+
+if tier == "gold" and orderValue > 1000:
+    discount = 0.20
+elif tier == "silver":
+    discount = 0.10
+else:
+    discount = 0.05
+
+finalPrice = orderValue * (1 - discount)
+
+# return the result as a JSON object
+return {
+    "tier": tier,
+    "original": orderValue,
+    "discount": discount * 100,
+    "final": finalPrice,
+    "currency": "USD"
+}

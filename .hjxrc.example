@@ -1,0 +1,6 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:31b-cloud",
+  "target": "javascript",
+  "explain": true
+}

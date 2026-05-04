@@ -1,0 +1,43 @@
+target: javascript
+provider: ollama
+model: gemma4:31b-cloud
+
+# Intent: Advanced Financial Analytics Pipeline
+# ---------------------------------------------------------
+# This script handles multi-currency data normalization
+# and risk assessment for a production fintech app.
+
+# 1. Define raw dataset (simulated from an API)
+raw_data = [
+    {"asset": "BTC", "amount": 1.5, "price_usd": 65000},
+    {"asset": "ETH", "amount": 10, "price_usd": 3500},
+    {"asset": "SOL", "amount": 100, "price_usd": 140}
+]
+
+# 2. Normalize and calculate total value in USD
+# Calculate individual values and the total portfolio weight
+total_value = 0
+for p in raw_data:
+    p["value_usd"] = p["amount"] * p["price_usd"]
+    total_value += p["value_usd"]
+
+# 3. Apply risk assessment
+# If BTC weight > 50%, mark as "High Risk Concentration"
+# Otherwise mark as "Diversified"
+btc_value = [p["value_usd"] for p in raw_data if p["asset"] == "BTC"][0]
+btc_ratio = btc_value / total_value
+
+if btc_ratio > 0.5:
+    risk_level = "High Risk"
+else:
+    risk_level = "Balanced"
+
+# 4. Return formatted report for React Frontend
+return {
+    "summary": {
+        "total": total_value,
+        "btc_concentration": btc_ratio * 100,
+        "risk": risk_level
+    },
+    "timestamp": "2024-05-01T12:00:00Z"
+}

@@ -1,609 +1,273 @@
-<h1 align="center">HJX</h1>
+# Intent — (Intent Coding) 🧠
 
-<p align="center">
-  <strong>The Unified UI Language with Flow-State Engine</strong><br/>
-  One file. HTML + CSS + JS. Zero config. Write in English or code — your choice.
-</p>
-
-<p align="center">
-  <a href="https://github.com/loayabdalslam/hjx"><img src="https://img.shields.io/badge/version-0.2.0-blue" alt="Version" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License" /></a>
-  <a href="https://github.com/loayabdalslam/hjx"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" /></a>
-  <a href="https://loayabdalslam.github.io/hjx/"><img src="https://img.shields.io/badge/docs-live-brightgreen" alt="Docs" /></a>
-</p>
+> **Unified AI-Powered Programming Language**
+> Write your intent in plain English (or Arabic), and Intent converts it to real, runnable code in any language.
 
 ---
 
-## What is HJX?
+## What is Intent Coding?
 
-HJX is a compiled UI language that unifies **structure**, **style**, and **logic** into a single `.hjx` file. It compiles to clean, dependency-free **HTML + CSS + JavaScript** or **React components** — no virtual DOM, no runtime overhead, no framework lock-in.
+**Intent Coding** is the first implementation of *True Intent Control*. While "Vibe Coding" relies on luck and imprecise prompting, Intent Coding uses a structured runtime to translate your exact mental model into executable, verifiable code. 
 
-**Write UI in plain English.** The Flow-State Engine translates natural language descriptions directly into HJX code. You can also mix English with code for a seamless development experience.
+**Intent** (formerly Hjx) is the engine for this movement. It is a **runtime for AI-generated code**. Instead of writing code, you describe your **Intent**. The system feeds this to high-performance models (like `gemma2:27b` or `gemma4`) and executes the results within a controlled environment.
 
-### 🎨 NEW in v0.2.1: Design System & Component Library
-
-**Professional UI in seconds.** HJX now includes a built-in Design System and a library of 10+ core components.
-
-- **Design Tokens**: Centralized colors, spacing, and typography.
-- **Built-in Components**: `Button`, `Card`, `Input`, `Modal`, `Form`, `Tabs`, `Alert`, `Badge`, `Spinner`, `Dropdown`.
-- **Variant System**: Easily toggle between `primary`, `secondary`, `danger`, `outline`, and `ghost` variants.
-
-```hjx
-layout:
-  Card (elevation="elevated"):
-    text.h2: "Order Summary"
-    Badge (label="Shipped", variant="primary")
-    Button (variant="outline"): "Track Order"
 ```
+# hello.hjx
+@target python
 
-```bash
-$ hjx flow "create a counter component"
-✅ Generates complete HJX with state, layout, styles, and handlers
-
-$ hjx flow "make a todo app"
-✅ Full todo app with add/remove functionality
-
-$ hjx flow --grammar custom.yml "build a dashboard"
-✅ Use your own grammar rules for custom generation
-```
-
-**Write styles in natural language:**
-
-```hjx
-style:
-  .card:
-    card
-    text align center
-    display flex
-    flex direction column
-    gap 24px
-
-  .button:
-    button primary
-
-  .button:hover:
-    box shadow medium
-    transition all 0.2s ease
-```
-
-**Compile to React with one command:**
-
-```bash
-$ hjx build todo-app.hjx --target react --backend
-✅ Generates TodoApp.tsx + CSS modules + Express.js API routes
+print hello world to the terminal
+print the current date and time
 ```
 
 ---
 
-## Quick Start
+## Usage
 
-### Prerequisites
+### 1. CLI Usage
+```bash
+hjx run hello.hjx
+```
 
-- **Node.js** v18+
-- **npm** v9+
+### 2. Programmatic API (Library)
+You can now use `hjx` directly in your Node.js/Next.js/Vite projects:
 
-### Install & Run
+```javascript
+import { runHjx } from 'hjx';
+
+const { output } = await runHjx("x = 10; y = 20; return x + y");
+console.log(output); // 30
+```
+
+---
+
+## Real-World Integrations
+
+Check out the [examples](./examples) folder for production-ready patterns:
+- **[Next.js + HJX](./examples/nextjs-hjx-server)**: A dynamic business logic server where React components fetch logic results defined in `.hjx` files.
+
+## Installation
+
+### Requirements
+- Node.js >= 18
+- At least one AI provider (see below)
+
+### Install
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/loayabdalslam/hjx.git
+git clone https://github.com/you/hjx
 cd hjx
-
-# 2. Install dependencies
 npm install
-
-# 3. Build the compiler
-npm run build
-
-# 4. Flow-State: Generate HJX from natural language
-node dist/cli.js flow "create a counter component"
-
-# 5. Build an example
-node dist/cli.js build examples/counter.hjx --out dist-app
-
-# 6. Start the dev server (with hot reload)
-node dist/cli.js dev examples/counter.hjx --out dist-app --port 5173
+npm link        # makes `hjx` available globally
 ```
-
-Open **http://localhost:5173** and you're live.
 
 ---
 
-## Flow-State Engine
+## AI Providers
 
-### Natural Language to Code
+Hjx supports multiple AI providers. Configure via `.hjxrc` or CLI flags.
 
-Describe what you want in English, get working HJX:
+| Provider | Flag | Requires |
+|----------|------|---------|
+| **Ollama** (default, local) | `--provider ollama` | Ollama running locally |
+| **Claude** (Anthropic) | `--provider claude` | `ANTHROPIC_API_KEY` |
+| **GPT** (OpenAI) | `--provider gpt` | `OPENAI_API_KEY` |
+| **Gemini** (Google) | `--provider gemini` | `GEMINI_API_KEY` |
 
-```bash
-# Create components
-hjx flow "create a counter component"
-hjx flow "make a form with name and email fields"
-hjx flow "build a todo list with add and delete"
-
-# Add features
-hjx flow "add state called count"
-hjx flow "add button called Submit"
-hjx flow "make the card centered with a shadow"
-
-# Compile directly to HTML/CSS/JS
-hjx flow --compile "create a counter with reset"
-```
-
-### Mixed Code + Language
-
-Seamlessly blend natural English with HJX code:
-
-```
-create a dashboard component
-state:
-  users = 0
-  revenue = 0
-
-make the container centered with a card style
-add a title that says "Analytics Dashboard"
-add buttons for "View Reports" and "Export Data"
-```
-
-### Custom Grammar
-
-Take full control of the language with `grammar.yml`:
-
-```yaml
-custom_rules:
-  rules:
-    - name: "my-component"
-      patterns:
-        - "make a {{1}} component"
-        - "build {{1}} widget"
-      template: |
-        component {{1|capitalize}}
-
-        state:
-          value = 0
-
-        layout:
-          view.card:
-            text: "{{1}}"
-
-        style:
-          .card:
-            card
-
-        handlers:
-```
+### Setup Ollama (recommended, 100% offline)
 
 ```bash
-hjx flow --grammar my-grammar.yml "make a weather widget"
+# Install Ollama from https://ollama.ai
+ollama pull codellama   # or mistral, deepseek-coder, etc.
 ```
 
-### Built-in Patterns
+### Setup Claude / GPT / Gemini
 
-| Command | Output |
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+export OPENAI_API_KEY=sk-...
+export GEMINI_API_KEY=AIza...
+```
+
+---
+
+## Hjx File Format (`.hjx`)
+
+```hjx
+## This is a comment
+
+@target python           # required: target language
+@description My program  # optional: short description
+
+# Single-line intent:
+create a function that sorts a list of numbers
+
+# Multi-line intent block:
+do {
+  read a CSV file called data.csv
+  calculate the average of the second column
+  print the result formatted with 2 decimal places
+}
+```
+
+### Supported target languages
+
+`python` · `javascript` · `typescript` · `rust` · `go` · `java` · `kotlin` · `cpp` · `c` · `sql`
+
+---
+
+## CLI Commands
+
+### `hjx run <file.hjx>`
+
+Translate and immediately execute the file.
+
+```bash
+hjx run hello.hjx
+hjx run script.hjx --provider claude --target javascript
+hjx run script.hjx --explain    # also show AI explanation
+hjx run script.hjx --no-run     # generate only, don't execute
+```
+
+### `hjx compile <file.hjx>`
+
+Translate only — show generated code without running it.
+
+```bash
+hjx compile script.hjx
+hjx compile script.hjx -t go   # override target language
+```
+
+### `hjx repl`
+
+Interactive mode — type intent, get code, run it, repeat.
+
+```bash
+hjx repl
+hjx repl --provider gpt --target javascript
+```
+
+REPL commands:
+
+| Command | Action |
 |---------|--------|
-| `create a counter` | Counter with increment/decrement |
-| `make a form` | Form with inputs, bindings, submit |
-| `create a todo list` | Todo app with add/remove |
-| `add state called X` | `state: X = 0` |
-| `add button called X` | `button.primary: "X"` |
-| `add a Card` | `Card:` |
-| `add a primary Button` | `Button (variant="primary"):` |
-| `make X centered` | Flexbox centering styles |
-| `fetch from /api/X` | API endpoint definition |
+| `:help` | Show commands |
+| `:target <lang>` | Change target language |
+| `:history` | Show last 10 entries |
+| `:clear` | Clear screen |
+| `:exit` | Quit |
 
----
+### `hjx explain <file.hjx>`
 
-## Natural Language CSS
-
-Write styles using human-readable descriptions. The compiler translates your intent to proper CSS automatically.
-
-### Shortcuts & Presets
-
-```hjx
-style:
-  .container:
-    container          # max-width: 1200px, margin: auto, padding
-
-  .card:
-    card               # padding, background, border-radius, shadow
-
-  .primary-btn:
-    button primary     # padding, background, color, border, cursor
-
-  .input-field:
-    input field        # padding, border, font-size, width
-```
-
-### Property Descriptions
-
-| Natural Language | Generated CSS |
-|---|---|
-| `padding 16px` | `padding: 16px;` |
-| `font size 24px` | `font-size: 24px;` |
-| `display flex` | `display: flex;` |
-| `justify content center` | `justify-content: center;` |
-| `box shadow light` | `box-shadow: 0 2px 8px rgba(0,0,0,0.1);` |
-| `border radius 12px` | `border-radius: 12px;` |
-| `transition all 0.3s ease` | `transition: all 0.3s ease;` |
-
-### Pseudo-Selectors & Media Queries
-
-```hjx
-breakpoints:
-  mobile = 480px
-  tablet = 768px
-
-style:
-  .button:
-    button primary
-
-  .button:hover:
-    background #0056b3
-    box shadow medium
-
-  .container @mobile:
-    padding 12px
-    flex direction column
-```
-
----
-
-## React Compilation
-
-Compile HJX directly to React components:
+Generate code and provide a plain-English explanation.
 
 ```bash
-hjx build counter.hjx --target react
+hjx explain script.hjx
 ```
 
-### Generated Output
+### `hjx history`
 
-**Counter.tsx:**
-```tsx
-import React, { useState } from 'react';
-import styles from './Counter.module.css';
+Show translation history.
 
-export function Counter() {
-  const [count, setCount] = useState(0);
+```bash
+hjx history          # last 20 entries
+hjx history -n 50    # last 50 entries
+hjx history clear    # clear all history
+```
 
-  function inc() { setCount(count + 1); }
-  function dec() { setCount(count - 1); }
+---
 
-  return (
-    <view className={styles.card} id="root">
-      <text className={styles.title}>Count: {count}</text>
-      <button className={styles.primary} onClick={() => inc()}>Increase</button>
-      <button className={styles.secondary} onClick={() => dec()}>Decrease</button>
-    </view>
-  );
+## Configuration
+
+Create a `.hjxrc` file in your project or home directory:
+
+```json
+{
+  "provider": "ollama",
+  "ollamaUrl": "http://localhost:11434",
+  "ollamaModel": "codellama",
+  "target": "python",
+  "run": true,
+  "explain": false,
+  "timeout": 30000
 }
 ```
 
-**Counter.module.css:**
-```css
-[data-hjx-scope="hjx-counter"] .card {
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  /* ... */
+Copy the example: `cp .hjxrc.example .hjxrc`
+
+### Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `HJX_PROVIDER` | Default provider |
+| `HJX_TARGET` | Default target language |
+| `HJX_OLLAMA_URL` | Ollama server URL |
+| `HJX_OLLAMA_MODEL` | Ollama model name |
+| `HJX_MODEL` | Model override (any provider) |
+| `ANTHROPIC_API_KEY` | Claude API key |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `GEMINI_API_KEY` | Gemini API key |
+
+---
+
+## Examples
+
+### Example 1 — Hello World
+
+```hjx
+@target python
+print hello world with a timestamp
+```
+
+```bash
+hjx run examples/hello.hjx
+```
+
+### Example 2 — Fibonacci (JavaScript)
+
+```hjx
+@target javascript
+create a recursive fibonacci function
+print fibonacci numbers from 0 to 15
+```
+
+### Example 3 — Data Processing
+
+```hjx
+@target python
+@description Student score analyzer
+
+do {
+  create a list of 10 random student scores between 50 and 100
+  calculate average, highest, and lowest score
+  print a summary report
+  classify each student as pass or fail
 }
 ```
 
-### React + Backend
+---
 
-```bash
-hjx build todo-app.hjx --target react --backend
-```
+## History
 
-Generates:
-- `TodoApp.tsx` — React component with API calls
-- `TodoApp.module.css` — Scoped CSS modules
-- `api/routes.ts` — Express.js routes
-- `api/handlers.ts` — API handler functions with TypeScript
+Hjx saves every translation to `~/.hjx/history.json`. You can inspect it directly or use `hjx history`.
 
 ---
 
-## REST API Integration
+## Architecture
 
-Define API endpoints directly in HJX:
-
-```hjx
-api:
-  GET /api/todos -> fetchTodos:
-    query:
-      page = 1
-      limit = 10
-
-  POST /api/todos -> createTodo:
-    body:
-      text = string
-      done = boolean
-
-  DELETE /api/todos/:id -> deleteTodo:
-    params:
-      id = number
 ```
-
-Use in handlers:
-
-```hjx
-handlers:
-  loadData:
-    fetch fetchTodos -> todos
-    set items = todos
-
-  addItem:
-    fetch createTodo with { text: newItem } -> result
-    set items = [...items, result]
-    set newItem = ""
+.hjx file → Parser → AI Router → Code Generator → Executor → Output
+                        ↓
+               Ollama / Claude / GPT / Gemini
 ```
 
 ---
 
-## Language Syntax
-
-### File Structure
-
-Every `.hjx` file follows this block structure:
-
-```
-component <Name>       ← Component declaration
-imports:               ← Optional: import other .hjx components
-state:                 ← Reactive variables
-api:                   ← Optional: REST API endpoints
-layout:                ← UI tree (indentation-based)
-style:                 ← Natural language CSS or raw CSS
-breakpoints:           ← Optional: custom media breakpoints
-handlers:              ← Event logic
-script:                ← Optional: server-side code
-```
-
-### Counter Example
-
-```hjx
-component Counter
-
-state:
-  count = 0
-
-layout:
-  view#root.card:
-    text.title: "Count: {{count}}"
-    button.primary (on click -> inc): "Increase"
-    button.secondary (on click -> dec): "Decrease"
-
-style:
-  .card:
-    padding 16px
-    border 1px solid #ddd
-    border radius 12px
-    text align center
-
-  .primary:
-    button primary
-
-  .secondary:
-    button secondary
-
-handlers:
-  inc:
-    set count = count + 1
-  dec:
-    set count = count - 1
-```
-
-**That's it.** One file → a fully working interactive counter. No imports, no boilerplate, no configuration.
-
-### State Types
-
-```hjx
-state:
-  count = 0                # Number
-  name = "John"            # String
-  active = true            # Boolean
-  items = ["a", "b"]       # Array
-  user = { name: "John" }  # Object
-```
-
-### Layout Nodes
-
-| Syntax | Description |
-|---|---|
-| `view` | Generic container (`<div>`) |
-| `text` | Inline text (`<span>`) |
-| `button` | Button element |
-| `input` | Input element |
-| `view#id.class1.class2:` | ID + classes |
-| `text: "Hello {{name}}"` | Text interpolation |
-| `button (on click -> handler): "Label"` | Event binding |
-| `input (bind value <-> stateVar)` | Two-way binding |
-
-### Control Flow
-
-```hjx
-layout:
-  if (isLoggedIn):
-    text: "Welcome back!"
-
-  for (item in items):
-    view.row:
-      text: "{{item}}"
-```
-
-### Handlers
-
-```hjx
-handlers:
-  increment:
-    set count = count + 1
-  reset:
-    set count = 0
-    log "Counter reset"
-```
-
 ---
 
-## CLI Reference
+## Real-World Projects & Integrations
 
-| Command | Description |
-|---|---|
-| `hjx parse <file.hjx>` | Print the AST (JSON) for a file |
-| `hjx build <file.hjx> --out <dir>` | Compile to vanilla HTML/CSS/JS |
-| `hjx build <file.hjx> --out <dir> --target react` | Compile to React component |
-| `hjx build <file.hjx> --out <dir> --target react --backend` | Compile to React + Express backend |
-| `hjx dev <file.hjx> --out <dir> --port <n>` | Build, serve, and watch with hot reload |
-| `hjx flow "description"` | Generate HJX from natural language |
-| `hjx flow --file input.txt` | Read input from file |
-| `hjx flow --grammar custom.yml "desc"` | Use custom grammar rules |
-| `hjx flow --compile "desc"` | Compile directly to HTML/CSS/JS |
+- **[Next.js Dynamic Logic](./examples/nextjs-hjx-server)**: Using HJX as a backend logic layer for React apps.
 
----
+## License
 
-## Performance Benchmarks
-
-> Benchmarked on **Windows x64** • Node.js • JSDOM environment
-> Date: **2026-02-17**
-
-### Parser Performance
-
-| Workload | Time |
-|---|---|
-| Parse 100 state variables | **2.15 ms** |
-| Parse 1,000 state variables | **1.90 ms** |
-| Parse 5,000 state variables | **11.25 ms** |
-| Parse 100 static nodes | **0.95 ms** |
-| Parse 1,000 static nodes | **2.55 ms** |
-| Parse 5,000 static nodes | **17.12 ms** |
-
-### Compiler Performance
-
-| Workload | Time |
-|---|---|
-| Compile 100 nodes → Vanilla JS | **1.73 ms** |
-| Compile 1,000 nodes → Vanilla JS | **2.87 ms** |
-| Compile 5,000 nodes → Vanilla JS | **13.19 ms** |
-| Scope 100 CSS rules | **0.33 ms** |
-| Scope 1,000 CSS rules | **1.86 ms** |
-
-### Flow-State Engine
-
-| Input | Intent Match | Generation Time |
-|---|---|---|
-| "create a counter" | counter (98%) | < 5ms |
-| "make a form" | form (95%) | < 5ms |
-| "create a todo list" | todo-list (95%) | < 5ms |
-| Mixed code + English | mixed (80%) | < 10ms |
-
-### Runtime Performance (JSDOM)
-
-| Workload | Render | Update |
-|---|---|---|
-| Static 100 items | 33 ms | — |
-| Static 1,000 items | 135 ms | — |
-| List 100 items | 59 ms | 27 ms |
-| List 1,000 items | 286 ms | 217 ms |
-| Conditional 100 items | 142 ms | **2 ms** |
-| Conditional 1,000 items | 8,057 ms | **14 ms** |
-| Text interpolation 100 items | 46 ms | **2 ms** |
-| Input binding 100 items | 63 ms | **1 ms** |
-
-> **Key insight:** Updates are extremely fast (sub-3ms for 100 items) thanks to targeted DOM patching.
-
----
-
-## Project Structure
-
-```
-hjx/
-├── src/
-│   ├── cli.ts                    # CLI entry point
-│   ├── parser.ts                 # HJX → AST
-│   ├── compiler/
-│   │   ├── vanilla.ts            # Vanilla JS target
-│   │   ├── react.ts              # React target (NEW)
-│   │   ├── nl_css.ts             # Natural language CSS (NEW)
-│   │   └── server_driven.ts      # Server-driven target
-│   ├── nlp/
-│   │   ├── flow/                 # Flow-State Engine (NEW)
-│   │   │   ├── flow_engine.ts
-│   │   │   ├── grammar_loader.ts
-│   │   │   └── cli.ts
-│   │   ├── tokenizer/            # HJX tokenizer
-│   │   ├── parser/               # Enhanced parser
-│   │   ├── intent/               # Intent classifier
-│   │   ├── entities/             # Entity extraction
-│   │   ├── features/             # Feature extraction
-│   │   ├── completion/           # Code completion
-│   │   ├── generation/           # Code generation
-│   │   └── errors/               # Error detection
-│   └── lovable/                  # AI integration
-├── examples/
-│   ├── counter.hjx
-│   ├── counter_v2.hjx            # Natural language CSS
-│   ├── todo-app.hjx              # With API integration
-│   ├── dashboard_v2.hjx          # Grid layouts
-│   └── components/
-├── grammar.yml                   # User-editable grammar (NEW)
-├── docs/                         # VitePress documentation
-├── extensions/vscode/            # VS Code extension
-├── packages/vite-plugin-hjx/     # Vite plugin
-└── package.json
-```
-
----
-
-## Ecosystem
-
-### Vite Plugin
-
-```bash
-npm install vite-plugin-hjx --save-dev
-```
-
-```js
-// vite.config.js
-import { defineConfig } from 'vite';
-import hjxPlugin from 'vite-plugin-hjx';
-
-export default defineConfig({
-  plugins: [hjxPlugin()]
-});
-```
-
-### VS Code Extension
-
-Syntax highlighting, snippets, and (coming soon) Flow-State integration.
-
-```bash
-# Install from extensions/vscode/
-code --install-extensions extensions/vscode/hjx-vscode-0.1.0.vsix
-```
-
----
-
-## Contributing
-
-PRs are welcome! If you'd like to contribute:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m 'Add my feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
-
-### Adding Custom Grammar
-
-1. Edit `grammar.yml` in the project root
-2. Add your patterns under `custom_rules:`
-3. Test with: `hjx flow --grammar grammar.yml "your description"`
-
----
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=loaiabdalslam/hjx&type=date&legend=top-left)](https://www.star-history.com/#loaiabdalslam/hjx&type=date&legend=top-left)
-
-## 📄 License
-
-MIT © [Loay Abdalslam](https://github.com/loayabdalslam)
+MIT
