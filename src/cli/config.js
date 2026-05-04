@@ -10,7 +10,7 @@ import { join } from 'path';
 const DEFAULTS = {
   provider: 'ollama',
   ollamaUrl: 'http://localhost:11434',
-  ollamaModel: 'gemma4:31b-cloud',
+  ollamaModel: 'gemma4:e4b',
   target: 'javascript',
   run: true,
   explain: false,
@@ -35,7 +35,7 @@ export function loadConfig(overrides = {}) {
     provider: process.env.HJX_PROVIDER,
     apiKey: process.env.HJX_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY,
     ollamaUrl: process.env.HJX_OLLAMA_URL,
-    ollamaModel: process.env.HJX_OLLAMA_MODEL,
+    ollamaModel: process.env.HJX_OLLAMA_MODEL || 'llama3',
     target: process.env.HJX_TARGET,
     model: process.env.HJX_MODEL,
   };

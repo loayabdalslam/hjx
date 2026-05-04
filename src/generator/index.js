@@ -15,20 +15,22 @@ export function buildPrompt(program, options = {}) {
   const { target, blocks, description } = program;
   const intents = blocks.map((b, i) => `${i + 1}. ${b.raw}`).join('\n');
   const context = description ? `Program description: ${description}\n\n` : '';
+  const inputs = options.inputs ? `Available inputs (data you can use): ${JSON.stringify(options.inputs)}\n\n` : '';
 
-  return `You are a code generator for the Hjx programming language runtime.
-Your job is to convert plain-English intent statements into clean, runnable ${target} code.
+  return `You are a world-class code generator for the Hjx programming language runtime.
+Your job is to convert plain-English intent statements into a standalone, reusable ${target} module.
 
-${context}Target language: ${target}
+${context}${inputs}Target language: ${target}
 User intent:
 ${intents}
 
 Rules:
 - Output ONLY raw ${target} code with no markdown, no explanation, no backticks, no preamble.
-- The code must be complete and directly runnable.
-- Use idiomatic ${target} patterns.
-- Add concise inline comments where helpful.
-- If intent includes multiple steps, chain them logically in one program.
+- The code must be a complete, standalone unit that can integrate into a larger system.
+- IMPORTANT: Use the data provided in the "Available inputs" if applicable. Do not hardcode values that should be dynamic.
+- If the target is a language like JavaScript or Python, the code should ideally be structured such that it can receive parameters or use the provided input context.
+- To return a result to the Hjx runtime, you MUST print the final result as a JSON string to standard output.
+- Maximize the quality of the output: use descriptive variable names, add helpful inline comments, and ensure the logic is robust and production-ready.
 
 Code:`;
 }
@@ -115,7 +117,10 @@ export function executeCode(code, target, options = {}) {
     const result = spawnSync(cmd, args, {
       encoding: 'utf8',
       timeout,
-      env: { ...process.env },
+      env: { 
+        ...process.env, 
+        HJX_INPUTS: JSON.stringify(options.inputs || {}) 
+      },
     });
 
     return {

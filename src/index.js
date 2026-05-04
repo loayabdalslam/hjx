@@ -22,6 +22,7 @@ export { loadConfig };
  */
 export async function runHjx(source, options = {}) {
   const config = loadConfig(options);
+  const inputs = options.inputs || {};
   const cacheDir = options.cacheDir || join(process.cwd(), '.intent-cache');
   const useCache = options.cache !== false;
   

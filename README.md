@@ -44,7 +44,7 @@ Uses MD5 hashing to ensure that identical intents always resolve to the same sta
 ```javascript
 target: javascript
 provider: ollama
-model: gemma4:31b-cloud
+model: gemma4:e4b
 
 # Calculate price based on region and loyalty
 # If region is EU, add 20% VAT.

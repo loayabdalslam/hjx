@@ -1,6 +1,6 @@
 target: javascript
 provider: ollama
-model: gemma4:31b-cloud
+model: gemma4:e4b
 # Intent: Complex Password & Email Validator
 
 email = "user@example.com"

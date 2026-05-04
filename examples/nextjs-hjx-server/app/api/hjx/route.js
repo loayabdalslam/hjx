@@ -4,24 +4,43 @@ import { join } from 'path';
 
 export async function GET(request) {
   try {
-    // 1. Load the business logic defined in .hjx
     const logicPath = join(process.cwd(), 'logic', 'discount-rules.hjx');
     const source = readFileSync(logicPath, 'utf8');
 
-    // 2. Run the logic through HJX
-    // In a real app, you might pass dynamic variables into the source string
-    // or use a provider like OpenAI/Claude
+    // Extract dynamic inputs from the system (e.g., from request params)
+    const { searchParams } = new URL(request.url);
+    const inputs = {
+      tier: searchParams.get('tier') || 'gold',
+      orderValue: parseFloat(searchParams.get('value')) || 1500
+    };
+
+    // Force re-generation to apply new prompt rules for standalone integration
     const result = await runHjx(source, {
-      provider: 'ollama', // or 'gpt'
-      model: 'gemma4:31b-cloud',    // or 'gpt-4'
+      provider: 'ollama',
+      model: 'gemma4:e4b',
+      cache: false,
+      inputs: inputs // Passing real system data
     });
-    console.log(result)
+
+    console.log('HJX Result:', JSON.stringify(result, null, 2));
+
     if (result.success) {
-      return new Response(JSON.stringify(result.output), {
+      let outputData = result.output;
+      
+      // If output is a string, try to parse it as JSON
+      if (typeof outputData === 'string') {
+        try {
+          outputData = JSON.parse(outputData);
+        } catch (e) {
+          // Keep as string if not JSON
+        }
+      }
+
+      return new Response(JSON.stringify(outputData), {
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      return new Response(JSON.stringify({ error: 'Logic execution failed' }), {
+      return new Response(JSON.stringify({ error: 'Logic execution failed', details: result.output }), {
         status: 500,
       });
     }

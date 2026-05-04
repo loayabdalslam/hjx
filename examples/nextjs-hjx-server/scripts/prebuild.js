@@ -13,9 +13,9 @@ async function prebuild() {
     const result = await runHjx(source, {
       cache: true, // This will generate the .intent-cache files
       provider: 'ollama',
-      model: 'gemma4:31b-cloud'
+      model: 'gemma4:e4b'
     });
-    
+
     if (result.success) {
       console.log(`✅ ${file} cached successfully ${result.cached ? '(already cached)' : '(new)'}`);
     } else {

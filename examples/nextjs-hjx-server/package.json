@@ -9,7 +9,7 @@
     "prebuild": "node scripts/prebuild.js"
   },
   "dependencies": {
-    "hjx-intent-coding": "latest",
+    "hjx-intent-coding": "file:../../",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"

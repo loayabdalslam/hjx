@@ -1,6 +1,6 @@
 target: javascript
 provider: ollama
-model: gemma4:31b-cloud
+model: gemma4:e4b
 
 # This is a business logic block
 # It calculates a dynamic discount based on user tier and order value
@@ -20,8 +20,8 @@ else:
 
 finalPrice = orderValue * (1 - discount)
 
-# return the result as a JSON object
-return {
+# output the result as a JSON object
+output {
     "tier": tier,
     "original": orderValue,
     "discount": discount * 100,
