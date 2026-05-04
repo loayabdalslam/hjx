@@ -47,12 +47,23 @@ export async function runHjx(source, options = {}) {
   }
 
   // 2. Run from provider
-  const provider = createProvider(config);
   const parsed = parse(source);
-  if (options.target) parsed.target = options.target;
   
-  const { code } = await generate(parsed, provider, config);
-  const result = executeCode(code, parsed.target, config);
+  // Merge priority: 1. options, 2. parsed metadata, 3. global config
+  const mergedOptions = {
+    ...parsed.metadata,
+    ...options
+  };
+  
+  if (options.target || parsed.target) {
+    parsed.target = options.target || parsed.target;
+  }
+
+  const finalConfig = loadConfig(mergedOptions);
+  const provider = createProvider(finalConfig);
+  
+  const { code } = await generate(parsed, provider, finalConfig);
+  const result = executeCode(code, parsed.target, finalConfig);
   
   // 3. Save to cache if successful
   if (useCache && result.success) {

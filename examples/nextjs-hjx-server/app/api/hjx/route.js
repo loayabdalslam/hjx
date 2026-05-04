@@ -13,9 +13,9 @@ export async function GET(request) {
     // or use a provider like OpenAI/Claude
     const result = await runHjx(source, {
       provider: 'ollama', // or 'gpt'
-      model: 'llama3',    // or 'gpt-4'
+      model: 'gemma4:31b-cloud',    // or 'gpt-4'
     });
-
+    console.log(result)
     if (result.success) {
       return new Response(JSON.stringify(result.output), {
         headers: { 'Content-Type': 'application/json' },

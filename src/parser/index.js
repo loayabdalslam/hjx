@@ -54,6 +54,13 @@ export function parse(source) {
       continue;
     }
 
+    // Generic Metadata Extraction (e.g., provider: ollama, model: gemma)
+    const metaMatch = noComment.match(/^(\w+):\s+(.+)/i);
+    if (metaMatch && !['target', 'do'].includes(metaMatch[1].toLowerCase())) {
+      program.metadata[metaMatch[1].toLowerCase()] = metaMatch[2].trim();
+      continue;
+    }
+
     if (!inBlock) {
       if (/^do\s*\{/i.test(noComment)) {
         currentBlock = { type: 'do', lines: [], raw: '' };
